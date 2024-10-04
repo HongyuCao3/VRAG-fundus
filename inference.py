@@ -20,9 +20,11 @@ def inference(args):
     model_path = args.model_path
     model_name = get_model_name_from_path(model_path)
     tokenizer, model, image_processor, context_len = load_pretrained_model(
-        model_path, args.mode_base, model_name
+        model_path, args.model_base, model_name
     )
-    questions = [json.loads(q) for q in open(args.question_file,"r")]
+    with open(args.question_file, 'r', encoding='utf-8') as file:
+        questions = json.load(file)
+    # questions = [json.loads(q) for q in open(args.question_file,"r")]
     for line in tqdm(questions):
         qs = line["text"].replace(DEFAULT_IMAGE_TOKEN, '').strip()
         image_file = line["image"]
@@ -67,6 +69,13 @@ if __name__ == "__main__":
     parser.add_argument("--model-path", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b")
     parser.add_argument("--model-base", type=str, default=None)
     parser.add_argument("--question-file", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/eye_diag.json")
+    parser.add_argument("--conv-mode", type=str, default="vicuna_v1")
+    parser.add_argument("--image-folder", type=str, default="./segmentation/")
+    parser.add_argument("--num-chunks", type=int, default=1)
+    parser.add_argument("--chunk-idx", type=int, default=0)
+    parser.add_argument("--temperature", type=float, default=0.2)
+    parser.add_argument("--top_p", type=float, default=None)
+    parser.add_argument("--num_beams", type=int, default=1)
     args = parser.parse_args()
     
     print(inference(args))
