@@ -34,6 +34,18 @@ class VRAG():
             self.model_path, args.model_base, model_name
         )
         self.image_folder = args.image_folder
+        self.qa_tmpl_str = (
+            "Given the provided information, including retrieved contents and metadata, \
+            accurately and precisely answer the query without any additional prior knowledge.\n"
+            "Please ensure honesty and responsibility, refraining from any racist or sexist remarks.\n"
+            "---------------------\n"
+            "Context: {context_str}\n"     ## 将上下文信息放进去
+            "Metadata: {metadata_str} \n"  ## 将原始的meta信息放进去
+            "---------------------\n"
+            "Query: {query_str}\n"
+            "Answer: "
+        )
+
         self.build_index()
         
     def build_index(self,):
@@ -51,18 +63,55 @@ class VRAG():
         image_nodes = [ImageNode(image_path=p, text=t, meta_data=k) for p, t, k in document]
         self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True)
         
-    def inference_rag(self, query_str, img_path):
+    def inference_rag_with_image(self, query_str, img_path):
+        # do retrieval
         img, txt, score, metadata = self.multi_index.as_retriever(similarity_top_k=1, image_similarity_top_k=1)
         image_documents = [ImageDocument(iamge_path=img_path)]
+        images= []
         for res_img in img:
             image_documents.append(ImageDocument(image_path=res_img))
+            image = Image.open(os.path.join(args.image_folder, res_img))
+            images.append(image)
         context_str = "".join(txt)
         for d in metadata:
             image_documents.append(ImageDocument(image_path=d["seg"]))
+            image = Image.open(os.path.join(args.image_folder, d["seg"]))
+            images.append(image)
             
-        # TODO:后续可以按照inference函数中进行构造
+        # do inference
+        set_seed(0)
+        disable_torch_init()
+        qs = (context_str + query_str).replace(DEFAULT_IMAGE_TOKEN, '').strip()
+        if self.model.config.mm_use_im_start_end:
+            qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
+        else:
+            qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
+        conv = conv_templates[args.conv_mode].copy()
+        conv.append_message(conv.roles[0], qs)
+        conv.append_message(conv.roles[1], None)
+        prompt = conv.get_prompt()
         
+        input_ids = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 
+        image_tensor = process_images([images], self.image_processor, self.model.config)[0] # TODO:验证这里的下标0
+        
+        stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
+        keywords = [stop_str]
+        stopping_criteria = KeywordsStoppingCriteria(keywords, self.tokenizer, input_ids)
+        with torch.inference_mode():
+                output_ids = self.model.generate(
+                    input_ids,
+                    images=image_tensor.unsqueeze(0).half().cuda(),
+                    do_sample=True if args.temperature > 0 else False,
+                    temperature=args.temperature,
+                    top_p=args.top_p,
+                    num_beams=args.num_beams,
+                    # no_repeat_ngram_size=3,
+                    max_new_tokens=1024,
+                    use_cache=True)
+
+        outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+        return outputs
 
     def inference(self):
         set_seed(0)
