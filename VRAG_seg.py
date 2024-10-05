@@ -46,17 +46,16 @@ class VRAG_seg():
             "Answer: "
         )
         self.context_str = "In segmentation image (the second image), the light red part means microaneurysm, the dark red part means hemorrhage, the yellow part means exudates, the white part means cotton wool spots."
-        self.query_str = args.query_str
         self.image_org = args.image_org
         self.image_seg = args.image_seg
         
-    def inference(self):
+    def inference_rag(self, query_str):
         set_seed(0)
         disable_torch_init()
         # add context and get input ids
         prompt = self.prompt_str.format(
             context_str=self.context_str,
-            query_str=self.query_str, 
+            query_str=query_str, 
         )
         qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
         if self.model.config.mm_use_im_start_end:
@@ -95,6 +94,52 @@ class VRAG_seg():
         outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
         return outputs
         
+        
+    def inference(self, query_str):
+        set_seed(0)
+        disable_torch_init()
+        # add context and get input ids
+        prompt = self.prompt_str.format(
+            context_str="",
+            query_str=query_str, 
+        )
+        qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
+        if self.model.config.mm_use_im_start_end:
+            qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
+        else:
+            qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
+            
+        conv = conv_templates[args.conv_mode].copy()
+        conv.append_message(conv.roles[0], qs)
+        conv.append_message(conv.roles[1], None)
+        prompt = conv.get_prompt()
+        input_ids = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
+        
+        # add image and seg
+        image_org = Image.open(self.image_org)
+        image_seg = Image.open(self.image_seg)
+        image_tensor = process_images([image_org], self.image_processor, self.model.config)[0]
+        
+        # do inference
+        stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
+        keywords = [stop_str]
+        stopping_criteria = KeywordsStoppingCriteria(keywords, self.tokenizer, input_ids)
+        
+        with torch.inference_mode():
+            output_ids = self.model.generate(
+                input_ids,
+                images=image_tensor.unsqueeze(0).half().cuda(),
+                do_sample=True if args.temperature > 0 else False,
+                temperature=args.temperature,
+                top_p=args.top_p,
+                num_beams=args.num_beams,
+                # no_repeat_ngram_size=3,
+                max_new_tokens=1024,
+                use_cache=True)
+
+        outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+        return outputs
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b")
@@ -118,4 +163,5 @@ if __name__ == "__main__":
     test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
     query_str_0 = "Can you describe the image in details?"
     query_str_1 = "what's the diagnosis?"
-    vrag.inference_rag(query_str_0, test_img)
+    print(vrag.inference(query_str_1))
+    print(vrag.inference_rag(query_str_1))
