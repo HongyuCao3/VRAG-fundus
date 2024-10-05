@@ -51,7 +51,16 @@ class VRAG():
         image_nodes = [ImageNode(image_path=p, text=t, meta_data=k) for p, t, k in document]
         self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True)
         
-        
+    def inference_rag(self, query_str, img_path):
+        img, txt, score, metadata = self.multi_index.as_retriever(similarity_top_k=1, image_similarity_top_k=1)
+        image_documents = [ImageDocument(iamge_path=img_path)]
+        for res_img in img:
+            image_documents.append(ImageDocument(image_path=res_img))
+        context_str = "".join(txt)
+        for d in metadata:
+            image_documents.append(ImageDocument(image_path=d["seg"]))
+            
+        # TODO:后续可以按照inference函数中进行构造
         
 
 
@@ -118,4 +127,8 @@ if __name__ == "__main__":
     
     vrag = VRAG(args)
     # print(vrag.inference())
-    vrag.build_index()
+    # vrag.build_index()
+    test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
+    query_str_0 = "Can you describe the image in details?"
+    query_str_1 = "what's the diagnosis?"
+    vrag.inference_rag(query_str_0, test_img)
