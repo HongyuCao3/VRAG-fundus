@@ -10,7 +10,7 @@ for file in os.listdir(path):
     else:
         discription.update({base_name: {"file": "", "seg": file, "idx": idx, "discription": ""}})
         idx += 1
-
+    # TODO:添加img_emb位置
 tgt_path = "/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json"
 with open(tgt_path, "w", encoding="UTF-8") as f:
     json.dump(discription, f)
