@@ -34,6 +34,7 @@ class VRAG():
             self.model_path, args.model_base, model_name
         )
         self.image_folder = args.image_folder
+        self.build_index()
         
     def build_index(self,):
         # read meta data
