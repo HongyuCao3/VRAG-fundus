@@ -45,7 +45,9 @@ class VRAG_seg():
             "Query: {query_str}\n"
             "Answer: "
         )
-        self.context_str = "In segmentation image (the second image), the light red part means microaneurysm, the dark red part means hemorrhage, the yellow part means exudates, the white part means cotton wool spots."
+        # self.context_str = "The second picture is segmentation image of the first picture, the colored part is ill. "
+        # In segmentation image (the second image), the light red part means microaneurysm, the dark red part means hemorrhage, the yellow part means exudates, the white part means cotton wool spots."
+        self.context_str = "microaneurysm, hemorrhage, cotton wool spots, exudates"
         self.image_org = args.image_org
         self.image_seg = args.image_seg
         
