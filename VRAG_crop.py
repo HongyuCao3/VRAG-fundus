@@ -48,20 +48,39 @@ class VRAG():
 
         self.build_index()
         
-    def build_index(self,):
+    def build_index(self, json_folder="./data/lesion/"):
         # read meta data
         document = []
-        with open(args.meta_data, "r", encoding="UTF-8") as f_m:
-            meta_data = json.load(f_m)
-        for k, d in meta_data.items():
-            caption = d["discription"]
-            img_path = self.image_folder + d["file"]
-            seg_path = self.image_folder + d["seg"]
-            document.append([img_path, caption, d])
+        # with open(args.meta_data, "r", encoding="UTF-8") as f_m:
+        #     meta_data = json.load(f_m)
+        document = self.extract_image_data(json_folder)
+        # for k, d in meta_data.items():
+        #     caption = d["discription"]
+        #     img_path = self.image_folder + d["file"]
+        #     seg_path = self.image_folder + d["seg"]
+        #     document.append([img_path, caption, d])
         # use llama-index to construct index
         Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
-        image_nodes = [ImageNode(image_path=p, text=t, meta_data=k) for p, t, k in document]
+        image_nodes = [ImageNode(image_path=json_folder+p, text=t, meta_data=k) for p, t, k in document]
         self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True)
+        
+    def extract_image_data(self, json_folder):
+        image_data = []
+
+        # 遍历指定目录下的所有JSON文件
+        for filename in os.listdir(json_folder):
+            if filename.endswith('.json'):
+                file_path = os.path.join(json_folder, filename)
+                with open(file_path, 'r') as f:
+                    # 加载JSON内容
+                    data = json.load(f)
+                    
+                    # 提取信息并构成元组
+                    for text, image_path in data.items():
+                        meta_data = {'source_file': filename}  # 可以根据需要添加更多元数据
+                        image_data.append((image_path, text, meta_data))
+
+        return image_data
         
     def inference_rag_with_image(self, query_str, img_path):
         # do retrieval
@@ -180,4 +199,5 @@ if __name__ == "__main__":
     test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
     query_str_0 = "Can you describe the image in details?"
     query_str_1 = "what's the diagnosis?"
-    vrag.inference_rag(query_str_0, test_img)
+    # vrag.inference_rag(query_str_0, test_img)
+    vrag.build_index()
