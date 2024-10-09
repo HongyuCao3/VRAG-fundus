@@ -4,6 +4,7 @@ import torch
 from PIL import Image
 import numpy as np
 import argparse
+from tqdm import tqdm
 
 class ImgEmb():
     def __init__(self, color_map, device):
@@ -101,6 +102,42 @@ class ImgEmb():
         # 保存到JSON文件
         with open(json_file, 'w') as f:
             json.dump(lesion_mapping, f, indent=4)
+    
+    def get_images_segs(self, image_folder):
+        # 创建一个字典来存储对应关系
+        mapping = {}
+
+        # 列出文件夹中的所有文件
+        files = os.listdir(image_folder)
+
+        # 遍历所有文件
+        for filename in files:
+            # 检查是否是png文件
+            if filename.endswith('.png'):
+                # 获取对应的jpg文件名
+                seg_filename = filename.replace('.png', '.jpg')
+                
+                # 检查对应的jpg文件是否存在
+                if seg_filename in files:
+                    # 添加到字典中
+                    mapping[filename] = seg_filename
+
+        return mapping
+    
+    def extract_lesion_all(self, image_folder):
+        images = self.get_images_segs(image_folder)
+        for k, v in tqdm(images.items()):
+            file = k.split(".")[0]
+            mask_path = "./segmentation/{file}.jpg".format(file=file)
+            img_path = "./segmentation/{file}.png".format(file=file)
+            output_dir = "./data/lesion/{file}/".format(file=file)
+            json_file="./data/lesion/lesion_map_{file}.json".format(file=file)
+            # print(mask_path)
+            # print(img_path)
+            # print(output_dir)
+            # print(json_file)
+            self.extract_lesions(img_path ,mask_path, output_dir, json_file)
+            
                 
 
 if __name__ == "__main__":
@@ -118,10 +155,10 @@ if __name__ == "__main__":
     # IE.create_color_images(colors, output_dir="./data/output_colors", json_file="./data/color_mapping.json")
     
     # 根据seg提取病灶crop
-    file = "IDRiD_49"
-    mask_path = "./segmentation/{file}.jpg".format(file=file)
-    img_path = "./segmentation/{file}.png".format(file=file)
-    IE.extract_lesions(img_path ,mask_path, output_dir="./data/lesion/{file}/".format(file=file), json_file="./data/lesion/lesion_map_{file}.json".format(file=file))
-    # print(image_paths)
-    # feature = IE.get_features_from_image_path(image_paths)
-    # print(feature)
+    # file = "IDRiD_49"
+    # mask_path = "./segmentation/{file}.jpg".format(file=file)
+    # img_path = "./segmentation/{file}.png".format(file=file)
+    # IE.extract_lesions(img_path ,mask_path, output_dir="./data/lesion/{file}/".format(file=file), json_file="./data/lesion/lesion_map_{file}.json".format(file=file))
+    
+    # 提取所有病灶
+    IE.extract_lesion_all(args.img_path)
