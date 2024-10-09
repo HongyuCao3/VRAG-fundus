@@ -97,7 +97,8 @@ class ImgEmb():
             lesion_img.save(f"{output_dir}/{file_name}")
 
             # 存储病灶名称和文件名的映射
-            lesion_mapping[lesion_name] = file_name
+            # print(image_path)
+            lesion_mapping[lesion_name] = image_path.split("/")[-1].split(".")[0] +"/"+ file_name
 
         # 保存到JSON文件
         with open(json_file, 'w') as f:
