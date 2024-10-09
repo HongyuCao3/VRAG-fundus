@@ -118,9 +118,10 @@ if __name__ == "__main__":
     # IE.create_color_images(colors, output_dir="./data/output_colors", json_file="./data/color_mapping.json")
     
     # 根据seg提取病灶crop
-    mask_path = "./segmentation/007-6008-300.jpg"
-    img_path = "./segmentation/007-6008-300.png"
-    IE.extract_lesions(img_path ,mask_path, output_dir="./data/lesion/007-6008-300/", json_file="./data/lesion/lesion_map_007-6008-300.json")
+    file = "IDRiD_49"
+    mask_path = "./segmentation/{file}.jpg".format(file=file)
+    img_path = "./segmentation/{file}.png".format(file=file)
+    IE.extract_lesions(img_path ,mask_path, output_dir="./data/lesion/{file}/".format(file=file), json_file="./data/lesion/lesion_map_{file}.json".format(file=file))
     # print(image_paths)
     # feature = IE.get_features_from_image_path(image_paths)
     # print(feature)
