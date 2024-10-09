@@ -1,5 +1,5 @@
 import clip
-import os
+import os, json
 import torch
 from PIL import Image
 import numpy as np
@@ -64,6 +64,29 @@ class ImgEmb():
                 lesion_crop = image_data[y0:y1, x0:x1]
                 cropped_image = Image.fromarray(lesion_crop)
                 cropped_image.save(os.path.join(output_dir, f'{label}.png'))
+                
+    def create_color_images(self, colors, output_dir='output_colors', json_file='color_mapping.json'):
+        # 创建输出目录
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        color_mapping = {}
+
+        for i, color in enumerate(colors):
+            # 创建纯色图像
+            img = Image.new('RGB', (100, 100), tuple(color))  # 100x100的纯色图像
+            file_name = f"color_{i+1}.png"
+            img.save(f"{output_dir}/{file_name}")
+            
+            # 存储颜色和文件名的映射
+            color_mapping[i + 1] = {
+                'color': color.tolist(),
+                'image': file_name
+            }
+
+        # 保存到JSON文件
+        with open(json_file, 'w') as f:
+            json.dump(color_mapping, f, indent=4)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -73,7 +96,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     image_paths = [os.path.join(args.img_path,file) for file in os.listdir(args.img_path)]
     IE = ImgEmb(args.device)
-    print(IE.get_lesion_colors(args.color_path))
+    colors = IE.get_lesion_colors(args.color_path)
+    IE.create_color_images(colors, output_dir="./data/output_colors", json_file="./data/color_mapping.json")
+    
     # print(image_paths)
     # feature = IE.get_features_from_image_path(image_paths)
     # print(feature)
