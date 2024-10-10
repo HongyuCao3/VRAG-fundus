@@ -34,6 +34,7 @@ class VRAG():
         self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model(
             self.model_path, args.model_base, model_name
         )
+        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         self.image_folder = args.image_folder
         self.qa_tmpl_str = (
             "Given the provided information, including retrieved contents and metadata, \
@@ -88,9 +89,30 @@ class VRAG():
 
         return image_data
         
-    def inference_rag_with_image(self, query_str, img_path):
+    def inference_rag(self, query_str, img_path):
         # do retrieval
-        img, txt, score, metadata = self.multi_index.as_retriever(similarity_top_k=3, image_similarity_top_k=3)
+        retrieve_data = self.multi_index.as_retriever(similarity_top_k=3, image_similarity_top_k=3)
+        txt = []
+        score = [] 
+        img = [] 
+        metadata= []
+        # multi modal retrieve
+        # img, txt, score, metadata = retrieve_data.retrieve(query_str)
+        # image retrieve
+        # print(retrieve_data.image_to_image_retrieve(img_path))
+        nodes = retrieve_data.image_to_image_retrieve(img_path)
+        # 此时还是index ndoe
+        for node in nodes:
+            print(type(node))
+            txt.append(node.get_text()) # excudates
+            score.append(node.get_score()) # 0.628
+            img.append(node.node.image_path)
+            metadata.append(node.node.metadata)
+            
+            
+            # img, txt, score, metadata = node
+        # txt2img retrieve
+        # img, txt, score, metadata = retrieve_data.text_to_image_retrieve(img_path)
         print(score)
         image_documents = [ImageDocument(iamge_path=img_path)]
         images= []
@@ -209,5 +231,5 @@ if __name__ == "__main__":
     test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
     query_str_0 = "Can you describe the image in details?"
     query_str_1 = "what's the diagnosis?"
-    # vrag.inference_rag(query_str_0, test_img)
+    vrag.inference_rag(query_str_0, test_img)
     # vrag.build_index()
