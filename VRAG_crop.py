@@ -67,7 +67,7 @@ class VRAG():
         Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         image_nodes = [ImageNode(image_path=json_folder+p, text=t, meta_data=k) for p, t, k in document]
         self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True)
-        # TODO:设置保存index和加载
+        # save index
         self.multi_index.storage_context.persist(persist_dir="./data/emb_crop")
         
     def extract_image_data(self, json_folder):
