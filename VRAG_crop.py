@@ -84,7 +84,8 @@ class VRAG():
         
     def inference_rag_with_image(self, query_str, img_path):
         # do retrieval
-        img, txt, score, metadata = self.multi_index.as_retriever(similarity_top_k=1, image_similarity_top_k=1)
+        img, txt, score, metadata = self.multi_index.as_retriever(similarity_top_k=3, image_similarity_top_k=3)
+        print(score)
         image_documents = [ImageDocument(iamge_path=img_path)]
         images= []
         for res_img in img:
@@ -92,15 +93,18 @@ class VRAG():
             image = Image.open(os.path.join(args.image_folder, res_img))
             images.append(image)
         context_str = "".join(txt)
-        for d in metadata:
-            image_documents.append(ImageDocument(image_path=d["seg"]))
-            image = Image.open(os.path.join(args.image_folder, d["seg"]))
-            images.append(image)
+        metadata_str = metadata
             
         # do inference
         set_seed(0)
         disable_torch_init()
-        qs = (context_str + query_str).replace(DEFAULT_IMAGE_TOKEN, '').strip()
+        prompt = self.qa_tmpl_str.format(
+            context_str=context_str,
+            metadata_str=metadata_str,
+            query_str=query_str, 
+        )
+        
+        qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
         if self.model.config.mm_use_im_start_end:
             qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
         else:
@@ -112,7 +116,7 @@ class VRAG():
         
         input_ids = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 
-        image_tensor = process_images([images], self.image_processor, self.model.config)[0] # TODO:验证这里的下标0
+        image_tensor = process_images([images], self.image_processor, self.model.config)[0] 
         
         stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
         keywords = [stop_str]
