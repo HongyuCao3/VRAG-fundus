@@ -17,6 +17,7 @@ from llama_index.core import (ServiceContext,
                                SimpleDirectoryReader,
                                SimpleDirectoryReader,
                                StorageContext,
+                               load_index_from_storage,
                                Settings)
 from llama_index.core.schema import ImageNode
 from llama_index.core.schema import ImageDocument
@@ -45,8 +46,11 @@ class VRAG():
             "Query: {query_str}\n"
             "Answer: "
         )
-
-        self.build_index()
+        if os.path.exists("./data/emb_crop"):
+            storage_context = StorageContext.from_defaults(persist_dir="./data/emb_crop")
+            self.multi_index = load_index_from_storage(storage_context)
+        else:
+            self.build_index()
         
     def build_index(self, json_folder="./data/lesion/"):
         # read meta data
@@ -63,6 +67,8 @@ class VRAG():
         Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         image_nodes = [ImageNode(image_path=json_folder+p, text=t, meta_data=k) for p, t, k in document]
         self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True)
+        # TODO:设置保存index和加载
+        self.multi_index.storage_context.persist(persist_dir="./data/emb_crop")
         
     def extract_image_data(self, json_folder):
         image_data = []
@@ -204,4 +210,4 @@ if __name__ == "__main__":
     query_str_0 = "Can you describe the image in details?"
     query_str_1 = "what's the diagnosis?"
     # vrag.inference_rag(query_str_0, test_img)
-    vrag.build_index()
+    # vrag.build_index()
