@@ -101,7 +101,6 @@ class VRAG():
         # image retrieve
         # print(retrieve_data.image_to_image_retrieve(img_path))
         nodes = retrieve_data.image_to_image_retrieve(img_path)
-        # 此时还是index ndoe
         for node in nodes:
             print(type(node))
             txt.append(node.get_text()) # excudates
@@ -118,7 +117,8 @@ class VRAG():
         images= []
         for res_img in img:
             image_documents.append(ImageDocument(image_path=res_img))
-            image = Image.open(os.path.join(args.image_folder, res_img))
+            # print(res_img)
+            image = Image.open(res_img)
             images.append(image)
         context_str = "".join(txt)
         metadata_str = metadata
@@ -144,7 +144,8 @@ class VRAG():
         
         input_ids = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 
-        image_tensor = process_images([images], self.image_processor, self.model.config)[0] 
+        # 考虑这里是否需要将所有图片都放进去
+        image_tensor = process_images(images, self.image_processor, self.model.config)[0] 
         
         stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
         keywords = [stop_str]
@@ -231,5 +232,5 @@ if __name__ == "__main__":
     test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
     query_str_0 = "Can you describe the image in details?"
     query_str_1 = "what's the diagnosis?"
-    vrag.inference_rag(query_str_0, test_img)
+    print(vrag.inference_rag(query_str_1, test_img))
     # vrag.build_index()
