@@ -30,6 +30,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 class VRAG():
     def __init__(self, args):
         self.model_path = args.model_path
+        self.top_k = args.top_k
         model_name = get_model_name_from_path(self.model_path)
         self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model(
             self.model_path, args.model_base, model_name
@@ -90,8 +91,10 @@ class VRAG():
         return image_data
         
     def inference_rag(self, query_str, img_path):
+        record_data = {}
         # do retrieval
-        retrieve_data = self.multi_index.as_retriever(similarity_top_k=3, image_similarity_top_k=3)
+        retrieve_data = self.multi_index.as_retriever(similarity_top_k=self.top_k, image_similarity_top_k=self.top_k)
+        # TODO: 需要了解两个top的参数最佳设置
         txt = []
         score = [] 
         img = [] 
@@ -108,7 +111,10 @@ class VRAG():
             img.append(node.node.image_path)
             metadata.append(node.node.metadata)
             
-            
+        record_data.update({"txt":txt})
+        record_data.update({"score":score})
+        record_data.update({"img":img})
+        record_data.update({"org":img_path})
             # img, txt, score, metadata = node
         # txt2img retrieve
         # img, txt, score, metadata = retrieve_data.text_to_image_retrieve(img_path)
@@ -144,7 +150,7 @@ class VRAG():
         
         input_ids = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 
-        # 考虑这里是否需要将所有图片都放进去
+        # TODO：考虑这里是否需要将所有图片都放进去
         image_tensor = process_images(images, self.image_processor, self.model.config)[0] 
         
         stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
@@ -163,7 +169,8 @@ class VRAG():
                     use_cache=True)
 
         outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        return outputs
+        record_data.update({"outputs": outputs})
+        return outputs, record_data
 
     def inference(self):
         set_seed(0)
@@ -221,6 +228,7 @@ if __name__ == "__main__":
     parser.add_argument("--num-chunks", type=int, default=1)
     parser.add_argument("--chunk-idx", type=int, default=0)
     parser.add_argument("--temperature", type=float, default=0.2)
+    parser.add_argument("--top_k", type=int, default=3)
     parser.add_argument("--top_p", type=float, default=None)
     parser.add_argument("--num_beams", type=int, default=1)
     parser.add_argument("--meta-data", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json")
