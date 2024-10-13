@@ -32,6 +32,7 @@ class VRAG():
         self.model_path = args.model_path
         self.top_k = args.top_k
         self.use_pics = args.use_pics
+        self.use_rag = args.use_rag
         model_name = get_model_name_from_path(self.model_path)
         self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model(
             self.model_path, args.model_base, model_name
@@ -135,12 +136,20 @@ class VRAG():
         # do inference
         set_seed(0)
         disable_torch_init()
-        prompt = self.qa_tmpl_str.format(
-            context_str=context_str,
-            metadata_str=metadata_str,
-            query_str=query_str, 
-        )
-        
+        print(self.use_rag)
+        if self.use_rag:
+            prompt = self.qa_tmpl_str.format(
+                context_str=context_str,
+                metadata_str=metadata_str,
+                query_str=query_str, 
+            )
+        else:
+            prompt = self.qa_tmpl_str.format(
+                context_str="",
+                metadata_str="",
+                query_str=query_str, 
+            )
+        print(prompt)
         qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
         if self.model.config.mm_use_im_start_end:
             qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
@@ -235,9 +244,9 @@ if __name__ == "__main__":
     parser.add_argument("--top_p", type=float, default=None)
     parser.add_argument("--num_beams", type=int, default=1)
     parser.add_argument("--meta-data", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json")
-    parser.add_argument("--use-pics", type=bool, default=True)
+    parser.add_argument("--use-pics", type=bool, default=False)
+    parser.add_argument("--use-rag", type=bool, default=False)
     args = parser.parse_args()
-    
     vrag = VRAG(args)
     # print(vrag.inference())
     # vrag.build_index()
