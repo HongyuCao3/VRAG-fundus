@@ -31,6 +31,7 @@ class VRAG():
     def __init__(self, args):
         self.model_path = args.model_path
         self.top_k = args.top_k
+        self.use_pics = args.use_pics
         model_name = get_model_name_from_path(self.model_path)
         self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model(
             self.model_path, args.model_base, model_name
@@ -120,13 +121,15 @@ class VRAG():
         # img, txt, score, metadata = retrieve_data.text_to_image_retrieve(img_path)
         print(score)
         image_documents = [ImageDocument(iamge_path=img_path)]
-        images= []
-        for res_img in img:
-            image_documents.append(ImageDocument(image_path=res_img))
-            # print(res_img)
-            image = Image.open(res_img)
-            images.append(image)
-        context_str = "".join(txt)
+        image_org = Image.open(img_path)
+        images= [image_org]
+        if self.use_pics:
+            for res_img in img:
+                image_documents.append(ImageDocument(image_path=res_img))
+                # print(res_img)
+                image = Image.open(res_img)
+                images.append(image)
+        context_str = ",".join(txt)
         metadata_str = metadata
             
         # do inference
@@ -232,6 +235,7 @@ if __name__ == "__main__":
     parser.add_argument("--top_p", type=float, default=None)
     parser.add_argument("--num_beams", type=int, default=1)
     parser.add_argument("--meta-data", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json")
+    parser.add_argument("--use-pics", type=bool, default=True)
     args = parser.parse_args()
     
     vrag = VRAG(args)
