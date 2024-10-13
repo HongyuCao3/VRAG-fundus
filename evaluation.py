@@ -36,6 +36,7 @@ if __name__ == "__main__":
     parser.add_argument("--meta-data", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json")
     parser.add_argument("--test-path", type=str, default="/home/hongyu/DDR/lesion_segmentation/test/image/")
     parser.add_argument("--query-str", type=str, default="what's the diagnosis?")
+    parser.add_argument("--use-pics", type=bool, default=True)
     args = parser.parse_args()
     vrag = VRAG(args)
     eva = evaluation(args, vrag)
