@@ -39,5 +39,5 @@ if __name__ == "__main__":
     parser.add_argument("--use-pics", type=bool, default=False)
     parser.add_argument("--use-rag", type=bool, default=False)
     args = parser.parse_args()
-    vrag = VRAG(args)
+    vrag = VRAG(args) # llava, llava-med, llava-med-rag
     eva = evaluation(args, vrag)
