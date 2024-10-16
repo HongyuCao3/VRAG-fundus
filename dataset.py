@@ -32,8 +32,8 @@ class DRDataset(Dataset):
 # Usage Example
 if __name__ == "__main__":
     # Specify the path to your CSV and image directory
-    csv_file = './data/DR/mulitdr.csv'
-    image_dir = './data/DR/multdr'
+    csv_file = './data/DR/multidr.csv'
+    image_dir = './data/DR/multidr'
 
     # Define transformations if needed
     transform = transforms.Compose([
