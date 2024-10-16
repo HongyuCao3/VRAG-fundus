@@ -3,6 +3,7 @@ import torch
 import os
 import json
 from tqdm import tqdm
+from dataset import DRDataset
 
 from VRAG_crop import VRAG
 
@@ -12,21 +13,51 @@ class evaluation():
         self.query_str = args.query_str
         self.model = model
         self.test_path = args.test_path
+        self.output_path = args.output_path
+        if args.dataset == "DR":
+            self.dataset = DRDataset(csv_file = './data/DR/multidr.csv',image_dir = './data/DR/multidr')
         
-    def test(self):
-        for file in os.listdir(self.test_path):
-            # TODO：添加test集ground truth提取代码
-            respond, record_data = self.model.inference_rag(self.query_str, file)
-        # TODO:添加结果保存和对比代码
+    def test(self, dataset):
+        correct_predictions = 0
+        total_samples = len(dataset)
+        results = []
+
+        for idx in range(total_samples):
+            img_name, diagnosis = dataset[idx]
+            
+            # Perform inference
+            respond, record_data = self.model.inference_rag(self.query_str, img_name)
+            
+            # Check if diagnosis is in respond
+            is_correct = diagnosis in respond
+            if is_correct:
+                correct_predictions += 1
+
+            # Append results to the list
+            results.append({
+                'img_name': img_name,
+                'diagnosis': diagnosis,
+                'respond': respond,
+                'record_data': record_data,
+                'correct': is_correct
+            })
+
+        # Calculate accuracy
+        accuracy = correct_predictions / total_samples if total_samples > 0 else 0
+
+        # Save results to a JSON file
+        with open(self.output_path, 'w') as json_file:
+            json.dump({'accuracy': accuracy, 'results': results}, json_file, indent=4)
+
+
+        return accuracy
     
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b")
     parser.add_argument("--model-base", type=str, default=None)
-    parser.add_argument("--question-file", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/eye_diag.json")
     parser.add_argument("--conv-mode", type=str, default="vicuna_v1")
-    parser.add_argument("--image-folder", type=str, default="./segmentation/")
     parser.add_argument("--num-chunks", type=int, default=1)
     parser.add_argument("--chunk-idx", type=int, default=0)
     parser.add_argument("--temperature", type=float, default=0.2)
@@ -34,10 +65,11 @@ if __name__ == "__main__":
     parser.add_argument("--top_p", type=float, default=None)
     parser.add_argument("--num_beams", type=int, default=1)
     parser.add_argument("--meta-data", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json")
-    parser.add_argument("--test-path", type=str, default="/home/hongyu/DDR/lesion_segmentation/test/image/")
+    parser.add_argument("--dataset", type=str, default="DR")
     parser.add_argument("--query-str", type=str, default="what's the diagnosis?")
     parser.add_argument("--use-pics", type=bool, default=False)
     parser.add_argument("--use-rag", type=bool, default=False)
     args = parser.parse_args()
     vrag = VRAG(args) # llava, llava-med, llava-med-rag
     eva = evaluation(args, vrag)
+    # TODO: 考虑对数据集将评价具体标准加入context
