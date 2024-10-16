@@ -121,7 +121,7 @@ class VRAG():
         # txt2img retrieve
         # img, txt, score, metadata = retrieve_data.text_to_image_retrieve(img_path)
         print(score)
-        image_documents = [ImageDocument(iamge_path=img_path)]
+        image_documents = [ImageDocument(image_path=img_path)]
         image_org = Image.open(img_path)
         images= [image_org]
         if self.use_pics:
