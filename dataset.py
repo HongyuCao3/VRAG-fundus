@@ -42,7 +42,7 @@ if __name__ == "__main__":
     ])
 
     # Create dataset and dataloader
-    dataset = MedicalImageDataset(csv_file=csv_file, image_dir=image_dir, transform=transform)
+    dataset = DRDataset(csv_file=csv_file, image_dir=image_dir, transform=transform)
     dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
 
     # Iterate through the dataloader
