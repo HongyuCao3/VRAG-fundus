@@ -62,6 +62,9 @@ class VRAG():
             "Query: {query_str}\n"
             "Answer: "
         )
+        self.chunk_m = args.chunk_m
+        self.chunk_n = args.chunk_n
+        self.tmp_path = args.tmp_path
         if os.path.exists("./data/emb_crop"):
             storage_context = StorageContext.from_defaults(persist_dir="./data/emb_crop")
             self.multi_index = load_index_from_storage(storage_context)
@@ -106,7 +109,22 @@ class VRAG():
         
     def inference_rag(self, query_str, img_path):
         # do retrieval
-        txt, score, img, metadata = self.retrieve(img_path)
+        if self.chunk_m == 1 and self.chunk_n == 1:
+            txt, score, img, metadata = self.retrieve(img_path)
+        else:
+            txt = []
+            score = [] 
+            img = [] 
+            metadata= []
+            sub_imgs = split_image(img_path, self.tmp_path, self.chunk_m, self.chunk_n)
+            for sub_img in sub_imgs:
+                txt_, score_, img_, metadata_ = self.retrieve(sub_img)
+                txt.extend(txt_)
+                score.extend(score_)
+                img.extend(img_)
+                metadata.extend(metadata_)
+                # TODO：添加计数方式
+            # TODO：删除临时图片
         
         # form context
         prompt, images, record_data = self.form_context(img_path, query_str, txt, score, img, metadata)
@@ -269,6 +287,7 @@ if __name__ == "__main__":
     parser.add_argument("--use-rag", type=bool, default=False)
     parser.add_argument("--chunk-m", type=int, default=1)
     parser.add_argument("--chunk-n", type=int, default=1)
+    parser.add_argument("--tmp-path", type=str, default="./data/tmp")
     args = parser.parse_args()
     vrag = VRAG(args)
     # print(vrag.inference())
