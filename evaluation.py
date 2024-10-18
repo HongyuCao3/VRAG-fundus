@@ -23,7 +23,7 @@ class evaluation():
         correct_predictions = 0
         total_samples = len(self.dataset)
         results = []
-        dataloader = DataLoader(self.dataset, batch_size=1, shuffle=True)
+        dataloader = DataLoader(self.dataset, batch_size=1, shuffle=False)
 
         # Iterate through the dataloader
         idx = 0
