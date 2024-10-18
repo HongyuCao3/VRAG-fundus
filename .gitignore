@@ -2,3 +2,4 @@ Model/
 segmentation/
 data/
 __pycache__/
+output/

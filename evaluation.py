@@ -4,6 +4,7 @@ import os
 import json
 from tqdm import tqdm
 from dataset import DRDataset
+from torch.utils.data import Dataset, DataLoader
 
 from VRAG_crop import VRAG
 
@@ -18,15 +19,21 @@ class evaluation():
             self.dataset = DRDataset(csv_file = './data/DR/multidr.csv',image_dir = './data/DR/multidr')
         self.test_num = args.test_num
         
-    def test(self, dataset):
+    def test(self):
         correct_predictions = 0
-        total_samples = len(dataset)
+        total_samples = len(self.dataset)
         results = []
+        dataloader = DataLoader(self.dataset, batch_size=1, shuffle=True)
 
-        for idx in tqdm(range(total_samples)):
+        # Iterate through the dataloader
+        idx = 0
+        for images, diagnosis in tqdm(dataloader):
+        # for idx in tqdm(range(total_samples)):
             if self.test_num != -1 and idx >= self.test_num:
                 break
-            img_name, diagnosis = dataset[idx]
+            idx += 1
+            diagnosis = diagnosis[0]
+            img_name = images[0]
             
             # Perform inference
             respond, record_data = self.model.inference_rag(self.query_str, img_name)
@@ -39,8 +46,8 @@ class evaluation():
             # Append results to the list
             results.append({
                 'img_name': img_name,
-                'diagnosis': diagnosis,
-                'respond': respond,
+                'ground truth': diagnosis,
+                'llm respond': respond,
                 'record_data': record_data,
                 'correct': is_correct
             })
@@ -78,4 +85,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     vrag = VRAG(args) # llava, llava-med, llava-med-rag
     eva = evaluation(args, vrag)
+    eva.test()
     # TODO: 考虑对数据集将评价具体标准加入context

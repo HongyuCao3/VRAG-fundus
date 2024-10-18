@@ -37,6 +37,10 @@ class VRAG():
         self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model(
             self.model_path, args.model_base, model_name
         )
+        self.conv_mode = args.conv_mode
+        self.temperature = args.temperature
+        self.top_p=args.top_p
+        self.num_beams=args.num_beams
         Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         self.image_folder = args.image_folder
         diagnosing_level = {"Mild NPDR": "MAs only", "Moderate NPDR": "At least one hemorrhage or MA and/or at least one of the following: Retinal hemorrhages, Hard exudates, Cotton wool spots, Venous beading", "Severe NPDR": "Any of the following but no signs of PDR (4-2-1 rule): >20 intraretinal hemorrhages in each of four quadrants, definite venous, beading in two or more quadrants, Prominent IRMA in one or more quadrants", "PDR": "One of either: Neovascularization, Vitreous/preretinal hemorrhage"}
@@ -148,14 +152,14 @@ class VRAG():
                 context_str=context_str,
                 metadata_str=metadata_str,
                 query_str=query_str, 
-                diagnoisis_str=self.diagnosing_str,
+                diagnosis_str=self.diagnosis_str,
             )
         else:
             prompt = self.qa_tmpl_str.format(
                 context_str="",
                 metadata_str="",
                 query_str=query_str, 
-                diagnoisis_str=self.diagnosing_str,
+                diagnosis_str=self.diagnosis_str,
             )
         print(prompt)
         qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
@@ -163,7 +167,7 @@ class VRAG():
             qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
         else:
             qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
-        conv = conv_templates[args.conv_mode].copy()
+        conv = conv_templates[self.conv_mode].copy()
         conv.append_message(conv.roles[0], qs)
         conv.append_message(conv.roles[1], None)
         prompt = conv.get_prompt()
@@ -180,10 +184,10 @@ class VRAG():
                 output_ids = self.model.generate(
                     input_ids,
                     images=image_tensor.unsqueeze(0).half().cuda(),
-                    do_sample=True if args.temperature > 0 else False,
-                    temperature=args.temperature,
-                    top_p=args.top_p,
-                    num_beams=args.num_beams,
+                    do_sample=True if self.temperature > 0 else False,
+                    temperature=self.temperature,
+                    top_p=self.top_p,
+                    num_beams=self.num_beams,
                     # no_repeat_ngram_size=3,
                     max_new_tokens=1024,
                     use_cache=True)
