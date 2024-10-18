@@ -1,3 +1,4 @@
 Model/
 segmentation/
 data/
+__pycache__/
