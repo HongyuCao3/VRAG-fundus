@@ -16,13 +16,16 @@ class evaluation():
         self.output_path = args.output_path
         if args.dataset == "DR":
             self.dataset = DRDataset(csv_file = './data/DR/multidr.csv',image_dir = './data/DR/multidr')
+        self.test_num = args.test_num
         
     def test(self, dataset):
         correct_predictions = 0
         total_samples = len(dataset)
         results = []
 
-        for idx in range(total_samples):
+        for idx in tqdm(range(total_samples)):
+            if self.test_num != -1 and idx >= self.test_num:
+                break
             img_name, diagnosis = dataset[idx]
             
             # Perform inference
@@ -69,6 +72,7 @@ if __name__ == "__main__":
     parser.add_argument("--query-str", type=str, default="what's the diagnosis accroding to the diagnosising standard?")
     parser.add_argument("--use-pics", type=bool, default=False)
     parser.add_argument("--use-rag", type=bool, default=False)
+    parser.add_argument("--test-num", type=int, default=-1)
     args = parser.parse_args()
     vrag = VRAG(args) # llava, llava-med, llava-med-rag
     eva = evaluation(args, vrag)
