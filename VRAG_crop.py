@@ -8,6 +8,8 @@ from PIL import Image
 import math
 from transformers import set_seed, logging
 
+from utils import split_image, delete_images
+
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
 from llava.model.builder import load_pretrained_model
@@ -110,7 +112,6 @@ class VRAG():
         prompt, images, record_data = self.form_context(img_path, query_str, txt, score, img, metadata)
             
         # do inference
-        
         set_seed(0)
         disable_torch_init()
         qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
@@ -125,7 +126,6 @@ class VRAG():
         
         input_ids = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 
-        # TODO：考虑这里是否需要将所有图片都放进去
         image_tensor = process_images(images, self.image_processor, self.model.config)[0] 
         
         stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
