@@ -103,49 +103,16 @@ class VRAG():
         return image_data
         
     def inference_rag(self, query_str, img_path):
-        record_data = {}
         # do retrieval
         txt, score, img, metadata = self.retrieve(img_path)
-            
-        record_data.update({"txt":txt})
-        record_data.update({"score":score})
-        record_data.update({"img":img})
-        record_data.update({"org":img_path})
-            # img, txt, score, metadata = node
-        # txt2img retrieve
-        # img, txt, score, metadata = retrieve_data.text_to_image_retrieve(img_path)
-        print(score)
-        image_documents = [ImageDocument(image_path=img_path)]
-        image_org = Image.open(img_path)
-        images= [image_org]
-        if self.use_pics:
-            for res_img in img:
-                image_documents.append(ImageDocument(image_path=res_img))
-                # print(res_img)
-                image = Image.open(res_img)
-                images.append(image)
-        context_str = ",".join(txt)
-        metadata_str = metadata
+        
+        # form context
+        prompt, images, record_data = self.form_context(img_path, query_str, txt, score, img, metadata)
             
         # do inference
+        
         set_seed(0)
         disable_torch_init()
-        print(self.use_rag)
-        if self.use_rag:
-            prompt = self.qa_tmpl_str.format(
-                context_str=context_str,
-                metadata_str=metadata_str,
-                query_str=query_str, 
-                diagnosis_str=self.diagnosis_str,
-            )
-        else:
-            prompt = self.qa_tmpl_str.format(
-                context_str="",
-                metadata_str="",
-                query_str=query_str, 
-                diagnosis_str=self.diagnosis_str,
-            )
-        print(prompt)
         qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
         if self.model.config.mm_use_im_start_end:
             qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
@@ -180,6 +147,44 @@ class VRAG():
         record_data.update({"outputs": outputs})
         return outputs, record_data
     
+    def form_context(self, img_path, query_str, txt, score, img, metadata):
+        record_data = {}
+        record_data.update({"txt":txt})
+        record_data.update({"score":score})
+        record_data.update({"img":img})
+        record_data.update({"org":img_path})
+            # img, txt, score, metadata = node
+        # txt2img retrieve
+        # img, txt, score, metadata = retrieve_data.text_to_image_retrieve(img_path)
+        # print(score)
+        image_documents = [ImageDocument(image_path=img_path)]
+        image_org = Image.open(img_path)
+        images= [image_org]
+        if self.use_pics:
+            for res_img in img:
+                image_documents.append(ImageDocument(image_path=res_img))
+                # print(res_img)
+                image = Image.open(res_img)
+                images.append(image)
+        context_str = ",".join(txt)
+        metadata_str = metadata
+        # print(self.use_rag)
+        if self.use_rag:
+            prompt = self.qa_tmpl_str.format(
+                context_str=context_str,
+                metadata_str=metadata_str,
+                query_str=query_str, 
+                diagnosis_str=self.diagnosis_str,
+            )
+        else:
+            prompt = self.qa_tmpl_str.format(
+                context_str="",
+                metadata_str="",
+                query_str=query_str, 
+                diagnosis_str=self.diagnosis_str,
+            )
+        return prompt, images, record_data
+            
     def retrieve(self, img_path):
         # get sim img and txt for img
         retrieve_data = self.multi_index.as_retriever(similarity_top_k=self.top_k, image_similarity_top_k=self.top_k)
@@ -262,6 +267,8 @@ if __name__ == "__main__":
     parser.add_argument("--meta-data", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json")
     parser.add_argument("--use-pics", type=bool, default=False)
     parser.add_argument("--use-rag", type=bool, default=False)
+    parser.add_argument("--chunk-m", type=int, default=1)
+    parser.add_argument("--chunk-n", type=int, default=1)
     args = parser.parse_args()
     vrag = VRAG(args)
     # print(vrag.inference())
