@@ -25,8 +25,35 @@ def split_image(img_path, tmp_path, m, n):
 
     return sub_images
 
+
+def delete_images(tmp_path):
+    # 检查目录是否存在
+    if not os.path.exists(tmp_path):
+        print("错误：指定的目录不存在")
+        return
+
+    # 获取目录下的所有文件和文件夹
+    items = os.listdir(tmp_path)
+
+    # 检查是否只有图片文件
+    only_images = all(item.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) for item in items)
+
+    if not only_images:
+        print("错误：目录中包含非图片文件或子目录")
+        return
+
+    # 删除所有图片文件
+    for item in items:
+        file_path = os.path.join(tmp_path, item)
+        os.remove(file_path)
+
+    print("成功删除所有图片文件")
+
+
+
 if __name__ == "__main__":
     img_path = "./data/DR/multidr/BRSET_img00149.jpg"
     tmp_path = "./data/tmp/"
     sub_imgs = split_image(img_path, tmp_path, 2, 2)
     print(sub_imgs)
+    delete_images(tmp_path)
