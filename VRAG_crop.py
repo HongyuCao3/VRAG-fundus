@@ -39,13 +39,20 @@ class VRAG():
         )
         Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         self.image_folder = args.image_folder
+        diagnosing_level = {"Mild NPDR": "MAs only", "Moderate NPDR": "At least one hemorrhage or MA and/or at least one of the following: Retinal hemorrhages, Hard exudates, Cotton wool spots, Venous beading", "Severe NPDR": "Any of the following but no signs of PDR (4-2-1 rule): >20 intraretinal hemorrhages in each of four quadrants, definite venous, beading in two or more quadrants, Prominent IRMA in one or more quadrants", "PDR": "One of either: Neovascularization, Vitreous/preretinal hemorrhage"}
+        self.diagnosing_str = ""
+        for key, value in diagnosing_level.items():
+            self.diagnosis_str += f"{key}: {value}
+        "
         self.qa_tmpl_str = (
             "Given the provided information, including retrieved contents and metadata, \
             accurately and precisely answer the query without any additional prior knowledge.\n"
             "Please ensure honesty and responsibility, refraining from any racist or sexist remarks.\n"
             "---------------------\n"
             "Context: {context_str}\n"     ## 将上下文信息放进去
+            "Diagnosing Standard: {diagnosis_str}\n" # 添加诊断标准
             "Metadata: {metadata_str} \n"  ## 将原始的meta信息放进去
+            ""
             "---------------------\n"
             "Query: {query_str}\n"
             "Answer: "
@@ -142,12 +149,14 @@ class VRAG():
                 context_str=context_str,
                 metadata_str=metadata_str,
                 query_str=query_str, 
+                diagnoisis_str=self.diagnosing_str,
             )
         else:
             prompt = self.qa_tmpl_str.format(
                 context_str="",
                 metadata_str="",
                 query_str=query_str, 
+                diagnoisis_str=self.diagnosing_str,
             )
         print(prompt)
         qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
