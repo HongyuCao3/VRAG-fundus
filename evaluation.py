@@ -12,7 +12,7 @@ class evaluation():
     def __init__(self, args, model):
         self.query_str = args.query_str
         self.model = model
-        self.test_path = args.test_path
+        # self.test_path = args.test_path
         self.output_path = args.output_path
         if args.dataset == "DR":
             self.dataset = DRDataset(csv_file = './data/DR/multidr.csv',image_dir = './data/DR/multidr')
@@ -73,6 +73,8 @@ if __name__ == "__main__":
     parser.add_argument("--use-pics", type=bool, default=False)
     parser.add_argument("--use-rag", type=bool, default=False)
     parser.add_argument("--test-num", type=int, default=-1)
+    parser.add_argument("--image-folder", type=str, default="./segmentation/")
+    parser.add_argument("--output-path", type=str, default="./output/DR.json")
     args = parser.parse_args()
     vrag = VRAG(args) # llava, llava-med, llava-med-rag
     eva = evaluation(args, vrag)
