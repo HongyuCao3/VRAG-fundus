@@ -105,23 +105,7 @@ class VRAG():
     def inference_rag(self, query_str, img_path):
         record_data = {}
         # do retrieval
-        retrieve_data = self.multi_index.as_retriever(similarity_top_k=self.top_k, image_similarity_top_k=self.top_k)
-        # TODO: 需要了解两个top的参数最佳设置
-        txt = []
-        score = [] 
-        img = [] 
-        metadata= []
-        # multi modal retrieve
-        # img, txt, score, metadata = retrieve_data.retrieve(query_str)
-        # image retrieve
-        # print(retrieve_data.image_to_image_retrieve(img_path))
-        nodes = retrieve_data.image_to_image_retrieve(img_path)
-        for node in nodes:
-            print(type(node))
-            txt.append(node.get_text()) # excudates
-            score.append(node.get_score()) # 0.628
-            img.append(node.node.image_path)
-            metadata.append(node.node.metadata)
+        txt, score, img, metadata = self.retrieve(img_path)
             
         record_data.update({"txt":txt})
         record_data.update({"score":score})
@@ -197,6 +181,7 @@ class VRAG():
         return outputs, record_data
     
     def retrieve(self, img_path):
+        # get sim img and txt for img
         retrieve_data = self.multi_index.as_retriever(similarity_top_k=self.top_k, image_similarity_top_k=self.top_k)
         txt = []
         score = [] 
