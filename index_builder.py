@@ -31,22 +31,29 @@ class IndexBuilder():
         Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         
     def build_index(self,):
-        # read crop data
         document = []
-        document = self.extract_image_data_crop(self.crop_dir)
-        image_nodes = [ImageNode(image_path=self.crop_dir+p, text=t, meta_data=k) for p, t, k in document]
+        image_nodes = []
+        
+        # read crop data
+        if self.crop_dir != None:
+            document = self.extract_image_data_crop(self.crop_dir)
+            image_nodes = [ImageNode(image_path=self.crop_dir+p, text=t, meta_data=k) for p, t, k in document]
         
         # read level data
-        document = self.extract_image_data_level(self.level_dir)
-        image_nodes_ = [ImageNode(image_path=p, text=t, meta_data=k) for p, t, k in document]
-        image_nodes.extend(image_nodes_)
+        if self.level_dir != None:
+            document = self.extract_image_data_level(self.level_dir)
+            image_nodes_ = [ImageNode(image_path=p, text=t, meta_data=k) for p, t, k in document]
+            image_nodes.extend(image_nodes_)
         
         # use llama-index to construct index
         Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True)
         
         # save index
-        self.multi_index.storage_context.persist(persist_dir=self.persist_dir)
+        if self.persist_dir != None:
+            self.multi_index.storage_context.persist(persist_dir=self.persist_dir)
+        else:
+            print("Error save path")
         
     def extract_image_data_crop(self, json_folder):
         image_data = []
@@ -89,9 +96,9 @@ class IndexBuilder():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--crop-dir", type=str, default="./data/lesion/")
-    parser.add_argument("--level-dir", type=str, default="./data/level/")
-    parser.add_argument("--persist-dir", type=str, default="./data/level_emb/")
+    parser.add_argument("--crop-dir", type=str, default=None)
+    parser.add_argument("--level-dir", type=str, default=None)
+    parser.add_argument("--persist-dir", type=str, default=None)
     args = parser.parse_args()
     IB = IndexBuilder(args)
     IB.build_index()
