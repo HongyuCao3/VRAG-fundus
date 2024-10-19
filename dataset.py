@@ -57,7 +57,7 @@ class DRDataset(Dataset):
                 shutil.copy(img_src, img_dst)
 
                 # 添加到JSON数据
-                json_data.append({'imid': imid, 'dis': dis})
+                json_data.append({'image_path': img_dst, 'imid': imid, 'dis': dis})
 
         # 保存JSON文件
         json_file_path = os.path.join(tgt_dir, 'level.json')
