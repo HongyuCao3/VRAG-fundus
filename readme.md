@@ -13,10 +13,9 @@
 ## 步骤
  - 需要测试topk对于结果的影响
  - 需要考虑是否要将所有图片都作为输入
- - 需要写一个批量测试
  - 需要测试crop的color超参数对于数据的影响
- - 挑选诊断level图加入knowledge base
 
 ## 实验
  - 对比rag与非rag
  - 对比llava和llava-med
+ - 对比使用不同knowledge base的方法
