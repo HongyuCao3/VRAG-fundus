@@ -65,10 +65,12 @@ class VRAG():
         self.chunk_m = args.chunk_m
         self.chunk_n = args.chunk_n
         self.tmp_path = args.tmp_path
+        self.emb_path = args.emb_path
         if os.path.exists("./data/emb_crop"):
-            storage_context = StorageContext.from_defaults(persist_dir="./data/emb_crop")
+            storage_context = StorageContext.from_defaults(persist_dir=self.emb_path)
             self.multi_index = load_index_from_storage(storage_context)
         else:
+            print("invalid emb")
             self.build_index()
         
     def build_index(self, json_folder="./data/lesion/"):
@@ -288,6 +290,7 @@ if __name__ == "__main__":
     parser.add_argument("--chunk-m", type=int, default=1)
     parser.add_argument("--chunk-n", type=int, default=1)
     parser.add_argument("--tmp-path", type=str, default="./data/tmp")
+    parser.add_argument("--emb-path", type=str, default="./data/emb_crop")
     args = parser.parse_args()
     vrag = VRAG(args)
     # print(vrag.inference())
