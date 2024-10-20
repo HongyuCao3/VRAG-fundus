@@ -49,6 +49,7 @@ python evaluation.py \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
+    --top-k 1 \
     --test-num 5
 
 
