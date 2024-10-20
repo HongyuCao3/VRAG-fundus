@@ -194,25 +194,31 @@ class VRAG():
         if self.level_multi_index != None:
             retrieve_data_l = self.level_multi_index.as_retriever(similarity_top_k=self.top_k_l, image_similarity_top_k=self.top_k_l)
             
-        txt = []
-        score = [] 
-        img = [] 
-        metadata= []
+        txt_c = []
+        score_c = [] 
+        img_c = [] 
+        metadata_c= []
+        txt_l = []
+        score_l = [] 
+        img_l = [] 
+        metadata_l= []
         # multi modal retrieve
         # img, txt, score, metadata = retrieve_data.retrieve(query_str)
         # image retrieve
         # print(retrieve_data.image_to_image_retrieve(img_path))
         nodes_c = retrieve_data_c.image_to_image_retrieve(img_path)
+        for node in nodes_c:
+            txt_c.append(node.get_text()) # excudates
+            score_c.append(node.get_score()) # 0.628
+            img_c.append(node.node.image_path)
+            metadata_c.append(node.node.metadata)
         nodes_l = retrieve_data_l.image_to_image_retrieve(img_path)
-        nodes = nodes_c
-        nodes.extend(nodes_l)
-        for node in nodes:
-            print(type(node))
-            txt.append(node.get_text()) # excudates
-            score.append(node.get_score()) # 0.628
-            img.append(node.node.image_path)
-            metadata.append(node.node.metadata)
-        return txt, score, img, metadata    
+        for node in nodes_l:
+            txt_l.append(node.get_text()) # excudates
+            score_l.append(node.get_score()) # 0.628
+            img_l.append(node.node.image_path)
+            metadata_l.append(node.node.metadata)
+        return {"txt_c": txt_c, "score_c": score_c, "img_c": img_c, "metadata_c": metadata_c}, {"txt_l": txt_l, "score_l": score_l, "img_l": img_l, "metadata_c": metadata_l} 
         
         
 
