@@ -14,6 +14,8 @@
  - 需要测试topk对于结果的影响
  - 需要考虑是否要将所有图片都作为输入
  - 需要测试crop的color超参数对于数据的影响
+ - 对于level-emb只能用top1
+ - level-emb和crop-emb的context必须分开
 
 ## 实验
  - 对比rag与非rag
