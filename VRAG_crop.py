@@ -32,7 +32,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 class VRAG():
     def __init__(self, args):
         self.model_path = args.model_path
-        self.top_k = args.top_k
+        self.top_k = args.top_k # TODO:对于crop和level分别添加
         self.use_pics = args.use_pics
         self.use_rag = args.use_rag
         model_name = get_model_name_from_path(self.model_path)
@@ -65,13 +65,30 @@ class VRAG():
         self.chunk_m = args.chunk_m
         self.chunk_n = args.chunk_n
         self.tmp_path = args.tmp_path
-        self.emb_path = args.emb_path
-        if os.path.exists("./data/emb_crop"):
-            storage_context = StorageContext.from_defaults(persist_dir=self.emb_path)
-            self.multi_index = load_index_from_storage(storage_context)
+        self.crop_emb_path = args.crop_emb_path
+        self.level_emb_path = args.level_emb_path
+        self.load_emb()
+    
+    def load_emb(self, ):
+        if self.crop_emb_path != None:
+            if os.path.exists(self.crop_emb_path):
+                storage_context_crop = StorageContext.from_defaults(persist_dir=self.crop_emb_path)
+                self.crop_multi_index = load_index_from_storage(storage_context_crop)
+            else:
+                print("invalid crop emb")
         else:
-            print("invalid emb")
+            self.crop_multi_index = None
+            print("None crop emb")
         
+        if self.level_emb_path != None:
+            if os.path.exists(self.level_emb_path):
+                storage_context_level = StorageContext.from_defaults(persist_dir=self.level_emb_path)
+                self.level_multi_index = load_index_from_storage(storage_context_level)
+            else:
+                print("invalid level emb")
+        else:
+            self.level_multi_index = None
+            print("None level emb")
         
     def inference_rag(self, query_str, img_path):
         # do retrieval
@@ -171,7 +188,11 @@ class VRAG():
             
     def retrieve(self, img_path):
         # get sim img and txt for img
-        retrieve_data = self.multi_index.as_retriever(similarity_top_k=self.top_k, image_similarity_top_k=self.top_k)
+        if self.crop_multi_index != None:
+            retrieve_data_c = self.crop_multi_index.as_retriever(similarity_top_k=self.top_k, image_similarity_top_k=self.top_k)
+        if self.level_multi_index != None:
+            retrieve_data_l = self.level_multi_index.as_retriever(similarity_top_k=self.top_k, image_similarity_top_k=self.top_k)
+            
         txt = []
         score = [] 
         img = [] 
@@ -180,7 +201,10 @@ class VRAG():
         # img, txt, score, metadata = retrieve_data.retrieve(query_str)
         # image retrieve
         # print(retrieve_data.image_to_image_retrieve(img_path))
-        nodes = retrieve_data.image_to_image_retrieve(img_path)
+        nodes_c = retrieve_data_c.image_to_image_retrieve(img_path)
+        nodes_l = retrieve_data_l.image_to_image_retrieve(img_path)
+        nodes = nodes_c
+        nodes.extend(nodes_l)
         for node in nodes:
             print(type(node))
             txt.append(node.get_text()) # excudates

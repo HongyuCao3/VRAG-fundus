@@ -85,9 +85,9 @@ if __name__ == "__main__":
     parser.add_argument("--chunk-m", type=int, default=1)
     parser.add_argument("--chunk-n", type=int, default=1)
     parser.add_argument("--tmp-path", type=str, default="./data/tmp")
-    parser.add_argument("--emb-path", type=str, default="./data/emb_crop")
+    parser.add_argument("--crop-emb-path", type=str, default="./data/emb_crop")
+    parser.add_argument("--level-emb-path", type=str, default="./data/level_emb")
     args = parser.parse_args()
     vrag = VRAG(args) # llava, llava-med, llava-med-rag
     eva = evaluation(args, vrag)
     eva.test()
-    # TODO: 考虑对数据集将评价具体标准加入context

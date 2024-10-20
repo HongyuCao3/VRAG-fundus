@@ -1,51 +1,59 @@
 # emb-crop raw llava-med
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
-emb=emb_crop
+crop_emb=emb_crop
+level_emb=level_emb
 dataset=DR
 emb_path="./data/${emb}"
 m=1
 n=1
-output_path="./output/${dataset}/${emb}_${m}_${n}.json"
+output_path="./output/${dataset}/${crop_emb}_${level_emb}_${m}_${n}.json"
 python evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \
-    --emb-path ${emb_path} \
+    --crop-emb-path ${crop_emb_path} \
+    --level-emb-path ${level_emb_path} \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --test-num 5
 
 # emb-crop rag llava-med
-emb=emb_crop
+crop_emb=emb_crop
+level_emb=level_emb
 dataset=DR
-emb_path="./data/${emb}"
+crop_emb_path="./data/${crop_emb}"
+level_emb_path="./data/${level_emb}"
 m=1
 n=1
-output_path="./output/${dataset}/${emb}_${m}_${n}_rag.json"
+output_path="./output/${dataset}/${crop_emb}_${level_emb}_${m}_${n}_rag.json"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \
-    --emb-path ${emb_path} \
+    --crop-emb-path ${crop_emb_path} \
+    --level-emb-path ${level_emb_path} \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
     --test-num 5
 
 # emb-level rag llava-med
-emb=level_emb
+crop_emb=emb_crop
+level_emb=level_emb
+crop_emb_path="./data/${crop_emb}"
+level_emb_path="./data/${level_emb}"
 dataset=DR
-emb_path="./data/${emb}"
 m=1
 n=1
-output_path="./output/${dataset}/${emb}_${m}_${n}_rag.json"
+output_path="./output/${dataset}/${crop_emb}_${level_emb}_${m}_${n}_rag.json"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \
-    --emb-path ${emb_path} \
+    --crop-emb-path ${crop_emb_path} \
+    --level-emb-path ${level_emb_path} \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
@@ -54,18 +62,21 @@ python evaluation.py \
 
 
 # emb-level-crop rag llava-med
-emb=level_crop_emb
+crop_emb=emb_crop
+level_emb=level_emb
 dataset=DR
-emb_path="./data/${emb}"
+crop_emb_path="./data/${crop_emb}"
+level_emb_path="./data/${level_emb}"
 m=1
 n=1
-output_path="./output/${dataset}/${emb}_${m}_${n}_rag.json"
+output_path="./output/${dataset}/${crop_emb}_${level_emb}_${m}_${n}_rag.json"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \
-    --emb-path ${emb_path} \
+    --crop-emb-path ${crop_emb_path} \
+    --level-emb-path ${level_emb_path} \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
