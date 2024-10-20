@@ -32,7 +32,8 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 class VRAG():
     def __init__(self, args):
         self.model_path = args.model_path
-        self.top_k = args.top_k # TODO:对于crop和level分别添加
+        self.top_k_c = args.top_k_c # forcrop emb
+        self.top_k_l = args.top_k_l # for level emb
         self.use_pics = args.use_pics
         self.use_rag = args.use_rag
         model_name = get_model_name_from_path(self.model_path)
@@ -189,9 +190,9 @@ class VRAG():
     def retrieve(self, img_path):
         # get sim img and txt for img
         if self.crop_multi_index != None:
-            retrieve_data_c = self.crop_multi_index.as_retriever(similarity_top_k=self.top_k, image_similarity_top_k=self.top_k)
+            retrieve_data_c = self.crop_multi_index.as_retriever(similarity_top_k=self.top_k_c, image_similarity_top_k=self.top_k_c)
         if self.level_multi_index != None:
-            retrieve_data_l = self.level_multi_index.as_retriever(similarity_top_k=self.top_k, image_similarity_top_k=self.top_k)
+            retrieve_data_l = self.level_multi_index.as_retriever(similarity_top_k=self.top_k_l, image_similarity_top_k=self.top_k_l)
             
         txt = []
         score = [] 

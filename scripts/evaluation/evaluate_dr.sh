@@ -4,7 +4,8 @@ conda activate llava-med
 crop_emb=emb_crop
 level_emb=level_emb
 dataset=DR
-emb_path="./data/${emb}"
+crop_emb_path="./data/${crop_emb}"
+level_emb_path="./data/${level_emb}"
 m=1
 n=1
 output_path="./output/${dataset}/${crop_emb}_${level_emb}_${m}_${n}.json"
@@ -57,7 +58,6 @@ python evaluation.py \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
-    --top-k 1 \
     --test-num 5
 
 
