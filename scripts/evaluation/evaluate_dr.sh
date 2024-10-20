@@ -33,5 +33,40 @@ python evaluation.py \
     --use-rag True \
     --test-num 5
 
+# emb-level rag llava-med
+emb=level_emb
+dataset=DR
+emb_path="./data/${emb}"
+m=1
+n=1
+output_path="./output/${dataset}/${emb}_${m}_${n}_rag.json"
+cd /home/hongyu/Visual-RAG-LLaVA-Med
+conda activate llava-med
+python evaluation.py \
+    --dataset ${dataset} \
+    --output-path ${output_path} \
+    --emb-path ${emb_path} \
+    --chunk-m ${m} \
+    --chunk-n ${n} \
+    --use-rag True \
+    --test-num 5
 
+
+# emb-level-crop rag llava-med
+emb=level_crop_emb
+dataset=DR
+emb_path="./data/${emb}"
+m=1
+n=1
+output_path="./output/${dataset}/${emb}_${m}_${n}_rag.json"
+cd /home/hongyu/Visual-RAG-LLaVA-Med
+conda activate llava-med
+python evaluation.py \
+    --dataset ${dataset} \
+    --output-path ${output_path} \
+    --emb-path ${emb_path} \
+    --chunk-m ${m} \
+    --chunk-n ${n} \
+    --use-rag True \
+    --test-num 5
 
