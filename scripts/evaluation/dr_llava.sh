@@ -92,7 +92,7 @@ python evaluation.py \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
-    --test-num 5 \
+    --test-num -1 \
     >${log_path} 2>&1 &
 
 
