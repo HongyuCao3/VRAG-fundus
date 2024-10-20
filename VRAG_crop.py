@@ -71,43 +71,7 @@ class VRAG():
             self.multi_index = load_index_from_storage(storage_context)
         else:
             print("invalid emb")
-            self.build_index()
         
-    def build_index(self, json_folder="./data/lesion/"):
-        # read meta data
-        document = []
-        # with open(args.meta_data, "r", encoding="UTF-8") as f_m:
-        #     meta_data = json.load(f_m)
-        document = self.extract_image_data(json_folder)
-        # for k, d in meta_data.items():
-        #     caption = d["discription"]
-        #     img_path = self.image_folder + d["file"]
-        #     seg_path = self.image_folder + d["seg"]
-        #     document.append([img_path, caption, d])
-        # use llama-index to construct index
-        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
-        image_nodes = [ImageNode(image_path=json_folder+p, text=t, meta_data=k) for p, t, k in document]
-        self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True)
-        # save index
-        self.multi_index.storage_context.persist(persist_dir="./data/emb_crop")
-        
-    def extract_image_data(self, json_folder):
-        image_data = []
-
-        # 遍历指定目录下的所有JSON文件
-        for filename in os.listdir(json_folder):
-            if filename.endswith('.json'):
-                file_path = os.path.join(json_folder, filename)
-                with open(file_path, 'r') as f:
-                    # 加载JSON内容
-                    data = json.load(f)
-                    
-                    # 提取信息并构成元组
-                    for text, image_path in data.items():
-                        meta_data = {'source_file': filename}  # 可以根据需要添加更多元数据
-                        image_data.append((image_path, text, meta_data))
-
-        return image_data
         
     def inference_rag(self, query_str, img_path):
         # do retrieval
@@ -225,50 +189,6 @@ class VRAG():
             metadata.append(node.node.metadata)
         return txt, score, img, metadata    
         
-    def inference(self):
-        set_seed(0)
-        disable_torch_init()
-        with open(args.question_file, 'r', encoding='utf-8') as file:
-            questions = json.load(file)
-        # questions = [json.loads(q) for q in open(args.question_file,"r")]
-        # do inference
-        for line in tqdm(questions):
-            qs = line["text"].replace(DEFAULT_IMAGE_TOKEN, '').strip()
-            image_file = line["image"]
-            if self.model.config.mm_use_im_start_end:
-                qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
-            else:
-                qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
-                
-            conv = conv_templates[args.conv_mode].copy()
-            conv.append_message(conv.roles[0], qs)
-            conv.append_message(conv.roles[1], None)
-            prompt = conv.get_prompt()
-            
-            input_ids = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
-
-            image = Image.open(os.path.join(args.image_folder, image_file))
-            image_tensor = process_images([image], self.image_processor, self.model.config)[0]
-            
-            stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
-            keywords = [stop_str]
-            stopping_criteria = KeywordsStoppingCriteria(keywords, self.tokenizer, input_ids)
-            
-            with torch.inference_mode():
-                output_ids = self.model.generate(
-                    input_ids,
-                    images=image_tensor.unsqueeze(0).half().cuda(),
-                    do_sample=True if args.temperature > 0 else False,
-                    temperature=args.temperature,
-                    top_p=args.top_p,
-                    num_beams=args.num_beams,
-                    # no_repeat_ngram_size=3,
-                    max_new_tokens=1024,
-                    use_cache=True)
-
-            outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-            return outputs
-            # TODO:批量测试需要记录上下文信息
         
 
 if __name__ == "__main__":
