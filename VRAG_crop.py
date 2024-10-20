@@ -55,7 +55,8 @@ class VRAG():
             accurately and precisely answer the query without any additional prior knowledge.\n"
             "Please ensure honesty and responsibility, refraining from any racist or sexist remarks.\n"
             "---------------------\n"
-            "Context: {context_str}\n"     ## 将上下文信息放进去
+            "The possible diagnosing level and probablity: {context_str_l}\n"     ## level诊断信息
+            "The possible lesion and probability: {context_str_c}\n"     ## crop诊断信息
             "Diagnosing Standard: {diagnosis_str}\n" # 添加诊断标准
             "Metadata: {metadata_str} \n"  ## 将原始的meta信息放进去
             ""
@@ -94,24 +95,16 @@ class VRAG():
     def inference_rag(self, query_str, img_path):
         # do retrieval
         if self.chunk_m == 1 and self.chunk_n == 1:
-            txt, score, img, metadata = self.retrieve(img_path)
+            ret_c, ret_l = self.retrieve(img_path)
         else:
-            txt = []
-            score = [] 
-            img = [] 
-            metadata= []
             sub_imgs = split_image(img_path, self.tmp_path, self.chunk_m, self.chunk_n)
             for sub_img in sub_imgs:
-                txt_, score_, img_, metadata_ = self.retrieve(sub_img)
-                txt.extend(txt_)
-                score.extend(score_)
-                img.extend(img_)
-                metadata.extend(metadata_)
+                ret_c, ret_l = self.retrieve(sub_img)
                 # TODO：添加计数方式
             # TODO：删除临时图片
         
         # form context
-        prompt, images, record_data = self.form_context(img_path, query_str, txt, score, img, metadata)
+        prompt, images, record_data = self.form_context(img_path, query_str, ret_c, ret_l)
             
         # do inference
         set_seed(0)
@@ -146,15 +139,14 @@ class VRAG():
                     use_cache=True)
 
         outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        record_data.update({"outputs": outputs})
+        # record_data.update({"outputs": outputs})
         return outputs, record_data
     
-    def form_context(self, img_path, query_str, txt, score, img, metadata):
+    def form_context(self, img_path, query_str, ret_c, ret_l):
         record_data = {}
-        record_data.update({"txt":txt})
-        record_data.update({"score":score})
-        record_data.update({"img":img})
-        record_data.update({"org":img_path})
+        record_data.update({"ret_c": str(ret_c)})
+        record_data.update({"ret_l": str(ret_l)})
+        record_data.update({"org": img_path})
             # img, txt, score, metadata = node
         # txt2img retrieve
         # img, txt, score, metadata = retrieve_data.text_to_image_retrieve(img_path)
@@ -162,29 +154,38 @@ class VRAG():
         image_documents = [ImageDocument(image_path=img_path)]
         image_org = Image.open(img_path)
         images= [image_org]
+        img = ret_c["img"]
+        img.extend(ret_l["img"])
         if self.use_pics:
             for res_img in img:
                 image_documents.append(ImageDocument(image_path=res_img))
                 # print(res_img)
                 image = Image.open(res_img)
                 images.append(image)
-        context_str = ",".join(txt)
-        metadata_str = metadata
+        result_dict_c = dict(zip(ret_c["txt"], ret_c["score"]))
+        result_dict_l = dict(zip(ret_l["txt"], ret_l["score"]))
+        context_str_c = str(result_dict_c)
+        context_str_l = str(result_dict_l)
+        metadata_str = ret_c["metadata"]
+        metadata_str.extend(ret_l["metadata"])
         # print(self.use_rag)
         if self.use_rag:
             prompt = self.qa_tmpl_str.format(
-                context_str=context_str,
+                context_str_c=context_str_c,
+                context_str_l=context_str_l,
                 metadata_str=metadata_str,
                 query_str=query_str, 
                 diagnosis_str=self.diagnosis_str,
             )
         else:
             prompt = self.qa_tmpl_str.format(
-                context_str="",
+                context_str_c="",
+                context_str_l="",
                 metadata_str="",
                 query_str=query_str, 
                 diagnosis_str=self.diagnosis_str,
             )
+        record_data.update({"prompt": prompt})
         return prompt, images, record_data
             
     def retrieve(self, img_path):
@@ -218,7 +219,7 @@ class VRAG():
             score_l.append(node.get_score()) # 0.628
             img_l.append(node.node.image_path)
             metadata_l.append(node.node.metadata)
-        return {"txt_c": txt_c, "score_c": score_c, "img_c": img_c, "metadata_c": metadata_c}, {"txt_l": txt_l, "score_l": score_l, "img_l": img_l, "metadata_c": metadata_l} 
+        return {"txt": txt_c, "score": score_c, "img": img_c, "metadata": metadata_c}, {"txt": txt_l, "score": score_l, "img": img_l, "metadata": metadata_l} 
         
         
 

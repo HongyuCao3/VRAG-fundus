@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_beams", type=int, default=1)
     parser.add_argument("--meta-data", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json")
     parser.add_argument("--dataset", type=str, default="DR")
-    parser.add_argument("--query-str", type=str, default="what's the diagnosis accroding to the diagnosising standard?")
+    parser.add_argument("--query-str", type=str, default="what's the diagnosis accroding to the diagnosising standard, possible level and possible lesion?")
     parser.add_argument("--use-pics", type=bool, default=False)
     parser.add_argument("--use-rag", type=bool, default=False)
     parser.add_argument("--test-num", type=int, default=-1)
