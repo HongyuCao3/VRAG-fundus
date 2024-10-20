@@ -9,7 +9,7 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 output_path="./output/${dataset}/raw_${m}_${n}.json"
-log_path="./output/${dataset}/raw_${m}_${n}.log"
+log_path="./output/${dataset}/log/raw_${m}_${n}.log"
 nohup python evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \
@@ -29,7 +29,7 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 output_path="./output/${dataset}/${crop_emb}_${level_emb}_${m}_${n}_rag.json"
-log_path="./output/${dataset}/${crop_emb}_${level_emb}_${m}_${n}_rag.json"
+log_path="./output/${dataset}/log/${crop_emb}_${level_emb}_${m}_${n}_rag.log"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 nohup python evaluation.py \
@@ -52,7 +52,7 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 output_path="./output/${dataset}/${level_emb}_${m}_${n}_rag.json"
-log_path="./output/${dataset}/${level_emb}_${m}_${n}_rag.log"
+log_path="./output/${dataset}/log/${level_emb}_${m}_${n}_rag.log"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 nohup python evaluation.py \
@@ -74,7 +74,7 @@ dataset=DR
 m=1
 n=1
 output_path="./output/${dataset}/${crop_emb}_${m}_${n}_rag.json"
-log_path="./output/${dataset}/${crop_emb}_${m}_${n}_rag.log"
+log_path="./output/${dataset}/log/${crop_emb}_${m}_${n}_rag.log"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python evaluation.py \
@@ -97,7 +97,7 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 output_path="./output/${dataset}/${crop_emb}_${level_emb}_${m}_${n}_rag.json"
-log_path="./output/${dataset}/${crop_emb}_${level_emb}_${m}_${n}_rag.log"
+log_path="./output/${dataset}/log/${crop_emb}_${level_emb}_${m}_${n}_rag.log"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python evaluation.py \
