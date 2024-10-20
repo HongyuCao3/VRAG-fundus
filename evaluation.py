@@ -82,6 +82,10 @@ if __name__ == "__main__":
     parser.add_argument("--test-num", type=int, default=-1)
     parser.add_argument("--image-folder", type=str, default="./segmentation/")
     parser.add_argument("--output-path", type=str, default="./output/DR.json")
+    parser.add_argument("--chunk-m", type=int, default=1)
+    parser.add_argument("--chunk-n", type=int, default=1)
+    parser.add_argument("--tmp-path", type=str, default="./data/tmp")
+    parser.add_argument("--emb-path", type=str, default="./data/emb_crop")
     args = parser.parse_args()
     vrag = VRAG(args) # llava, llava-med, llava-med-rag
     eva = evaluation(args, vrag)
