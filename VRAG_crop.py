@@ -34,6 +34,7 @@ class VRAG():
         self.model_path = args.model_path
         self.top_k_c = args.top_k_c # forcrop emb
         self.top_k_l = args.top_k_l # for level emb
+        self.top_k_cl = args.top_k_cl # for level emb
         self.use_pics = args.use_pics
         self.use_rag = args.use_rag
         model_name = get_model_name_from_path(self.model_path)
@@ -70,7 +71,7 @@ class VRAG():
         self.tmp_path = args.tmp_path
         self.crop_emb_path = args.crop_emb_path
         self.level_emb_path = args.level_emb_path
-        self.classic_emb_path = args.level_emb_path
+        self.classic_emb_path = args.classic_emb_path
         self.load_emb()
     
     def load_emb(self, ):
@@ -102,10 +103,10 @@ class VRAG():
                 storage_context_classic = StorageContext.from_defaults(persist_dir=self.classic_emb_path)
                 self.classic_multi_index = load_index_from_storage(storage_context_classic)
             else:
-                print("invalid level emb")
+                print("invalid classic emb")
         else:
             self.classic_multi_index = None
-            print("None level emb")
+            print("None classic emb")
         
     def inference_rag(self, query_str, img_path):
         # do retrieval
@@ -246,7 +247,7 @@ class VRAG():
         img_cl = [] 
         metadata_cl= []    
         if self.classic_multi_index != None:
-            retrieve_data_cl = self.level_multi_index.as_retriever(similarity_top_k=self.top_k_cl, image_similarity_top_k=self.top_k_cl)
+            retrieve_data_cl = self.classic_multi_index.as_retriever(similarity_top_k=self.top_k_cl, image_similarity_top_k=self.top_k_cl)
             # multi modal retrieve
             # img, txt, score, metadata = retrieve_data.retrieve(query_str)
             # image retrieve

@@ -73,6 +73,7 @@ if __name__ == "__main__":
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--top-k-c", type=int, default=3)
     parser.add_argument("--top-k-l", type=int, default=1)
+    parser.add_argument("--top-k-cl", type=int, default=1)
     parser.add_argument("--top_p", type=float, default=None)
     parser.add_argument("--num_beams", type=int, default=1)
     parser.add_argument("--meta-data", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json")
