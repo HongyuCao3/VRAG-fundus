@@ -13,3 +13,10 @@ python index_builder.py \
     --crop-dir "./data/lesion/" \
     --level-dir "./data/level/" \
     --persist-dir "./data/level_crop_emb/" 
+
+# build level
+/home/hongyu/Visual-RAG-LLaVA-Med
+conda activate llava-med
+python index_builder.py \
+    --classic-dir "./data/Classic Images/" \
+    --persist-dir "./data/classic_emb/" 
