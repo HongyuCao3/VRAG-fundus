@@ -14,9 +14,16 @@ python index_builder.py \
     --level-dir "./data/level/" \
     --persist-dir "./data/level_crop_emb/" 
 
-# build level
+# build classic
 /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python index_builder.py \
     --classic-dir "./data/Classic Images/" \
     --persist-dir "./data/classic_emb/" 
+
+# build classic dr
+/home/hongyu/Visual-RAG-LLaVA-Med
+conda activate llava-med
+python index_builder.py \
+    --classic-dir "./data/Classic Images/" \
+    --persist-dir "./data/classic_dr_emb/" 
