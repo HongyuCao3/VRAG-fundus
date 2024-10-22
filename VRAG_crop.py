@@ -57,6 +57,7 @@ class VRAG():
             "---------------------\n"
             "The possible diagnosing level and probablity: {context_str_l}\n"     ## level诊断信息
             "The possible lesion and probability: {context_str_c}\n"     ## crop诊断信息
+            "The possible diagnosing class and probality: {context_str_cl}\n" # 添加classic信息
             "Diagnosing Standard: {diagnosis_str}\n" # 添加诊断标准
             "Metadata: {metadata_str} \n"  ## 将原始的meta信息放进去
             ""
@@ -69,9 +70,11 @@ class VRAG():
         self.tmp_path = args.tmp_path
         self.crop_emb_path = args.crop_emb_path
         self.level_emb_path = args.level_emb_path
+        self.classic_emb_path = args.level_emb_path
         self.load_emb()
     
     def load_emb(self, ):
+        # load crop emb
         if self.crop_emb_path != None:
             if os.path.exists(self.crop_emb_path):
                 storage_context_crop = StorageContext.from_defaults(persist_dir=self.crop_emb_path)
@@ -82,6 +85,7 @@ class VRAG():
             self.crop_multi_index = None
             print("None crop emb")
         
+        #load level emb
         if self.level_emb_path != None:
             if os.path.exists(self.level_emb_path):
                 storage_context_level = StorageContext.from_defaults(persist_dir=self.level_emb_path)
@@ -91,11 +95,22 @@ class VRAG():
         else:
             self.level_multi_index = None
             print("None level emb")
+            
+        #load classic emb
+        if self.classic_emb_path != None:
+            if os.path.exists(self.classic_emb_path):
+                storage_context_classic = StorageContext.from_defaults(persist_dir=self.classic_emb_path)
+                self.classic_multi_index = load_index_from_storage(storage_context_classic)
+            else:
+                print("invalid level emb")
+        else:
+            self.classic_multi_index = None
+            print("None level emb")
         
     def inference_rag(self, query_str, img_path):
         # do retrieval
         if self.chunk_m == 1 and self.chunk_n == 1:
-            ret_c, ret_l = self.retrieve(img_path)
+            ret_c, ret_l, ret_cl = self.retrieve(img_path)
         else:
             sub_imgs = split_image(img_path, self.tmp_path, self.chunk_m, self.chunk_n)
             for sub_img in sub_imgs:
@@ -104,7 +119,7 @@ class VRAG():
             # TODO：删除临时图片
         
         # form context
-        prompt, images, record_data = self.form_context(img_path, query_str, ret_c, ret_l)
+        prompt, images, record_data = self.form_context(img_path, query_str, ret_c, ret_l, ret_cl)
             
         # do inference
         set_seed(0)
@@ -142,10 +157,11 @@ class VRAG():
         # record_data.update({"outputs": outputs})
         return outputs, record_data
     
-    def form_context(self, img_path, query_str, ret_c, ret_l):
+    def form_context(self, img_path, query_str, ret_c, ret_l, ret_cl):
         record_data = {}
         record_data.update({"ret_c": str(ret_c)})
         record_data.update({"ret_l": str(ret_l)})
+        record_data.update({"ret_cl": str(ret_cl)})
         record_data.update({"org": img_path})
             # img, txt, score, metadata = node
         # txt2img retrieve
@@ -164,15 +180,19 @@ class VRAG():
                 images.append(image)
         result_dict_c = dict(zip(ret_c["txt"], ret_c["score"]))
         result_dict_l = dict(zip(ret_l["txt"], ret_l["score"]))
+        result_dict_cl = dict(zip(ret_cl["txt"], ret_cl["score"]))
         context_str_c = str(result_dict_c)
         context_str_l = str(result_dict_l)
+        context_str_cl = str(result_dict_cl)
         metadata_str = ret_c["metadata"]
         metadata_str.extend(ret_l["metadata"])
+        metadata_str.extend(ret_cl["metadata"])
         # print(self.use_rag)
         if self.use_rag:
             prompt = self.qa_tmpl_str.format(
                 context_str_c=context_str_c,
                 context_str_l=context_str_l,
+                context_str_cl=context_str_cl,
                 metadata_str=metadata_str,
                 query_str=query_str, 
                 diagnosis_str=self.diagnosis_str,
@@ -181,6 +201,7 @@ class VRAG():
             prompt = self.qa_tmpl_str.format(
                 context_str_c="",
                 context_str_l="",
+                context_str_cl="",
                 metadata_str="",
                 query_str=query_str, 
                 diagnosis_str=self.diagnosis_str,
@@ -189,7 +210,7 @@ class VRAG():
         return prompt, images, record_data
             
     def retrieve(self, img_path):
-        # get sim img and txt for img
+        # retrieve crop
         txt_c = []
         score_c = [] 
         img_c = [] 
@@ -202,6 +223,7 @@ class VRAG():
                 score_c.append(node.get_score()) # 0.628
                 img_c.append(node.node.image_path)
                 metadata_c.append(node.node.metadata)
+        # retireve level
         txt_l = []
         score_l = [] 
         img_l = [] 
@@ -218,8 +240,25 @@ class VRAG():
                 score_l.append(node.get_score()) # 0.628
                 img_l.append(node.node.image_path)
                 metadata_l.append(node.node.metadata)
+        # retrieve classic
+        txt_cl = []
+        score_cl = [] 
+        img_cl = [] 
+        metadata_cl= []    
+        if self.classic_multi_index != None:
+            retrieve_data_cl = self.level_multi_index.as_retriever(similarity_top_k=self.top_k_cl, image_similarity_top_k=self.top_k_cl)
+            # multi modal retrieve
+            # img, txt, score, metadata = retrieve_data.retrieve(query_str)
+            # image retrieve
+            # print(retrieve_data.image_to_image_retrieve(img_path))
+            nodes_cl = retrieve_data_cl.image_to_image_retrieve(img_path)
+            for node in nodes_cl:
+                txt_cl.append(node.get_text()) # excudates
+                score_cl.append(node.get_score()) # 0.628
+                img_cl.append(node.node.image_path)
+                metadata_cl.append(node.node.metadata)
                 
-        return {"txt": txt_c, "score": score_c, "img": img_c, "metadata": metadata_c}, {"txt": txt_l, "score": score_l, "img": img_l, "metadata": metadata_l} 
+        return {"txt": txt_c, "score": score_c, "img": img_c, "metadata": metadata_c}, {"txt": txt_l, "score": score_l, "img": img_l, "metadata": metadata_l} , {"txt": txt_cl, "score": score_cl, "img": img_cl, "metadata": metadata_cl}
         
         
 
