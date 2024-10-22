@@ -122,8 +122,8 @@ level_emb_path="./data/${level_emb}"
 classic_emb_path="./data/${classic_emb}"
 m=1
 n=1
-output_path="./output/${dataset}/${classic_emb}_${m}_${n}_rag.json"
-log_path="./output/${dataset}/log/${classic_emb}_${m}_${n}_rag.log"
+output_path="./output/${dataset}/llava-med/${classic_emb}_${m}_${n}_rag.json"
+log_path="./output/${dataset}/llava-med/log/${classic_emb}_${m}_${n}_rag.log"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 nohup python evaluation.py \
