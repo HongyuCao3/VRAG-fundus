@@ -18,7 +18,7 @@ class Analysis():
         total_counts = defaultdict(int)
         match_counts = defaultdict(int)
         
-        for item in data:
+        for item in data["results"]:
             ground_truth = item["ground truth"]
             correct = item["correct"]
             
@@ -30,7 +30,7 @@ class Analysis():
                 correct_counts[ground_truth] += 1
             
             # 统计匹配数量
-            ret_l_txt = item["record_data"]["ret_l"]["txt"]
+            ret_l_txt = eval(item["record_data"]["ret_l"])["txt"]
             if ret_l_txt and ground_truth in ret_l_txt:
                 match_counts[ground_truth] += 1
         
@@ -50,8 +50,7 @@ class Analysis():
         return relationship
 
     def analyze(self,):
-        file_path = 'data.json'
-        data = self.load_json(file_path)
+        data = self.load_json(self.file_path)
         
         accuracy, match_rate = self.calculate_metrics(data)
         relationship = self.analyze_relationship(accuracy, match_rate)
