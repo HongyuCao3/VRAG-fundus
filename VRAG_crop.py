@@ -226,22 +226,23 @@ class VRAG():
                 img_c.append(node.node.image_path)
                 metadata_c.append(node.node.metadata)
         # retireve level
-        txt_l = []
-        score_l = [] 
-        img_l = [] 
-        metadata_l= []
-        if self.level_multi_index != None:
-            retrieve_data_l = self.level_multi_index.as_retriever(similarity_top_k=self.top_k_l, image_similarity_top_k=self.top_k_l)
-            # multi modal retrieve
-            # img, txt, score, metadata = retrieve_data.retrieve(query_str)
-            # image retrieve
-            # print(retrieve_data.image_to_image_retrieve(img_path))
-            nodes_l = retrieve_data_l.image_to_image_retrieve(img_path)
-            for node in nodes_l:
-                txt_l.append(node.get_text()) # excudates
-                score_l.append(node.get_score()) # 0.628
-                img_l.append(node.node.image_path)
-                metadata_l.append(node.node.metadata)
+        # txt_l = []
+        # score_l = [] 
+        # img_l = [] 
+        # metadata_l= []
+        level_ret = self.retrieve_from_emb(self.level_multi_index, img_path, self.top_k_l)
+        # if self.level_multi_index != None:
+        #     retrieve_data_l = self.level_multi_index.as_retriever(similarity_top_k=self.top_k_l, image_similarity_top_k=self.top_k_l)
+        #     # multi modal retrieve
+        #     # img, txt, score, metadata = retrieve_data.retrieve(query_str)
+        #     # image retrieve
+        #     # print(retrieve_data.image_to_image_retrieve(img_path))
+        #     nodes_l = retrieve_data_l.image_to_image_retrieve(img_path)
+        #     for node in nodes_l:
+        #         txt_l.append(node.get_text()) # excudates
+        #         score_l.append(node.get_score()) # 0.628
+        #         img_l.append(node.node.image_path)
+        #         metadata_l.append(node.node.metadata)
         # retrieve classic
         txt_cl = []
         score_cl = [] 
@@ -260,35 +261,36 @@ class VRAG():
                 img_cl.append(node.node.image_path)
                 metadata_cl.append(node.node.metadata)
                 
-        return {"txt": txt_c, "score": score_c, "img": img_c, "metadata": metadata_c}, {"txt": txt_l, "score": score_l, "img": img_l, "metadata": metadata_l} , {"txt": txt_cl, "score": score_cl, "img": img_cl, "metadata": metadata_cl}
+        return {"txt": txt_c, "score": score_c, "img": img_c, "metadata": metadata_c}, level_ret , {"txt": txt_cl, "score": score_cl, "img": img_cl, "metadata": metadata_cl}
     
     def retrieve_from_emb(self, multi_index, img_path, top_k):
         txt = []
         score = [] 
         img = [] 
         metadata = []
-        retrieve_data = multi_index.as_retriever(similarity_top_k=top_k, image_similarity_top_k=top_k)
-        nodes = retrieve_data.image_to_image_retrieve(img_path)
-        for node in nodes:
-            txt.append(node.get_text()) # excudates
-            score.append(node.get_score()) # 0.628
-            img.append(node.node.image_path)
-            metadata.append(node.node.metadata)
+        if multi_index != None:
+            retrieve_data = multi_index.as_retriever(similarity_top_k=top_k, image_similarity_top_k=top_k)
+            nodes = retrieve_data.image_to_image_retrieve(img_path)
+            for node in nodes:
+                txt.append(node.get_text()) # excudates
+                score.append(node.get_score()) # 0.628
+                img.append(node.node.image_path)
+                metadata.append(node.node.metadata)
         return {"txt": txt, "score": score, "img": img, "metadata": metadata}
     
         
     def build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, diagnosis_str, metadata_str, query_str):
         parts = []
         
-        if context_str_l:
+        if context_str_l != "{}":
             parts.append(f"The possible diagnosing level and probability: {context_str_l}\n")
-        if context_str_c:
+        if context_str_c != "{}":
             parts.append(f"The possible lesion and probability: {context_str_c}\n")
-        if context_str_cl:
+        if context_str_cl != "{}":
             parts.append(f"The possible diagnosing class and probability: {context_str_cl}\n")
-        if diagnosis_str:
+        if diagnosis_str != "{}":
             parts.append(f"Diagnosing Standard: {diagnosis_str}\n")
-        if metadata_str:
+        if metadata_str != "[{}]":
             parts.append(f"Metadata: {metadata_str}\n")
         
         parts.append("---------------------\n")
