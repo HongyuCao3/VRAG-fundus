@@ -98,7 +98,7 @@ m=1
 n=1
 test_num=-1
 output_path="./output/${dataset}/llava-med/${crop_emb}_${level_emb}_${m}_${n}_rag_${test_num}.json"
-log_path="./output/${dataset}/llava-med/log/${crop_emb}_${level_emb}_${m}_${n}_rag.log"
+log_path="./output/${dataset}/llava-med/log/${crop_emb}_${level_emb}_${m}_${n}_rag_${test_num}.log"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 nohup python evaluation.py \
