@@ -189,7 +189,7 @@ class VRAG():
         metadata_str.extend(ret_l["metadata"])
         metadata_str.extend(ret_cl["metadata"])
         # print(self.use_rag)
-        prompt = self.build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, self.diagnosis_str, metadata_str, query_str)
+        prompt = self.build_diagnosis_string(context_str_l, context_str_c, context_str_cl, self.diagnosis_str, metadata_str, query_str)
         # if self.use_rag:
         #     prompt = self.qa_tmpl_str.format(
         #         context_str_c=context_str_c,
