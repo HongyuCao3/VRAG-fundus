@@ -26,7 +26,7 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/llava-med-finetuned/${crop_emb}_${level_emb}_${m}_${n}_${test_num}.json"
+output_path="./output/${dataset}/llava-med-finetuned/raw_${m}_${n}_${test_num}.json"
 res_path="./output/${dataset}/llava-med-finetuned/analysis/raw_${m}_${n}_${tet_num}_pics.txt"
 model_path="/home/hongyu/eye_llava_medllava_finetune_mistral"
 cd /home/hongyu/Visual-RAG-LLaVA-Med

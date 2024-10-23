@@ -42,6 +42,8 @@ class evaluation():
             is_correct = diagnosis in respond
             if diagnosis == "proliferative diabetic retinopathy" and "nonproliferative diabetic retinopath" in respond:
                 is_correct = False
+            if diagnosis == "proliferative diabetic retinopathy" and "severe nonproliferative diabetic retinopathy" in respond:
+                is_correct = False
             if diagnosis == "PDR" and "NPDR" in respond:
                 is_correct = False
             if is_correct:
