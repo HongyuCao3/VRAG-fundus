@@ -189,24 +189,25 @@ class VRAG():
         metadata_str.extend(ret_l["metadata"])
         metadata_str.extend(ret_cl["metadata"])
         # print(self.use_rag)
-        if self.use_rag:
-            prompt = self.qa_tmpl_str.format(
-                context_str_c=context_str_c,
-                context_str_l=context_str_l,
-                context_str_cl=context_str_cl,
-                metadata_str=metadata_str,
-                query_str=query_str, 
-                diagnosis_str=self.diagnosis_str,
-            )
-        else:
-            prompt = self.qa_tmpl_str.format(
-                context_str_c="",
-                context_str_l="",
-                context_str_cl="",
-                metadata_str="",
-                query_str=query_str, 
-                diagnosis_str=self.diagnosis_str,
-            )
+        prompt = self.build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, self.diagnosis_str, metadata_str, query_str)
+        # if self.use_rag:
+        #     prompt = self.qa_tmpl_str.format(
+        #         context_str_c=context_str_c,
+        #         context_str_l=context_str_l,
+        #         context_str_cl=context_str_cl,
+        #         metadata_str=metadata_str,
+        #         query_str=query_str, 
+        #         diagnosis_str=self.diagnosis_str,
+        #     )
+        # else:
+        #     prompt = self.qa_tmpl_str.format(
+        #         context_str_c="",
+        #         context_str_l="",
+        #         context_str_cl="",
+        #         metadata_str="",
+        #         query_str=query_str, 
+        #         diagnosis_str=self.diagnosis_str,
+        #     )
         record_data.update({"prompt": prompt})
         return prompt, images, record_data
             
@@ -261,6 +262,26 @@ class VRAG():
                 
         return {"txt": txt_c, "score": score_c, "img": img_c, "metadata": metadata_c}, {"txt": txt_l, "score": score_l, "img": img_l, "metadata": metadata_l} , {"txt": txt_cl, "score": score_cl, "img": img_cl, "metadata": metadata_cl}
         
+        
+    def build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, diagnosis_str, metadata_str, query_str):
+        parts = []
+        
+        if context_str_l:
+            parts.append(f"The possible diagnosing level and probability: {context_str_l}\n")
+        if context_str_c:
+            parts.append(f"The possible lesion and probability: {context_str_c}\n")
+        if context_str_cl:
+            parts.append(f"The possible diagnosing class and probability: {context_str_cl}\n")
+        if diagnosis_str:
+            parts.append(f"Diagnosing Standard: {diagnosis_str}\n")
+        if metadata_str:
+            parts.append(f"Metadata: {metadata_str}\n")
+        
+        parts.append("---------------------\n")
+        parts.append(f"Query: {query_str}\n")
+        parts.append("Answer: ")
+        
+        return "".join(parts)
         
 
 if __name__ == "__main__":
