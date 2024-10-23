@@ -6,6 +6,7 @@ from collections import defaultdict
 class Analysis():
     def __init__(self, args):
         self.file_path = args.file_path
+        self.res_path = args.res_path
     
     def load_json(self, file_path):
         with open(file_path, 'r') as file:
@@ -55,21 +56,27 @@ class Analysis():
         accuracy, match_rate = self.calculate_metrics(data)
         relationship = self.analyze_relationship(accuracy, match_rate)
         
-        print("Accuracy per ground truth type:")
-        for gt, acc in accuracy.items():
-            print(f"{gt}: {acc:.2f}")
-        
-        print("\nMatch rate per ground truth type:")
-        for gt, rate in match_rate.items():
-            print(f"{gt}: {rate:.2f}")
-        
-        print("\nRelationship between accuracy and match rate:")
-        for gt, (acc, rate) in relationship.items():
-            print(f"{gt}: Accuracy={acc:.2f}, Match Rate={rate:.2f}")
-
+        self.write_results_to_file(accuracy, match_rate, relationship)
+            
+            
+    def write_results_to_file(self, accuracy, match_rate, relationship):
+        with open(self.res_path, 'w') as file:
+            file.write("Accuracy per ground truth type:\n")
+            for gt, acc in accuracy.items():
+                file.write(f"{gt}: {acc:.2f}\n")
+            
+            file.write("\nMatch rate per ground truth type:\n")
+            for gt, rate in match_rate.items():
+                file.write(f"{gt}: {rate:.2f}\n")
+            
+            file.write("\nRelationship between accuracy and match rate:\n")
+            for gt, (acc, rate) in relationship.items():
+                file.write(f"{gt}: Accuracy={acc:.2f}, Match Rate={rate:.2f}\n")
+            
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file-path", type=str, default="")
+    parser.add_argument("--res-path", type=str, default="")
     parser.add_argument("--num", type=int, default=-1)
     args = parser.parse_args()
     AS = Analysis(args)
