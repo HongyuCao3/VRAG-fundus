@@ -1,4 +1,4 @@
-# level crop combined raw llava-med finetuned
+# raw llava-med finetuned
 crop_emb=emb_crop
 level_emb=level_emb
 dataset=DR
@@ -7,8 +7,8 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/llava-med-finetuned/${crop_emb}_${level_emb}_${m}_${n}_${test_num}.json"
-log_path="./output/${dataset}/llava-med-finetuned/log/${crop_emb}_${level_emb}_${m}_${n}_${tet_num}.log"
+output_path="./output/${dataset}/llava-med-finetuned/raw_${m}_${n}_${test_num}.json"
+log_path="./output/${dataset}/llava-med-finetuned/log/raw_${m}_${n}_${tet_num}.log"
 model_path="/home/hongyu/eye_llava_medllava_finetune_mistral"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
