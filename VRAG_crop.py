@@ -51,21 +51,6 @@ class VRAG():
         self.diagnosis_str = ""
         for key, value in diagnosing_level.items():
             self.diagnosis_str += f"{key}: {value}"
-        self.qa_tmpl_str = (
-            "Given the provided information, including retrieved contents and metadata, \
-            accurately and precisely answer the query without any additional prior knowledge.\n"
-            "Please ensure honesty and responsibility, refraining from any racist or sexist remarks.\n"
-            "---------------------\n"
-            "The possible diagnosing level and probablity: {context_str_l}\n"     ## level诊断信息
-            "The possible lesion and probability: {context_str_c}\n"     ## crop诊断信息
-            "The possible diagnosing class and probality: {context_str_cl}\n" # 添加classic信息
-            "Diagnosing Standard: {diagnosis_str}\n" # 添加诊断标准
-            "Metadata: {metadata_str} \n"  ## 将原始的meta信息放进去
-            ""
-            "---------------------\n"
-            "Query: {query_str}\n"
-            "Answer: "
-        )
         self.chunk_m = args.chunk_m
         self.chunk_n = args.chunk_n
         self.tmp_path = args.tmp_path
@@ -75,41 +60,9 @@ class VRAG():
         self.load_embs()
     
     def load_embs(self, ):
-        # load crop emb
         self.crop_multi_index = self.load_emb(self.crop_emb_path)
-        # if self.crop_emb_path != None:
-        #     if os.path.exists(self.crop_emb_path):
-        #         storage_context_crop = StorageContext.from_defaults(persist_dir=self.crop_emb_path)
-        #         self.crop_multi_index = load_index_from_storage(storage_context_crop)
-        #     else:
-        #         print("invalid crop emb")
-        # else:
-        #     self.crop_multi_index = None
-        #     print("None crop emb")
-        
-        #load level emb
         self.level_multi_index = self.load_emb(self.level_emb_path)
-        # if self.level_emb_path != None:
-        #     if os.path.exists(self.level_emb_path):
-        #         storage_context_level = StorageContext.from_defaults(persist_dir=self.level_emb_path)
-        #         self.level_multi_index = load_index_from_storage(storage_context_level)
-        #     else:
-        #         print("invalid level emb")
-        # else:
-        #     self.level_multi_index = None
-        #     print("None level emb")
-            
-        #load classic emb
         self.classic_multi_index = self.load_emb(self.classic_emb_path)
-        # if self.classic_emb_path != None:
-        #     if os.path.exists(self.classic_emb_path):
-        #         storage_context_classic = StorageContext.from_defaults(persist_dir=self.classic_emb_path)
-        #         self.classic_multi_index = load_index_from_storage(storage_context_classic)
-        #     else:
-        #         print("invalid classic emb")
-        # else:
-        #     self.classic_multi_index = None
-        #     print("None classic emb")
             
     def load_emb(self, emb_path):
         if emb_path != None:
@@ -204,80 +157,14 @@ class VRAG():
         metadata_str = ret_c["metadata"]
         metadata_str.extend(ret_l["metadata"])
         metadata_str.extend(ret_cl["metadata"])
-        # print(self.use_rag)
         prompt = self.build_diagnosis_string(context_str_l, context_str_c, context_str_cl, self.diagnosis_str, metadata_str, query_str)
-        # if self.use_rag:
-        #     prompt = self.qa_tmpl_str.format(
-        #         context_str_c=context_str_c,
-        #         context_str_l=context_str_l,
-        #         context_str_cl=context_str_cl,
-        #         metadata_str=metadata_str,
-        #         query_str=query_str, 
-        #         diagnosis_str=self.diagnosis_str,
-        #     )
-        # else:
-        #     prompt = self.qa_tmpl_str.format(
-        #         context_str_c="",
-        #         context_str_l="",
-        #         context_str_cl="",
-        #         metadata_str="",
-        #         query_str=query_str, 
-        #         diagnosis_str=self.diagnosis_str,
-        #     )
         record_data.update({"prompt": prompt})
         return prompt, images, record_data
             
     def retrieve(self, img_path):
-        # retrieve crop
         crop_ret = self.retrieve_from_emb(self.crop_multi_index, img_path, self.top_k_c)
-        # txt_c = []
-        # score_c = [] 
-        # img_c = [] 
-        # metadata_c= []
-        # if self.crop_multi_index != None:
-        #     retrieve_data_c = self.crop_multi_index.as_retriever(similarity_top_k=self.top_k_c, image_similarity_top_k=self.top_k_c)
-        #     nodes_c = retrieve_data_c.image_to_image_retrieve(img_path)
-        #     for node in nodes_c:
-        #         txt_c.append(node.get_text()) # excudates
-        #         score_c.append(node.get_score()) # 0.628
-        #         img_c.append(node.node.image_path)
-        #         metadata_c.append(node.node.metadata)
-        # retireve level
-        # txt_l = []
-        # score_l = [] 
-        # img_l = [] 
-        # metadata_l= []
         level_ret = self.retrieve_from_emb(self.level_multi_index, img_path, self.top_k_l)
-        # if self.level_multi_index != None:
-        #     retrieve_data_l = self.level_multi_index.as_retriever(similarity_top_k=self.top_k_l, image_similarity_top_k=self.top_k_l)
-        #     # multi modal retrieve
-        #     # img, txt, score, metadata = retrieve_data.retrieve(query_str)
-        #     # image retrieve
-        #     # print(retrieve_data.image_to_image_retrieve(img_path))
-        #     nodes_l = retrieve_data_l.image_to_image_retrieve(img_path)
-        #     for node in nodes_l:
-        #         txt_l.append(node.get_text()) # excudates
-        #         score_l.append(node.get_score()) # 0.628
-        #         img_l.append(node.node.image_path)
-        #         metadata_l.append(node.node.metadata)
-        # retrieve classic
         classic_ret = self.retrieve_from_emb(self.classic_multi_index, img_path, self.top_k_cl)
-        # txt_cl = []
-        # score_cl = [] 
-        # img_cl = [] 
-        # metadata_cl= []    
-        # if self.classic_multi_index != None:
-        #     retrieve_data_cl = self.classic_multi_index.as_retriever(similarity_top_k=self.top_k_cl, image_similarity_top_k=self.top_k_cl)
-        #     # multi modal retrieve
-        #     # img, txt, score, metadata = retrieve_data.retrieve(query_str)
-        #     # image retrieve
-        #     # print(retrieve_data.image_to_image_retrieve(img_path))
-        #     nodes_cl = retrieve_data_cl.image_to_image_retrieve(img_path)
-        #     for node in nodes_cl:
-        #         txt_cl.append(node.get_text()) # excudates
-        #         score_cl.append(node.get_score()) # 0.628
-        #         img_cl.append(node.node.image_path)
-        #         metadata_cl.append(node.node.metadata)
                 
         return crop_ret, level_ret, classic_ret
     
