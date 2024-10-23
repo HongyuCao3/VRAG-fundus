@@ -261,7 +261,21 @@ class VRAG():
                 metadata_cl.append(node.node.metadata)
                 
         return {"txt": txt_c, "score": score_c, "img": img_c, "metadata": metadata_c}, {"txt": txt_l, "score": score_l, "img": img_l, "metadata": metadata_l} , {"txt": txt_cl, "score": score_cl, "img": img_cl, "metadata": metadata_cl}
-        
+    
+    def retrieve_from_emb(self, multi_index, img_path, top_k):
+        txt = []
+        score = [] 
+        img = [] 
+        metadata = []
+        retrieve_data = multi_index.as_retriever(similarity_top_k=top_k, image_similarity_top_k=top_k)
+        nodes = retrieve_data.image_to_image_retrieve(img_path)
+        for node in nodes:
+            txt.append(node.get_text()) # excudates
+            score.append(node.get_score()) # 0.628
+            img.append(node.node.image_path)
+            metadata.append(node.node.metadata)
+        return {"txt": txt, "score": score, "img": img, "metadata": metadata}
+    
         
     def build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, diagnosis_str, metadata_str, query_str):
         parts = []
