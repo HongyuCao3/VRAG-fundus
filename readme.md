@@ -18,6 +18,6 @@
  - level-emb和crop-emb的context必须分开
 
 ## 实验
- - 对比rag与非rag
- - 对比llava和llava-med
- - 对比使用不同knowledge base的方法
+ - 现在的问题是对比
+   - 图片分块匹配
+   - 图片embedding分段匹配
