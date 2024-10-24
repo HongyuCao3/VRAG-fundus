@@ -48,7 +48,7 @@ class IndexBuilder():
             
         # read classic data
         if self.classic_dir != None:
-            document = self.extract_image_data_classic(self.classic_dir)
+            document = self.extract_image_data_classic_dr(self.classic_dir)
             image_nodes_ = [ImageNode(image_path=p, text=t, meta_data=k) for p, t, k in document]
             image_nodes.extend(image_nodes_)
         
