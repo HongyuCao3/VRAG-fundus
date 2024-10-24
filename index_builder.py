@@ -162,6 +162,14 @@ class IndexBuilder():
                         text = file.split("_")[0]
                         if text == "no DR":
                             text = "Normal"
+                        elif text == "mild NPDR":
+                            text = "mild nonproliferative diabetic retinopathy"
+                        elif text == "PDR":
+                            text = "proliferative diabetic retinopathy"
+                        elif text == "severe NPDR":
+                            text = "severe nonproliferative diabetic retinopathy"
+                        elif text == "moderate" or text == "moderate NPDR":
+                            text = "moderate nonproliferative diabetic retinopathy"
                         image_path = full_path
                         meta_data = file
                         image_data.append((image_path, text, meta_data))

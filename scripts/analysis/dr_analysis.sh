@@ -36,7 +36,7 @@ python analysis.py \
     --res-path ${res_path}
 
 
-# raw finetuned analysis
+# classic dr finetuned analysis
 crop_emb=emb_crop
 level_emb=classic_dr_emb
 dataset=DR
