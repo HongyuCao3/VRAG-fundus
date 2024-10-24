@@ -32,8 +32,11 @@ class Analysis():
                 correct_counts[ground_truth] += 1
             else:
                 # 如果不正确，统计错误类型
-                predicted = eval(item["record_data"]["ret_l"])["txt"][0]  # 假设返回的第一个结果是预测值
-                error_types[ground_truth][predicted] += 1
+                if len(eval(item["record_data"]["ret_l"])["txt"]) != 0:
+                    predicted = eval(item["record_data"]["ret_l"])["txt"][0]  # 假设返回的第一个结果是预测值
+                    error_types[ground_truth][predicted] += 1
+                else:
+                    pass
             
             # 统计匹配数量
             ret_l_txt = eval(item["record_data"]["ret_l"])["txt"]
