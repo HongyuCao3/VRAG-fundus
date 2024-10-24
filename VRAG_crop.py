@@ -83,13 +83,11 @@ class VRAG():
             ret_c, ret_l, ret_cl = self.retrieve(img_path)
         else:
             sub_imgs = split_image(img_path, self.tmp_path, self.chunk_m, self.chunk_n)
-            ret_ls = []
+            ret_cs = []
             for sub_img in sub_imgs:
                 ret_c, ret_l, ret_cl= self.retrieve(sub_img)
-                ret_ls.append(ret_l)
-                
-                # TODO：添加计数方式
-            # TODO：删除临时图片
+                ret_cs.append(ret_c)
+            ret_c = merge_dicts(ret_cs)
         
         # form context
         prompt, images, record_data = self.form_context(img_path, query_str, ret_c, ret_l, ret_cl)
@@ -128,6 +126,7 @@ class VRAG():
 
         outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
         # record_data.update({"outputs": outputs})
+        # delete_images()
         return outputs, record_data
     
     def form_context(self, img_path, query_str, ret_c, ret_l, ret_cl):
