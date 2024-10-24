@@ -18,6 +18,6 @@
  - level-emb和crop-emb的context必须分开
 
 ## 实验
- - 现在的问题是对比
+ - 现在的问题是需要提升匹配正确率
    - 图片分块匹配
    - 图片embedding分段匹配
