@@ -27,13 +27,14 @@ class Analysis():
             # 统计总数量
             total_counts[ground_truth] += 1
             
-            # 统计正确数量
+            # 统计结果正确数量
             if correct:
                 correct_counts[ground_truth] += 1
-            else:
-                # 如果不正确，统计错误类型
-                if len(eval(item["record_data"]["ret_l"])["txt"]) != 0:
-                    predicted = eval(item["record_data"]["ret_l"])["txt"][0]  # 假设返回的第一个结果是预测值
+                
+            if len(eval(item["record_data"]["ret_l"])["txt"]) != 0:
+                predicted = eval(item["record_data"]["ret_l"])["txt"][0]  # 假设返回的第一个结果是预测值
+                if predicted != item["ground truth"]:
+                    # 如果不正确，统计错误类型
                     error_types[ground_truth][predicted] += 1
                 else:
                     pass
@@ -52,7 +53,7 @@ class Analysis():
             match_rate[gt] = match_counts[gt] / total_counts[gt]
             
             # 计算错误概率
-            error_total = total_counts[gt] - correct_counts[gt]  # 错误总数
+            error_total = total_counts[gt]   # 错误总数
             if error_total > 0:
                 error_probabilities[gt] = {error: count / error_total for error, count in error_types[gt].items()}
             else:
@@ -89,8 +90,8 @@ class Analysis():
             for gt, rate in error_prob.items():
                 file.write(f"{gt}: \n")
                 for k,v in rate.items():
-                    if k == gt:
-                        continue
+                    # if k == gt:
+                    #     continue
                     file.write(f"\t{k}: {v}\n")
             
             file.write("\nRelationship between accuracy and match rate:\n")
