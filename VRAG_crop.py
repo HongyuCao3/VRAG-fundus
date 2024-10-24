@@ -8,7 +8,7 @@ from PIL import Image
 import math
 from transformers import set_seed, logging
 
-from utils import split_image, delete_images
+from utils import split_image, delete_images, merge_dicts
 
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
@@ -83,8 +83,11 @@ class VRAG():
             ret_c, ret_l, ret_cl = self.retrieve(img_path)
         else:
             sub_imgs = split_image(img_path, self.tmp_path, self.chunk_m, self.chunk_n)
+            ret_ls = []
             for sub_img in sub_imgs:
-                ret_c, ret_l = self.retrieve(sub_img)
+                ret_c, ret_l, ret_cl= self.retrieve(sub_img)
+                ret_ls.append(ret_l)
+                
                 # TODO：添加计数方式
             # TODO：删除临时图片
         

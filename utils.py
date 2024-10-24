@@ -111,7 +111,34 @@ def generate_markdown_with_temp_images(json_data, temp_dir):
     # finally:
     #     # Clean up temporary directory after use
     #     shutil.rmtree(temp_dir)
-
+    
+def merge_dicts(dicts):
+    from collections import defaultdict
+    
+    # 使用defaultdict来自动处理缺失的键
+    merged = defaultdict(lambda: {'score': 0, 'imgs': [], 'metadata': []})
+    
+    for d in dicts:
+        for txt, score, img, meta in zip(d['txt'], d['score'], d['img'], d['metadata']):
+            merged[txt]['score'] += score
+            merged[txt]['imgs'].append(img)
+            merged[txt]['metadata'].append(meta)
+    
+    # 将defaultdict转换为普通字典
+    result = {
+        'txt': [],
+        'score': [],
+        'img': [],
+        'metadata': []
+    }
+    
+    for txt, data in merged.items():
+        result['txt'].append(txt)
+        result['score'].append(data['score'])
+        result['img'].extend(data['imgs'])
+        result['metadata'].extend(data['metadata'])
+    
+    return result
 
 if __name__ == "__main__":
     # split img
@@ -121,13 +148,30 @@ if __name__ == "__main__":
     # print(sub_imgs)
     # delete_images(tmp_path)
     
-    # 读取JSON文件
-    with open("./output/DR_rag.json", "r") as file:
-        data = json.load(file)
+    # # 读取JSON文件
+    # with open("./output/DR_rag.json", "r") as file:
+    #     data = json.load(file)
 
-    # 生成Markdown文档
-    markdown_document = generate_markdown_with_temp_images(data, "./data/tmp/low_res")
+    # # 生成Markdown文档
+    # markdown_document = generate_markdown_with_temp_images(data, "./data/tmp/low_res")
 
-    # 将Markdown文档写入文件
-    with open("./output/DR_rag.md", "w") as file:
-        file.write(markdown_document)
+    # # 将Markdown文档写入文件
+    # with open("./output/DR_rag.md", "w") as file:
+    #     file.write(markdown_document)
+    
+    dicts = [
+    {'txt': ['exudates', 'hemorrhage', 'microaneurysm'], 
+     'score': [0.6606726254525561, 0.6223304584308493, 0.6112649314480555], 
+     'img': ['./data/lesion/IDRiD_49/exudates.png', './data/lesion/IDRiD_49/hemorrhage.png', './data/lesion/20051020_64945_0100_PP/microaneurysm.png'], 
+     'metadata': [{}, {}, {}]},
+    {'txt': ['exudates', 'hemorrhage'], 
+     'score': [0.3393273745474439, 0.3776695415691507], 
+     'img': ['./data/lesion/IDRiD_50/exudates.png', './data/lesion/IDRiD_50/hemorrhage.png'], 
+     'metadata': [{'key': 'value'}, {'key2': 'value2'}]}
+    ]
+
+    # 调用函数
+    merged_dict = merge_dicts(dicts)
+
+    # 输出结果
+    print(merged_dict)
