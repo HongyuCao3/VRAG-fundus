@@ -1,3 +1,5 @@
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+
 # raw llava-med finetuned
 crop_emb=emb_crop
 level_emb=level_emb
