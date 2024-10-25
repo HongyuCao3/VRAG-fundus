@@ -1,7 +1,7 @@
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 # classic level rag llava-med finetuned with pics
 crop_emb=emb_crop
-level_emb=classic_dr_emb_pubmedbert
+level_emb=classic_dr_emb_large
 dataset=DR
 crop_emb_path="./data/${crop_emb}"
 level_emb_path="./data/${level_emb}"
