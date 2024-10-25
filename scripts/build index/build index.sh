@@ -34,3 +34,12 @@ conda activate llava-med
 python index_builder.py \
     --classic-dir "./data/Classic Images/" \
     --persist-dir "./data/classic_dr_emb/" 
+
+
+# build classic dr clip base
+/home/hongyu/Visual-RAG-LLaVA-Med
+conda activate llava-med
+python index_builder.py \
+    --classic-dir "./data/Classic Images/" \
+    --persist-dir "./data/classic_dr_emb_pubmedbert/" \
+    --embedding-name "NeuML/pubmedbert-base-embeddings"

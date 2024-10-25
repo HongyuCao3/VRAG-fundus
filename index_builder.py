@@ -22,6 +22,7 @@ from llama_index.core.response.notebook_utils import display_source_node
 from llama_index.core.indices.multi_modal.base import MultiModalVectorStoreIndex
 from llama_index.embeddings.clip import ClipEmbedding
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.embeddings.openai import OpenAIEmbedding
 
 class IndexBuilder():
     def __init__(self, args):
@@ -29,7 +30,8 @@ class IndexBuilder():
         self.level_dir = args.level_dir
         self.classic_dir = args.classic_dir
         self.persist_dir = args.persist_dir
-        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+        self.embedding_name = args.embedding_name
+        # Settings.embed_model = HuggingFaceEmbedding(model_name=self.embedding_name)
         
     def build_index(self,):
         document = []
@@ -54,7 +56,7 @@ class IndexBuilder():
             image_nodes.extend(image_nodes_)
         
         # use llama-index to construct index
-        Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+        Settings.embed_model = HuggingFaceEmbedding(model_name=self.embedding_name)
         self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True)
         
         # save index
@@ -218,6 +220,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--crop-dir", type=str, default=None)
     parser.add_argument("--level-dir", type=str, default=None)
+    parser.add_argument("--embedding-name", type=str, default=None)
     parser.add_argument("--classic-dir", type=str, default=None)
     parser.add_argument("--persist-dir", type=str, default=None)
     args = parser.parse_args()
