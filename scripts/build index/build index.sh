@@ -36,10 +36,10 @@ python index_builder.py \
     --persist-dir "./data/classic_dr_emb/" 
 
 
-# build classic dr clip base
+# build classic dr large base
 /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python index_builder.py \
     --classic-dir "./data/Classic Images/" \
-    --persist-dir "./data/classic_dr_emb_pubmedbert/" \
-    --embedding-name "NeuML/pubmedbert-base-embeddings"
+    --persist-dir "./data/classic_dr_emb_large/" \
+    --embedding-name "BAAI/bge-large-en-v1.5"
