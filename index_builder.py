@@ -43,6 +43,7 @@ class IndexBuilder():
         # read level data
         if self.level_dir != None:
             document = self.extract_image_data_level(self.level_dir)
+            document = self.process_images(document)
             image_nodes_ = [ImageNode(image_path=p, text=t, meta_data=k) for p, t, k in document]
             image_nodes.extend(image_nodes_)
             
@@ -174,6 +175,42 @@ class IndexBuilder():
                         meta_data = file
                         image_data.append((image_path, text, meta_data))
                         print(f"Image found: {file} in subfolder: {sub_folder} at path: {full_path}")
+        return image_data
+    
+    def process_images(self, image_data):
+        """
+        对给定的image_data列表中的每个图像执行旋转(90°, 180°, 270°)和水平翻转，
+        并将新的图像保存到原始路径的同一目录下，同时更新image_data列表。
+        
+        :param image_data: 列表，其中每个元素是一个包含(image_path, text, meta_data)的三元组
+        :return: 更新后的image_data列表
+        """
+        transformations = [
+            (Image.ROTATE_90, '_rotate_90'),
+            (Image.ROTATE_180, '_rotate_180'),
+            (Image.ROTATE_270, '_rotate_270'),
+            (Image.FLIP_LEFT_RIGHT, '_flip_horizontal')
+        ]
+        image_data_ = []
+        for image_path, text, meta_data in tqdm(image_data):
+            # 打开原始图像
+            with Image.open(image_path) as img:
+                # 获取图像所在的目录和文件名
+                directory, filename = os.path.split(image_path)
+                name, ext = os.path.splitext(filename)
+                
+                # 应用每种变换
+                for transform, suffix in transformations:
+                    transformed_img = img.transpose(transform)
+                    new_filename = f"{name}{suffix}{ext}"
+                    new_image_path = os.path.join(directory, new_filename)
+                    
+                    # 保存新图像
+                    transformed_img.save(new_image_path)
+                    
+                    # 将新图像的信息添加到image_data中
+                    image_data_.append((new_image_path, text, meta_data))
+        image_data.extend(image_data_)
         return image_data
     
 

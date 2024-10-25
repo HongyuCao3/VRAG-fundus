@@ -5,6 +5,13 @@ python index_builder.py \
     --level-dir "./data/level/" \
     --persist-dir "./data/level_emb/" 
 
+# build level with rotation
+/home/hongyu/Visual-RAG-LLaVA-Med
+conda activate llava-med
+python index_builder.py \
+    --level-dir "./data/level_copy/" \
+    --persist-dir "./data/level_emb_r/" 
+
 
 # build all
 /home/hongyu/Visual-RAG-LLaVA-Med
