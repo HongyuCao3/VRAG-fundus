@@ -64,6 +64,28 @@ nohup python evaluation.py \
     --use-rag True \
     --test-num -1 \
     >${log_path} 2>&1 &
+    
+# level-emb-r rag llava-med
+crop_emb=emb_crop
+level_emb=level_emb_r
+dataset=DR
+crop_emb_path="./data/${crop_emb}"
+level_emb_path="./data/${level_emb}"
+m=1
+n=1
+output_path="./output/${dataset}/llava-med/${level_emb}_${m}_${n}_rag.json"
+log_path="./output/${dataset}/llava-med/log/${level_emb}_${m}_${n}_rag.log"
+cd /home/hongyu/Visual-RAG-LLaVA-Med
+conda activate llava-med
+nohup python evaluation.py \
+    --dataset ${dataset} \
+    --output-path ${output_path} \
+    --level-emb-path ${level_emb_path} \
+    --chunk-m ${m} \
+    --chunk-n ${n} \
+    --use-rag True \
+    --test-num -1 \
+    >${log_path} 2>&1 &
 
 # crop-emb rag llava-med
 crop_emb=emb_crop
