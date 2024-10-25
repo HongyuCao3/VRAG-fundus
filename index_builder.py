@@ -56,8 +56,9 @@ class IndexBuilder():
             image_nodes.extend(image_nodes_)
         
         # use llama-index to construct index
+        print(self.embedding_name)
         Settings.embed_model = HuggingFaceEmbedding(model_name=self.embedding_name)
-        self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True)
+        self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True, embed_model=HuggingFaceEmbedding(model_name=self.embedding_name))
         
         # save index
         if self.persist_dir != None:
