@@ -193,9 +193,9 @@ crop_emb_path="./data/${crop_emb}"
 level_emb_path="./data/${level_emb}"
 m=2
 n=2
-test_num=5
-output_path="./output/${dataset}/llava-med-finetuned/${level_emb}_${m}_${n}_rag_${test_num}_pics.json"
-log_path="./output/${dataset}/llava-med-finetuned/log/${level_emb}_${m}_${n}_rag_${tet_num}_pics.log"
+test_num=-1
+output_path="./output/${dataset}/llava-med-finetuned/${crop_emb}_${m}_${n}_rag_${test_num}_pics.json"
+log_path="./output/${dataset}/llava-med-finetuned/log/${crop_emb}_${m}_${n}_rag_${tet_num}_pics.log"
 model_path="/home/hongyu/eye_llava_medllava_finetune_mistral"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
@@ -203,7 +203,7 @@ nohup python evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \
     --model-path ${model_path} \
-    --level-emb-path ${level_emb_path} \
+    --crop-emb-path ${crop_emb_path} \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
