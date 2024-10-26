@@ -101,6 +101,7 @@ nohup python evaluation.py \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
+    --use-pics True \
     --test-num ${test_num} \
     >${log_path} 2>&1 &
 
