@@ -1,7 +1,10 @@
 import os, json
 import argparse
 from collections import defaultdict
-
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import confusion_matrix
+import itertools
 
 class Analysis():
     def __init__(self, args):
@@ -74,6 +77,31 @@ class Analysis():
         relationship = self.analyze_relationship(accuracy, match_rate)
         
         self.write_results_to_file(accuracy, match_rate, error_prob, relationship)
+        data = self.load_json(self.file_path)
+    
+        accuracy, match_rate, error_prob = self.calculate_metrics(data)
+        relationship = self.analyze_relationship(accuracy, match_rate)
+        
+        # 准备混淆矩阵所需的数据
+        y_true = []
+        y_pred = []
+        for item in data["results"]:
+            y_true.append(item["ground truth"])
+            if len(eval(item["record_data"]["ret_l"])["txt"]) != 0:
+                y_pred.append(eval(item["record_data"]["ret_l"])["txt"][0])  # 假设返回的第一个结果是预测值
+            else:
+                y_pred.append(None)  # 如果没有预测值，则用 None 表示
+        
+        # 获取所有的 ground truth 类别
+        classes = list(set(y_true + y_pred))
+        
+        # 创建混淆矩阵
+        cm = confusion_matrix(y_true, y_pred, labels=classes)
+        
+        # 绘制并保存混淆矩阵
+        self.plot_confusion_matrix(cm, classes, normalize=True, title='Normalized Confusion Matrix')
+        
+        self.write_results_to_file(accuracy, match_rate, error_prob, relationship)
             
             
     def write_results_to_file(self, accuracy, match_rate, error_prob, relationship):
@@ -98,6 +126,41 @@ class Analysis():
             for gt, (acc, rate) in relationship.items():
                 file.write(f"{gt}: Accuracy={acc:.2f}, Match Rate={rate:.2f}\n")
             
+    def plot_confusion_matrix(self, cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
+        """
+        This function prints and plots the confusion matrix.
+        Normalization can be applied by setting `normalize=True`.
+        """
+        if normalize:
+            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+            print("Normalized confusion matrix")
+        else:
+            print('Confusion matrix, without normalization')
+
+        print(cm)
+
+        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+        plt.title(title)
+        plt.colorbar()
+        tick_marks = np.arange(len(classes))
+        plt.xticks(tick_marks, classes, rotation=45)
+        plt.yticks(tick_marks, classes)
+
+        fmt = '.2f' if normalize else 'd'
+        thresh = cm.max() / 2.
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            plt.text(j, i, format(cm[i, j], fmt),
+                    horizontalalignment="center",
+                    color="white" if cm[i, j] > thresh else "black")
+
+        plt.tight_layout()
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label')
+
+        # 保存图像
+        plt.savefig(self.res_path.replace('.txt', '_confusion_matrix.png'))
+        plt.show()
+        
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file-path", type=str, default="")
