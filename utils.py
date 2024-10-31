@@ -140,6 +140,25 @@ def merge_dicts(dicts):
     
     return result
 
+def find_longest_matching_class(llm_respond, classes):
+    """
+    在classes列表中查找与字符串llm_respond匹配的最长类名。
+    
+    :param llm_respond: 需要匹配的字符串
+    :param classes: 包含类名的列表
+    :return: 匹配的最长类名，如果没有匹配则返回None
+    """
+    longest_match = None
+    max_length = 0
+
+    for class_name in classes:
+        if class_name in llm_respond and len(class_name) > max_length:
+            longest_match = class_name
+            max_length = len(class_name)
+    if longest_match == None:
+        print("no matching")
+    return longest_match
+
 if __name__ == "__main__":
     # split img
     # img_path = "./data/DR/multidr/BRSET_img00149.jpg"
@@ -159,19 +178,25 @@ if __name__ == "__main__":
     # with open("./output/DR_rag.md", "w") as file:
     #     file.write(markdown_document)
     
-    dicts = [
-    {'txt': ['exudates', 'hemorrhage', 'microaneurysm'], 
-     'score': [0.6606726254525561, 0.6223304584308493, 0.6112649314480555], 
-     'img': ['./data/lesion/IDRiD_49/exudates.png', './data/lesion/IDRiD_49/hemorrhage.png', './data/lesion/20051020_64945_0100_PP/microaneurysm.png'], 
-     'metadata': [{}, {}, {}]},
-    {'txt': ['exudates', 'hemorrhage'], 
-     'score': [0.3393273745474439, 0.3776695415691507], 
-     'img': ['./data/lesion/IDRiD_50/exudates.png', './data/lesion/IDRiD_50/hemorrhage.png'], 
-     'metadata': [{'key': 'value'}, {'key2': 'value2'}]}
-    ]
+    # dicts = [
+    # {'txt': ['exudates', 'hemorrhage', 'microaneurysm'], 
+    #  'score': [0.6606726254525561, 0.6223304584308493, 0.6112649314480555], 
+    #  'img': ['./data/lesion/IDRiD_49/exudates.png', './data/lesion/IDRiD_49/hemorrhage.png', './data/lesion/20051020_64945_0100_PP/microaneurysm.png'], 
+    #  'metadata': [{}, {}, {}]},
+    # {'txt': ['exudates', 'hemorrhage'], 
+    #  'score': [0.3393273745474439, 0.3776695415691507], 
+    #  'img': ['./data/lesion/IDRiD_50/exudates.png', './data/lesion/IDRiD_50/hemorrhage.png'], 
+    #  'metadata': [{'key': 'value'}, {'key2': 'value2'}]}
+    # ]
 
-    # 调用函数
-    merged_dict = merge_dicts(dicts)
+    # # 调用函数
+    # merged_dict = merge_dicts(dicts)
 
-    # 输出结果
-    print(merged_dict)
+    # # 输出结果
+    # print(merged_dict)
+    llm_respond = "The model predicted severe proliferative diabetic retinopathy."
+    classes = ["Normal", "moderate nonproliferative diabetic retinopathy", 
+            "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
+
+    matched_class = find_longest_matching_class(llm_respond, classes)
+    print(f"Longest matching class: {matched_class}")

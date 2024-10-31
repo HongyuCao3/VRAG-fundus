@@ -6,6 +6,7 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import itertools
 import ast
+from utils import find_longest_matching_class
 
 class Analysis():
     def __init__(self, args):
@@ -93,20 +94,39 @@ class Analysis():
         accuracy, match_rate, error_prob = self.calculate_metrics(data)
         relationship = self.analyze_relationship(accuracy, match_rate)
 
+        # 计算level的混淆矩阵
         y_true, y_pred, classes = self.get_matrix_attr_level_emb(data)
-
-        # 创建混淆矩阵
         cm = confusion_matrix(y_true, y_pred, labels=classes)
+        
+        # 计算最终结果的混淆矩阵
+        y_true_o, y_pred_o, classes_o = self.get_matrix_attr_output(data)
+        
+        cm_o = confusion_matrix(y_true_o, y_pred_o, labels=classes_o)
+
 
         # 替换坐标轴标签
         plot_classes = ["Normal", "moderate pdr", "severe npdr", "pdr"]
 
         # 绘制并保存混淆矩阵
-        self.plot_confusion_matrix(cm, plot_classes, normalize=True, title='Normalized Confusion Matrix')
+        self.plot_confusion_matrix(cm, plot_classes, normalize=True, title='level emb Confusion Matrix')
+        self.plot_confusion_matrix(cm_o, plot_classes, normalize=True, title='llm respond Confusion Matrix')
 
         self.write_results_to_file(accuracy, match_rate, error_prob, relationship)  
     
+    def get_matrix_attr_output(self, data):
+        y_true = []
+        y_pred = []
+        classes = ["Normal", "moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
+        for item in data["results"]:
+            y_true.append(item["ground truth"])
+            pred = find_longest_matching_class(item["llm respond"], classes)
+            if pred == None:
+                pred = "None"
+            y_pred.append(pred)
+        return y_true, y_pred, classes
+    
     def get_matrix_attr_level_emb(self, data):
+        # 获取level emb的预测混淆矩阵
         y_true = []
         y_pred = []
         for item in data["results"]:
@@ -179,7 +199,7 @@ class Analysis():
         plt.xlabel('Predicted label')
 
         # 保存图像
-        plt.savefig(self.res_path.replace('.txt', '_confusion_matrix.png'))
+        plt.savefig(self.res_path.replace('.txt', f'_{title}.png'))
         plt.show()
         
 if __name__ == "__main__":
