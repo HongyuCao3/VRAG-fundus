@@ -109,13 +109,13 @@ class Analysis():
                 y_pred.append(None)  # 如果 ret_l_str 为空，则用 None 表示
 
         # 指定类别的顺序
-        classes = ["Normal", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
+        classes = ["Normal", "moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
 
         # 创建混淆矩阵
         cm = confusion_matrix(y_true, y_pred, labels=classes)
 
         # 替换坐标轴标签
-        plot_classes = ["Normal", "severe npdr", "pdr"]
+        plot_classes = ["Normal", "moderate pdr", "severe npdr", "pdr"]
 
         # 绘制并保存混淆矩阵
         self.plot_confusion_matrix(cm, plot_classes, normalize=True, title='Normalized Confusion Matrix')
