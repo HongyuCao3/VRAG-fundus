@@ -2,9 +2,11 @@ import torch
 from transformers import CLIPModel, CLIPProcessor
 from PIL import Image
 import argparse
+from torch.nn.functional import cosine_similarity
+
 
 class EmbBuilder():
-    def __init__(self):
+    def __init__(self, args,):
         pass
     def get_layer_representation(self, img_path, layer_index=11):
         # 加载预训练的CLIP模型和处理器
@@ -43,11 +45,36 @@ class EmbBuilder():
 
         return layer_output
 
+    def calculate_similarity(self, img_path1, img_path2, layer_index=11):
+        # 获取两张图片的特征表示
+        feature1 = self.get_layer_representation(img_path1, layer_index)
+        feature2 = self.get_layer_representation(img_path2, layer_index)
+
+        # 检查特征张量的形状
+        print(f"Feature1 shape: {feature1.shape}")
+        print(f"Feature2 shape: {feature2.shape}")
+
+        # 根据特征张量的形状进行平均池化
+        if len(feature1.shape) == 4:
+            feature1 = feature1.mean(dim=(2, 3))
+            feature2 = feature2.mean(dim=(2, 3))
+        elif len(feature1.shape) == 3:
+            feature1 = feature1.mean(dim=2)
+            feature2 = feature2.mean(dim=2)
+        else:
+            raise ValueError("Unexpected feature tensor shape")
+
+        # 计算余弦相似度
+        similarity = cosine_similarity(feature1, feature2, dim=1)
+
+        return similarity.item()  # 返回相似度的标量值
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # 使用示例
     args = parser.parse_args()
     EB = EmbBuilder(args)
-    img_path = './data/level/ODIR_2450_right.jpg'
-    layer_representation = EB.get_layer_representation(img_path, layer_index=11)
-    print(layer_representation.shape)  # 打印输出张量的形状
+    img_path1 = './data/level/ODIR_2450_right.jpg'
+    img_path2 = './data/level/ODIR_3259_left.jpg'
+    sim = EB.calculate_similarity(img_path1, img_path2)
+    print(sim)
