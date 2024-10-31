@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import confusion_matrix
 import itertools
+import ast
 
 class Analysis():
     def __init__(self, args):
@@ -69,41 +70,58 @@ class Analysis():
         for gt in accuracy:
             relationship[gt] = (accuracy[gt], match_rate[gt])
         return relationship
-
-    def analyze(self,):
-        data = self.load_json(self.file_path)
-        
-        accuracy, match_rate, error_prob = self.calculate_metrics(data)
-        relationship = self.analyze_relationship(accuracy, match_rate)
-        
-        self.write_results_to_file(accuracy, match_rate, error_prob, relationship)
-        data = self.load_json(self.file_path)
     
+    def analyze(self):
+        data = self.load_json(self.file_path)
+
+        # 数据预处理：将 mild 和 moderate 类别合并到 Normal
+        for item in data["results"]:
+            ground_truth = item["ground truth"]
+            if ground_truth in ["mild nonproliferative diabetic retinopathy", "moderate nonproliferative diabetic retinopathy"]:
+                item["ground truth"] = "Normal"
+
+            ret_l_str = item["record_data"]["ret_l"]
+            if ret_l_str and ret_l_str.strip():  # 检查 ret_l_str 是否非空
+                ret_l = ast.literal_eval(ret_l_str)  # 安全解析字符串为 Python 对象
+                if "txt" in ret_l and ret_l["txt"]:
+                    predicted = ret_l["txt"][0]
+                    if predicted in ["mild nonproliferative diabetic retinopathy", "moderate nonproliferative diabetic retinopathy"]:
+                        ret_l["txt"][0] = "Normal"
+                    item["record_data"]["ret_l"] = str(ret_l)  # 将修改后的对象转回字符串
+
+        # 重新计算度量标准
         accuracy, match_rate, error_prob = self.calculate_metrics(data)
         relationship = self.analyze_relationship(accuracy, match_rate)
-        
+
         # 准备混淆矩阵所需的数据
         y_true = []
         y_pred = []
         for item in data["results"]:
             y_true.append(item["ground truth"])
-            if len(eval(item["record_data"]["ret_l"])["txt"]) != 0:
-                y_pred.append(eval(item["record_data"]["ret_l"])["txt"][0])  # 假设返回的第一个结果是预测值
+            ret_l_str = item["record_data"]["ret_l"]
+            if ret_l_str and ret_l_str.strip():  # 检查 ret_l_str 是否非空
+                ret_l = ast.literal_eval(ret_l_str)  # 安全解析字符串为 Python 对象
+                if "txt" in ret_l and ret_l["txt"]:
+                    y_pred.append(ret_l["txt"][0])  # 假设返回的第一个结果是预测值
+                else:
+                    y_pred.append(None)  # 如果没有预测值，则用 None 表示
             else:
-                y_pred.append(None)  # 如果没有预测值，则用 None 表示
-        
-        # 获取所有的 ground truth 类别
-        classes = list(set(y_true + y_pred))
-        
+                y_pred.append(None)  # 如果 ret_l_str 为空，则用 None 表示
+
+        # 指定类别的顺序
+        classes = ["Normal", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
+
         # 创建混淆矩阵
         cm = confusion_matrix(y_true, y_pred, labels=classes)
-        
+
+        # 替换坐标轴标签
+        plot_classes = ["Normal", "severe npdr", "pdr"]
+
         # 绘制并保存混淆矩阵
-        self.plot_confusion_matrix(cm, classes, normalize=True, title='Normalized Confusion Matrix')
-        
-        self.write_results_to_file(accuracy, match_rate, error_prob, relationship)
-            
-            
+        self.plot_confusion_matrix(cm, plot_classes, normalize=True, title='Normalized Confusion Matrix')
+
+        self.write_results_to_file(accuracy, match_rate, error_prob, relationship)  
+    
     def write_results_to_file(self, accuracy, match_rate, error_prob, relationship):
         with open(self.res_path, 'w') as file:
             file.write("Accuracy per ground truth type:\n")
