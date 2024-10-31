@@ -12,6 +12,7 @@ class Analysis():
     def __init__(self, args):
         self.file_path = args.file_path
         self.res_path = args.res_path
+        self.level_emb = args.level_emb
     
     def load_json(self, file_path):
         with open(file_path, 'r') as file:
@@ -90,25 +91,21 @@ class Analysis():
                         ret_l["txt"][0] = "Normal"
                     item["record_data"]["ret_l"] = str(ret_l)  # 将修改后的对象转回字符串
 
+        plot_classes = ["Normal", "moderate pdr", "severe npdr", "pdr"]
+        
         # 重新计算度量标准
         accuracy, match_rate, error_prob = self.calculate_metrics(data)
         relationship = self.analyze_relationship(accuracy, match_rate)
 
-        # 计算level的混淆矩阵
-        y_true, y_pred, classes = self.get_matrix_attr_level_emb(data)
-        cm = confusion_matrix(y_true, y_pred, labels=classes)
+        # 计算并绘制level的混淆矩阵
+        if self.level_emb:
+            y_true, y_pred, classes = self.get_matrix_attr_level_emb(data)
+            cm = confusion_matrix(y_true, y_pred, labels=classes)
+            self.plot_confusion_matrix(cm, plot_classes, normalize=True, title='level emb Confusion Matrix')
         
-        # 计算最终结果的混淆矩阵
+        # 计算并绘制最终结果的混淆矩阵
         y_true_o, y_pred_o, classes_o = self.get_matrix_attr_output(data)
-        
         cm_o = confusion_matrix(y_true_o, y_pred_o, labels=classes_o)
-
-
-        # 替换坐标轴标签
-        plot_classes = ["Normal", "moderate pdr", "severe npdr", "pdr"]
-
-        # 绘制并保存混淆矩阵
-        self.plot_confusion_matrix(cm, plot_classes, normalize=True, title='level emb Confusion Matrix')
         self.plot_confusion_matrix(cm_o, plot_classes, normalize=True, title='llm respond Confusion Matrix')
 
         self.write_results_to_file(accuracy, match_rate, error_prob, relationship)  
@@ -206,6 +203,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file-path", type=str, default="")
     parser.add_argument("--res-path", type=str, default="")
+    parser.add_argument("--level-emb", type=bool, default=False)
     parser.add_argument("--num", type=int, default=-1)
     args = parser.parse_args()
     AS = Analysis(args)
