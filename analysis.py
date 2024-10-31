@@ -93,7 +93,20 @@ class Analysis():
         accuracy, match_rate, error_prob = self.calculate_metrics(data)
         relationship = self.analyze_relationship(accuracy, match_rate)
 
-        # 准备混淆矩阵所需的数据
+        y_true, y_pred, classes = self.get_matrix_attr_level_emb(data)
+
+        # 创建混淆矩阵
+        cm = confusion_matrix(y_true, y_pred, labels=classes)
+
+        # 替换坐标轴标签
+        plot_classes = ["Normal", "moderate pdr", "severe npdr", "pdr"]
+
+        # 绘制并保存混淆矩阵
+        self.plot_confusion_matrix(cm, plot_classes, normalize=True, title='Normalized Confusion Matrix')
+
+        self.write_results_to_file(accuracy, match_rate, error_prob, relationship)  
+    
+    def get_matrix_attr_level_emb(self, data):
         y_true = []
         y_pred = []
         for item in data["results"]:
@@ -110,17 +123,7 @@ class Analysis():
 
         # 指定类别的顺序
         classes = ["Normal", "moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
-
-        # 创建混淆矩阵
-        cm = confusion_matrix(y_true, y_pred, labels=classes)
-
-        # 替换坐标轴标签
-        plot_classes = ["Normal", "moderate pdr", "severe npdr", "pdr"]
-
-        # 绘制并保存混淆矩阵
-        self.plot_confusion_matrix(cm, plot_classes, normalize=True, title='Normalized Confusion Matrix')
-
-        self.write_results_to_file(accuracy, match_rate, error_prob, relationship)  
+        return y_true, y_pred, classes
     
     def write_results_to_file(self, accuracy, match_rate, error_prob, relationship):
         with open(self.res_path, 'w') as file:
