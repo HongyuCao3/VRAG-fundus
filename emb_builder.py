@@ -1,4 +1,5 @@
 import torch
+import os, json
 from transformers import CLIPModel, CLIPProcessor
 from PIL import Image
 import argparse
@@ -7,18 +8,20 @@ from torch.nn.functional import cosine_similarity
 
 class EmbBuilder():
     def __init__(self, args,):
-        pass
+        self.img_path = args.img_path
+        self.emb_folder = args.emb_path
+        self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+        self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        
     def get_layer_representation(self, img_path, layer_index=11):
         # 加载预训练的CLIP模型和处理器
-        model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-        processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
         # 加载并预处理图像
         image = Image.open(img_path)
-        inputs = processor(images=image, return_tensors="pt")
+        inputs = self.processor(images=image, return_tensors="pt")
 
         # 获取模型的视觉编码器
-        visual_model = model.vision_model
+        visual_model = self.model.vision_model
 
         # 定义一个前向传播钩子来捕获指定层的输出
         layer_output = None
@@ -69,12 +72,49 @@ class EmbBuilder():
 
         return similarity.item()  # 返回相似度的标量值
     
+    def save_image_representations(self, source_folder, target_folder, layer_index=11):
+        if not os.path.exists(target_folder):
+            os.makedirs(target_folder)
+
+        representation_data = {}
+        for filename in os.listdir(source_folder):
+            if filename.endswith(('.png', '.jpg', '.jpeg')):
+                file_path = os.path.join(source_folder, filename)
+                representation = self.get_layer_representation(file_path, layer_index)
+                
+                # Save the representation as a .pt file
+                representation_file = os.path.join(target_folder, f"{os.path.splitext(filename)[0]}.pt")
+                torch.save(representation, representation_file)
+
+                # Record the correspondence
+                representation_data[filename] = representation_file
+
+        # Save the correspondence data to a JSON file
+        correspondence_file = os.path.join(target_folder, 'correspondence.json')
+        with open(correspondence_file, 'w') as f:
+            json.dump(representation_data, f)
+
+    def load_image_representations(self, target_folder):
+        correspondence_file = os.path.join(target_folder, 'correspondence.json')
+        with open(correspondence_file, 'r') as f:
+            representation_data = json.load(f)
+        
+        representations = {}
+        for img_name, rep_path in representation_data.items():
+            representation = torch.load(rep_path)
+            representations[img_name] = representation
+        
+        return representations
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # 使用示例
+    parser.add_argument("--img-path", type=str, default="./data/level")
+    parser.add_argument("--emb-path", type=str, default="./data/level_emb_clip")
     args = parser.parse_args()
     EB = EmbBuilder(args)
     img_path1 = './data/level/ODIR_2450_right.jpg'
     img_path2 = './data/level/ODIR_3259_left.jpg'
-    sim = EB.calculate_similarity(img_path1, img_path2)
-    print(sim)
+    # sim = EB.calculate_similarity(img_path1, img_path2)
+    # print(sim)
+    EB.save_image_representations(args.img_path, args.emb_path)
