@@ -77,7 +77,7 @@ class Analysis():
         # 数据预处理：将 mild 和 moderate 类别合并到 Normal
         for item in data["results"]:
             ground_truth = item["ground truth"]
-            if ground_truth in ["mild nonproliferative diabetic retinopathy", "moderate nonproliferative diabetic retinopathy"]:
+            if ground_truth in ["mild nonproliferative diabetic retinopathy"]:
                 item["ground truth"] = "Normal"
 
             ret_l_str = item["record_data"]["ret_l"]
@@ -85,7 +85,7 @@ class Analysis():
                 ret_l = ast.literal_eval(ret_l_str)  # 安全解析字符串为 Python 对象
                 if "txt" in ret_l and ret_l["txt"]:
                     predicted = ret_l["txt"][0]
-                    if predicted in ["mild nonproliferative diabetic retinopathy", "moderate nonproliferative diabetic retinopathy"]:
+                    if predicted in ["mild nonproliferative diabetic retinopathy"]:
                         ret_l["txt"][0] = "Normal"
                     item["record_data"]["ret_l"] = str(ret_l)  # 将修改后的对象转回字符串
 
