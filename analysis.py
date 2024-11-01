@@ -118,6 +118,7 @@ class Analysis():
             y_true.append(item["ground truth"])
             pred = find_longest_matching_class(item["llm respond"], classes)
             if pred == None:
+                print(item["llm respond"])
                 pred = "None"
             y_pred.append(pred)
         return y_true, y_pred, classes
