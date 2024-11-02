@@ -8,8 +8,8 @@ from utils import find_json_file
 
 
 class EmbBuilder():
-    def __init__(self, args,):
-        self.img_path = args.img_path
+    def __init__(self, img_folder, emb_folder):
+        self.img_path = args.img_folder
         self.emb_folder = args.emb_path
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     parser.add_argument("--img-path", type=str, default="./data/level")
     parser.add_argument("--emb-path", type=str, default="./data/level_emb_clip")
     args = parser.parse_args()
-    EB = EmbBuilder(args)
+    EB = EmbBuilder(args.img_path, args.emb_path)
     img_path1 = './data/level/ODIR_2450_right.jpg'
     img_path2 = './data/level/ODIR_3259_left.jpg'
     # input_img = './data/DR/multidr/39dis_1ffa92f4-8d87-11e8-9daf-6045cb817f5b.jpg'
