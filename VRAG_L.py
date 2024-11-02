@@ -51,6 +51,7 @@ class VRAG():
         self.chunk_m = args.chunk_m
         self.chunk_n = args.chunk_n
         self.tmp_path = args.tmp_path
+        self.use_pics = args.use_pics
         self.crop_emb_path = args.crop_emb_path
         self.level_emb_path = args.level_emb_path
         self.load_embs()
