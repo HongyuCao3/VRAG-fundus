@@ -106,6 +106,54 @@ class EmbBuilder():
         
         return representations
     
+    def find_similar_images(self, input_img, k=2):
+        """
+        对于输入图片，计算其与emb_folder中保存的所有嵌入的相似度，
+        并返回最相似的前k个图像的原始路径。
+        
+        :param input_img: 输入图片的路径
+        :param emb_folder: 包含预计算嵌入和对应关系的文件夹路径
+        :param k: 返回最相似图像的数量，默认为5
+        :return: 一个列表，包含最相似图像的原始路径和相似度分数
+        """
+        # 获取输入图片的嵌入
+        input_emb = self.get_layer_representation(input_img)
+        
+        # 确保输入嵌入是一个二维张量 (batch_size, feature_dim)
+        if len(input_emb.shape) == 4:
+            input_emb = input_emb.mean(dim=(2, 3))  # 全局平均池化
+        elif len(input_emb.shape) == 3:
+            input_emb = input_emb.mean(dim=2)  # 全局平均池化
+        else:
+            raise ValueError("Unexpected feature tensor shape")
+
+        # 加载文件夹中的所有嵌入
+        representations = self.load_image_representations(self.emb_folder)
+
+        # 计算所有嵌入与输入嵌入的相似度
+        similarities = []
+        for img_name, rep in representations.items():
+            # 确保预加载的嵌入也是一个二维张量 (batch_size, feature_dim)
+            if len(rep.shape) == 4:
+                rep = rep.mean(dim=(2, 3))  # 全局平均池化
+            elif len(rep.shape) == 3:
+                rep = rep.mean(dim=2)  # 全局平均池化
+            else:
+                raise ValueError("Unexpected feature tensor shape")
+
+            # 计算余弦相似度
+            sim = cosine_similarity(input_emb, rep, dim=1)
+            similarities.append((img_name, sim.item()))
+
+        # 按相似度排序并选择前k个
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        top_k = similarities[:k]
+
+        # 获取最相似图像的原始路径
+        similar_images = [(os.path.join(self.emb_folder, img_name), sim) for img_name, sim in top_k]
+        return similar_images
+
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # 使用示例
@@ -115,6 +163,9 @@ if __name__ == "__main__":
     EB = EmbBuilder(args)
     img_path1 = './data/level/ODIR_2450_right.jpg'
     img_path2 = './data/level/ODIR_3259_left.jpg'
+    # input_img = './data/DR/multidr/39dis_1ffa92f4-8d87-11e8-9daf-6045cb817f5b.jpg'
+    input_img = './data/level/ODIR_2450_right.jpg'
     # sim = EB.calculate_similarity(img_path1, img_path2)
     # print(sim)
-    EB.save_image_representations(args.img_path, args.emb_path)
+    # EB.save_image_representations(args.img_path, args.emb_path)
+    print(EB.find_similar_images(input_img))
