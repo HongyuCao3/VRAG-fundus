@@ -14,8 +14,6 @@ class EmbBuilder():
         self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
         
     def get_layer_representation(self, img_path, layer_index=11):
-        # 加载预训练的CLIP模型和处理器
-
         # 加载并预处理图像
         image = Image.open(img_path)
         inputs = self.processor(images=image, return_tensors="pt")
