@@ -159,6 +159,18 @@ def find_longest_matching_class(llm_respond, classes):
         print("no matching")
     return longest_match
 
+def find_json_file(folder):
+    """
+    查找指定文件夹中的JSON文件。
+    
+    :param folder: 要查找的文件夹路径
+    :return: JSON文件的路径，如果未找到则返回None
+    """
+    for filename in os.listdir(folder):
+        if filename.endswith('.json'):
+            return os.path.join(folder, filename)
+    return None
+
 if __name__ == "__main__":
     # split img
     # img_path = "./data/DR/multidr/BRSET_img00149.jpg"

@@ -4,6 +4,7 @@ from transformers import CLIPModel, CLIPProcessor
 from PIL import Image
 import argparse
 from torch.nn.functional import cosine_similarity
+from utils import find_json_file
 
 
 class EmbBuilder():
@@ -12,6 +13,9 @@ class EmbBuilder():
         self.emb_folder = args.emb_path
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        self.json_file = find_json_file(self.img_path)
+        if self.json_file is None:
+            raise FileNotFoundError("JSON file not found in the specified folder.")
         
     def get_layer_representation(self, img_path, layer_index=11):
         # 加载并预处理图像
@@ -151,7 +155,7 @@ class EmbBuilder():
         similar_images = [(os.path.join(self.emb_folder, img_name), sim) for img_name, sim in top_k]
         return similar_images
     
-    def get_detailed_similarities(self, input_img, json_file, k=5):
+    def get_detailed_similarities(self, input_img, k=5):
         """
         获取输入图片与文件夹中保存的嵌入的相似度，并返回最相似的前k个图像的详细信息。
         
@@ -165,7 +169,7 @@ class EmbBuilder():
         similar_images = self.find_similar_images(input_img, k=k)
 
         # 读取JSON文件中的详细信息
-        with open(json_file, 'r') as f:
+        with open(self.json_file, 'r') as f:
             image_details = json.load(f)
 
         # 创建一个字典以便快速查找
@@ -196,4 +200,4 @@ if __name__ == "__main__":
     # sim = EB.calculate_similarity(img_path1, img_path2)
     # print(sim)
     # EB.save_image_representations(args.img_path, args.emb_path)
-    print(EB.get_detailed_similarities(input_img, "./data/level/level.json"))
+    print(EB.get_detailed_similarities(input_img))
