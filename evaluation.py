@@ -6,7 +6,8 @@ from tqdm import tqdm
 from dataset import DRDataset
 from torch.utils.data import Dataset, DataLoader
 
-from VRAG_crop import VRAG
+# from VRAG_crop import VRAG
+from VRAG_L import VRAG
 
 
 class evaluation():
