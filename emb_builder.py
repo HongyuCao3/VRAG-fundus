@@ -152,6 +152,36 @@ class EmbBuilder():
         # 获取最相似图像的原始路径
         similar_images = [(os.path.join(self.emb_folder, img_name), sim) for img_name, sim in top_k]
         return similar_images
+    
+    def get_detailed_similarities(self, input_img, json_file, k=5):
+        """
+        获取输入图片与文件夹中保存的嵌入的相似度，并返回最相似的前k个图像的详细信息。
+        
+        :param input_img: 输入图片的路径
+        :param emb_folder: 包含预计算嵌入和对应关系的文件夹路径
+        :param json_file: 包含图像详细信息的JSON文件路径
+        :param k: 返回最相似图像的数量，默认为5
+        :return: 一个列表，包含最相似图像的score, dis, 和 imid
+        """
+        # 获取最相似的图像
+        similar_images = self.find_similar_images(input_img, k=k)
+
+        # 读取JSON文件中的详细信息
+        with open(json_file, 'r') as f:
+            image_details = json.load(f)
+
+        # 创建一个字典以便快速查找
+        image_dict = {os.path.basename(detail['image_path']): detail for detail in image_details}
+
+        # 获取详细的相似信息
+        detailed_similarities = []
+        for img_path, score in similar_images:
+            img_name = os.path.basename(img_path)
+            if img_name in image_dict:
+                detail = image_dict[img_name]
+                detailed_similarities.append({"score":score, "txt": detail['dis'], "metadata": detail['imid'], "img": img_path})
+
+        return detailed_similarities
 
     
 if __name__ == "__main__":
@@ -168,4 +198,4 @@ if __name__ == "__main__":
     # sim = EB.calculate_similarity(img_path1, img_path2)
     # print(sim)
     # EB.save_image_representations(args.img_path, args.emb_path)
-    print(EB.find_similar_images(input_img))
+    print(EB.get_detailed_similarities(input_img, "./data/level/level.json"))
