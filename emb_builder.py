@@ -9,8 +9,8 @@ from utils import find_json_file
 
 class EmbBuilder():
     def __init__(self, img_folder, emb_folder):
-        self.img_path = args.img_folder
-        self.emb_folder = args.emb_path
+        self.img_path = img_folder
+        self.emb_folder = emb_folder
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
         self.json_file = find_json_file(self.img_path)
