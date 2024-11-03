@@ -192,6 +192,52 @@ class EmbBuilder():
         detailed_similarities = {"score":score_, "txt": txt_, "metadata": metadata_, "img": img_}
 
         return detailed_similarities
+    
+    def process_lesion_data(self, source_root, target_folder, layer_index=11):
+        """
+        处理病变数据集，提取每张图片的特征表示并保存。
+
+        参数:
+            source_root (str): 源数据根目录路径。
+            target_folder (str): 目标保存目录路径。
+            layer_index (int): 特征提取使用的模型层索引。
+        """
+        if not os.path.exists(target_folder):
+            os.makedirs(target_folder)
+
+        representation_data = {}
+
+        # 获取所有JSON文件
+        json_files = [f for f in os.listdir(source_root) if f.endswith('.json')]
+
+        for json_file in json_files:
+            json_path = os.path.join(source_root, json_file)
+            with open(json_path, 'r') as f:
+                images_dict = json.load(f)
+
+            # 对JSON文件中指定的每张图片进行处理
+            for key, value in images_dict.items():
+                # 构建正确的图片路径
+                image_folder = key  # 使用键作为文件夹名
+                image_path = os.path.join(source_root, value)
+                if not os.path.exists(image_path):
+                    print(f"Warning: Image {image_path} does not exist.")
+                    continue
+
+                representation = self.get_layer_representation(image_path, layer_index)
+
+                # 确保文件名唯一，可以采用JSON文件名+原文件名的形式
+                unique_name = f"{os.path.splitext(json_file)[0]}_{os.path.splitext(key)[0]}"
+                representation_file = os.path.join(target_folder, f"{unique_name}.pt")
+                torch.save(representation, representation_file)
+
+                # 记录对应关系
+                representation_data[image_path] = representation_file
+
+        # 保存所有图片的对应关系到JSON文件
+        correspondence_file = os.path.join(target_folder, 'correspondence.json')
+        with open(correspondence_file, 'w') as f:
+            json.dump(representation_data, f)
 
     
 if __name__ == "__main__":
@@ -208,4 +254,5 @@ if __name__ == "__main__":
     # sim = EB.calculate_similarity(img_path1, img_path2)
     # print(sim)
     # EB.save_image_representations(args.img_path, args.emb_path)
-    print(EB.get_detailed_similarities(input_img))
+    # print(EB.get_detailed_similarities(input_img))
+    EB.process_lesion_data(args.img_path, args.emb_path)
