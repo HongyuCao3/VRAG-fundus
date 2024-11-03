@@ -216,7 +216,7 @@ class EmbBuilder():
             score_.append(score)
             txt_.append(img_path.split("/")[-1].split(".")[0])
             metadata_.append(img_path)
-            img_.append(img_path)
+            img_.append("." + "".join(img_path.split(".")[-2:]))
         detailed_similarities = {"score":score_, "txt": txt_, "metadata": metadata_, "img": img_}
 
         return detailed_similarities
