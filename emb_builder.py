@@ -273,6 +273,7 @@ if __name__ == "__main__":
     # 使用示例
     parser.add_argument("--img-path", type=str, default="./data/level")
     parser.add_argument("--emb-path", type=str, default="./data/level_emb_clip")
+    parser.add_argument("--layer", type=int, default=11)
     args = parser.parse_args()
     EB = EmbBuilder(args.img_path, args.emb_path)
     img_path1 = './data/level/ODIR_2450_right.jpg'
@@ -281,7 +282,7 @@ if __name__ == "__main__":
     input_img = './data/level/ODIR_2450_right.jpg'
     # sim = EB.calculate_similarity(img_path1, img_path2)
     # print(sim)
-    # EB.save_image_representations(args.img_path, args.emb_path)
+    EB.save_image_representations(args.img_path, args.emb_path, args.layer)
     # print(EB.get_detailed_similarities(input_img))
     # EB.process_lesion_data(args.img_path, args.emb_path)
-    print(EB.get_detailed_similarities_crop(input_img))
+    # print(EB.get_detailed_similarities_crop(input_img))
