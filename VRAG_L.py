@@ -54,6 +54,7 @@ class VRAG():
         self.use_pics = args.use_pics
         self.crop_emb_path = args.crop_emb_path
         self.level_emb_path = args.level_emb_path
+        self.layer = args.layer
         self.load_embs()
     
     def load_embs(self, ):
@@ -156,7 +157,7 @@ class VRAG():
         else:
             ret_c = ret_empty
         if self.level_emb:
-            ret_l = self.level_emb.get_detailed_similarities(img_path, self.top_k_l)
+            ret_l = self.level_emb.get_detailed_similarities(img_path, self.top_k_l, self.layer)
         else:
             ret_l = ret_empty
         return ret_c, ret_l
@@ -199,6 +200,7 @@ if __name__ == "__main__":
     parser.add_argument("--chunk-n", type=int, default=1)
     parser.add_argument("--tmp-path", type=str, default="./data/tmp")
     parser.add_argument("--emb-path", type=str, default="./data/emb_crop")
+    parser.add_argument("--layer", type=int, default=11)
     args = parser.parse_args()
     vrag = VRAG(args)
     # print(vrag.inference())

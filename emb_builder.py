@@ -108,7 +108,7 @@ class EmbBuilder():
         
         return representations
     
-    def find_similar_images(self, input_img, k=2):
+    def find_similar_images(self, input_img, k=2, layer=11):
         """
         对于输入图片，计算其与emb_folder中保存的所有嵌入的相似度，
         并返回最相似的前k个图像的原始路径。
@@ -119,7 +119,7 @@ class EmbBuilder():
         :return: 一个列表，包含最相似图像的原始路径和相似度分数
         """
         # 获取输入图片的嵌入
-        input_emb = self.get_layer_representation(input_img)
+        input_emb = self.get_layer_representation(input_img, layer_index=layer)
         
         # 确保输入嵌入是一个二维张量 (batch_size, feature_dim)
         if len(input_emb.shape) == 4:
@@ -155,7 +155,7 @@ class EmbBuilder():
         similar_images = [(os.path.join(self.img_path, img_name), sim) for img_name, sim in top_k]
         return similar_images
     
-    def get_detailed_similarities(self, input_img, k=5):
+    def get_detailed_similarities(self, input_img, k=5, layer=11):
         """
         获取输入图片与文件夹中保存的嵌入的相似度，并返回最相似的前k个图像的详细信息。
         
@@ -166,7 +166,7 @@ class EmbBuilder():
         :return: 一个列表，包含最相似图像的score, dis, 和 imid
         """
         # 获取最相似的图像
-        similar_images = self.find_similar_images(input_img, k=k)
+        similar_images = self.find_similar_images(input_img, k=k, layer=layer)
         # print(similar_images)
         # 读取JSON文件中的详细信息
         with open(self.json_file, 'r') as f:

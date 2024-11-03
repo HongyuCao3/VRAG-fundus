@@ -97,6 +97,7 @@ if __name__ == "__main__":
     parser.add_argument("--crop-emb-path", type=str, default=None)
     parser.add_argument("--level-emb-path", type=str, default=None)
     parser.add_argument("--classic-emb-path", type=str, default=None)
+    parser.add_argument("--layer", type=int, default=11)
     args = parser.parse_args()
     vrag = VRAG(args) # llava, llava-med, llava-med-rag
     eva = evaluation(args, vrag)
