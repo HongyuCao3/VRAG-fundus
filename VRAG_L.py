@@ -127,7 +127,6 @@ class VRAG():
         img = ret_c["img"]
         img.extend(ret_l["img"])
         if self.use_pics:
-            print(res_img)
             for res_img in img:
                 image_documents.append(ImageDocument(image_path=res_img))
                 # print(res_img)
@@ -144,7 +143,7 @@ class VRAG():
         return prompt, images, record_data
             
     def retrieve(self, img_path):
-        ret_c = {"img": [], "txt": None, "score": None}
+        ret_c = {"img": [], "txt": [], "score": [], "metadata": []}
         ret_l = self.level_emb.get_detailed_similarities(img_path, 3)
         return ret_c, ret_l
         

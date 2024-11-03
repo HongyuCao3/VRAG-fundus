@@ -152,7 +152,7 @@ class EmbBuilder():
         top_k = similarities[:k]
 
         # 获取最相似图像的原始路径
-        similar_images = [(os.path.join(self.emb_folder, img_name), sim) for img_name, sim in top_k]
+        similar_images = [(os.path.join(self.img_path, img_name), sim) for img_name, sim in top_k]
         return similar_images
     
     def get_detailed_similarities(self, input_img, k=5):
@@ -167,7 +167,7 @@ class EmbBuilder():
         """
         # 获取最相似的图像
         similar_images = self.find_similar_images(input_img, k=k)
-
+        print(similar_images)
         # 读取JSON文件中的详细信息
         with open(self.json_file, 'r') as f:
             image_details = json.load(f)
@@ -189,7 +189,7 @@ class EmbBuilder():
                 txt_.append(detail["dis"])
                 metadata_.append(detail["imid"])
                 img_.append(img_path)
-        detailed_similarities = {"score":score, "txt": detail['dis'], "metadata": detail['imid'], "img": img_path}
+        detailed_similarities = {"score":score_, "txt": txt_, "metadata": metadata_, "img": img_}
 
         return detailed_similarities
 
