@@ -127,6 +127,7 @@ class VRAG():
         img = ret_c["img"]
         img.extend(ret_l["img"])
         if self.use_pics:
+            print(res_img)
             for res_img in img:
                 image_documents.append(ImageDocument(image_path=res_img))
                 # print(res_img)
