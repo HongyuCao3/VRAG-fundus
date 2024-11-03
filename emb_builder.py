@@ -167,7 +167,7 @@ class EmbBuilder():
         """
         # 获取最相似的图像
         similar_images = self.find_similar_images(input_img, k=k)
-        print(similar_images)
+        # print(similar_images)
         # 读取JSON文件中的详细信息
         with open(self.json_file, 'r') as f:
             image_details = json.load(f)

@@ -144,7 +144,7 @@ class VRAG():
             
     def retrieve(self, img_path):
         ret_c = {"img": [], "txt": [], "score": [], "metadata": []}
-        ret_l = self.level_emb.get_detailed_similarities(img_path, 3)
+        ret_l = self.level_emb.get_detailed_similarities(img_path, 1)
         return ret_c, ret_l
         
     def build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, diagnosis_str, metadata_str, query_str):
