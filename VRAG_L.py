@@ -164,16 +164,16 @@ class VRAG():
     def build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, diagnosis_str, metadata_str, query_str):
         parts = []
         
+        if diagnosis_str != "{}":
+            parts.append(f"Diagnosing Standard: {diagnosis_str}\n")
         if context_str_l != "{}":
             parts.append(f"The possible diagnosing level and probability: {context_str_l}\n")
         if context_str_c != "{}":
             parts.append(f"The possible lesion and probability: {context_str_c}\n")
         if context_str_cl != "{}":
             parts.append(f"The possible diagnosing class and probability: {context_str_cl}\n")
-        if diagnosis_str != "{}":
-            parts.append(f"Diagnosing Standard: {diagnosis_str}\n")
-        if metadata_str != "[{}]":
-            parts.append(f"Metadata: {metadata_str}\n")
+        # if metadata_str != "[{}]":
+        #     parts.append(f"Metadata: {metadata_str}\n")
         
         parts.append("---------------------\n")
         parts.append(f"Query: {query_str}\n")

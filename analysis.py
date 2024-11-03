@@ -102,6 +102,7 @@ class Analysis():
             y_true, y_pred, classes = self.get_matrix_attr_level_emb(data)
             cm = confusion_matrix(y_true, y_pred, labels=classes)
             self.plot_confusion_matrix(cm, plot_classes, normalize=True, title='level emb Confusion Matrix')
+            plt.clf()
         
         # 计算并绘制最终结果的混淆矩阵
         y_true_o, y_pred_o, classes_o = self.get_matrix_attr_output(data)
