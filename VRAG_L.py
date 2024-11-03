@@ -63,17 +63,17 @@ class VRAG():
     def inference_rag(self, query_str, img_path):
         # do retrieval
         if self.chunk_m == 1 and self.chunk_n == 1:
-            ret_c, ret_l, ret_cl = self.retrieve(img_path)
+            ret_c, ret_l= self.retrieve(img_path)
         else:
             sub_imgs = split_image(img_path, self.tmp_path, self.chunk_m, self.chunk_n)
             ret_cs = []
             for sub_img in sub_imgs:
-                ret_c, ret_l, ret_cl= self.retrieve(sub_img)
+                ret_c, ret_l= self.retrieve(sub_img)
                 ret_cs.append(ret_c)
             ret_c = merge_dicts(ret_cs)
         
         # form context
-        prompt, images, record_data = self.form_context(img_path, query_str, ret_c, ret_l, ret_cl)
+        prompt, images, record_data = self.form_context(img_path, query_str, ret_c, ret_l)
             
         # do inference
         set_seed(0)
@@ -143,8 +143,9 @@ class VRAG():
         return prompt, images, record_data
             
     def retrieve(self, img_path):
+        ret_c = {"img": [], "txt": None, "score": None}
         ret_l = self.level_emb.get_detailed_similarities(img_path, 3)
-        return ret_l
+        return ret_c, ret_l
         
     def build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, diagnosis_str, metadata_str, query_str):
         parts = []

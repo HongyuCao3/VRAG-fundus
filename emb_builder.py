@@ -176,12 +176,20 @@ class EmbBuilder():
         image_dict = {os.path.basename(detail['image_path']): detail for detail in image_details}
 
         # 获取详细的相似信息
-        detailed_similarities = []
+        # detailed_similarities = 
+        score_ = []
+        txt_ = []
+        metadata_ = []
+        img_ = []
         for img_path, score in similar_images:
             img_name = os.path.basename(img_path)
             if img_name in image_dict:
                 detail = image_dict[img_name]
-                detailed_similarities.append({"score":score, "txt": detail['dis'], "metadata": detail['imid'], "img": img_path})
+                score_.append(score)
+                txt_.append(detail["dis"])
+                metadata_.append(detail["imid"])
+                img_.append(img_path)
+        detailed_similarities = {"score":score, "txt": detail['dis'], "metadata": detail['imid'], "img": img_path}
 
         return detailed_similarities
 
