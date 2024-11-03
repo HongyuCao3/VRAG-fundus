@@ -14,7 +14,8 @@ cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python analysis.py \
     --file-path ${output_path} \
-    --res-path ${res_path}
+    --res-path ${res_path} \
+    --level-emb ${level_emb_path}
 
 # crop
 crop_emb=crop_emb_clip
@@ -50,4 +51,5 @@ cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python analysis.py \
     --file-path ${output_path} \
-    --res-path ${res_path}
+    --res-path ${res_path} \
+    --level-emb ${level_emb_path}
