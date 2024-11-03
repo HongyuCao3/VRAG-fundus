@@ -45,6 +45,7 @@ nohup python evaluation.py \
     --output-path ${output_path} \
     --model-path ${model_path} \
     --level-emb-path ${level_emb_path} \
+    --crop-emb-path ${crop_emb_path} \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
