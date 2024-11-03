@@ -57,7 +57,14 @@ class VRAG():
         self.load_embs()
     
     def load_embs(self, ):
-        self.level_emb = EmbBuilder("./data/level/", self.level_emb_path)
+        if self.level_emb_path:
+            self.level_emb = EmbBuilder("./data/level/", self.level_emb_path)
+        else:
+            self.level_emb = None
+        if self.crop_emb_path:
+            self.crop_emb = EmbBuilder("./data/lesion/", self.crop_emb_path)
+        else:
+            self.crop_emb = None
             
         
     def inference_rag(self, query_str, img_path):
@@ -143,8 +150,15 @@ class VRAG():
         return prompt, images, record_data
             
     def retrieve(self, img_path):
-        ret_c = {"img": [], "txt": [], "score": [], "metadata": []}
-        ret_l = self.level_emb.get_detailed_similarities(img_path, 1)
+        ret_empty = {"img": [], "txt": [], "score": [], "metadata": []}
+        if self.crop_emb:
+            ret_c = self.crop_emb.get_detailed_similarities_crop(img_path, self.top_k_c)
+        else:
+            ret_c = ret_empty
+        if self.level_emb:
+            ret_l = self.level_emb.get_detailed_similarities(img_path, self.top_k_l)
+        else:
+            ret_l = ret_empty
         return ret_c, ret_l
         
     def build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, diagnosis_str, metadata_str, query_str):
