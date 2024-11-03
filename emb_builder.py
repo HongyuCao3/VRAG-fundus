@@ -193,6 +193,34 @@ class EmbBuilder():
 
         return detailed_similarities
     
+    def get_detailed_similarities_crop(self, input_img, k=5):
+        """
+        获取输入图片与文件夹中保存的嵌入的相似度，并返回最相似的前k个图像的详细信息。
+        
+        :param input_img: 输入图片的路径
+        :param emb_folder: 包含预计算嵌入和对应关系的文件夹路径
+        :param json_file: 包含图像详细信息的JSON文件路径
+        :param k: 返回最相似图像的数量，默认为5
+        :return: 一个列表，包含最相似图像的score, dis, 和 imid
+        """
+        # 获取最相似的图像
+        similar_images = self.find_similar_images(input_img, k=k)
+
+
+        # 获取详细的相似信息
+        score_ = []
+        txt_ = []
+        metadata_ = []
+        img_ = []
+        for img_path, score in similar_images:
+            score_.append(score)
+            txt_.append(img_path.split("/")[-1].split(".")[0])
+            metadata_.append(img_path)
+            img_.append(img_path)
+        detailed_similarities = {"score":score_, "txt": txt_, "metadata": metadata_, "img": img_}
+
+        return detailed_similarities
+    
     def process_lesion_data(self, source_root, target_folder, layer_index=11):
         """
         处理病变数据集，提取每张图片的特征表示并保存。
@@ -255,4 +283,5 @@ if __name__ == "__main__":
     # print(sim)
     # EB.save_image_representations(args.img_path, args.emb_path)
     # print(EB.get_detailed_similarities(input_img))
-    EB.process_lesion_data(args.img_path, args.emb_path)
+    # EB.process_lesion_data(args.img_path, args.emb_path)
+    print(EB.get_detailed_similarities_crop(input_img))
