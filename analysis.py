@@ -115,12 +115,15 @@ class Analysis():
         y_true = []
         y_pred = []
         classes = ["Normal", "moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
+        classes_ = ["Normal","mild nonproliferative diabetic retinopathy", "moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
         for item in data["results"]:
             y_true.append(item["ground truth"])
-            pred = find_longest_matching_class(item["llm respond"], classes)
+            pred = find_longest_matching_class(item["llm respond"], classes_)
             if pred == None:
                 print(item["llm respond"])
                 pred = "None"
+            if pred in ["mild nonproliferative diabetic retinopathy"]:
+                pred = "Normal"
             y_pred.append(pred)
         return y_true, y_pred, classes
     
