@@ -81,6 +81,8 @@ class Analysis():
             ground_truth = item["ground truth"]
             if ground_truth in ["mild nonproliferative diabetic retinopathy"]:
                 item["ground truth"] = "Normal"
+            elif ground_truth in ["moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]:
+                item["ground truth"] = "Referable DR"
 
             ret_l_str = item["record_data"]["ret_l"]
             if ret_l_str and ret_l_str.strip():  # 检查 ret_l_str 是否非空
@@ -89,9 +91,12 @@ class Analysis():
                     predicted = ret_l["txt"][0]
                     if predicted in ["mild nonproliferative diabetic retinopathy"]:
                         ret_l["txt"][0] = "Normal"
+                    elif predicted in ["moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]:
+                        ret_l["txt"][0] = "Referable DR"
                     item["record_data"]["ret_l"] = str(ret_l)  # 将修改后的对象转回字符串
 
-        plot_classes = ["Normal", "moderate pdr", "severe npdr", "pdr"]
+        # plot_classes = ["Normal", "moderate pdr", "severe npdr", "pdr"]
+        plot_classes = ["Normal", "Referable DR"]
         
         # 重新计算度量标准
         accuracy, match_rate, error_prob = self.calculate_metrics(data)
@@ -114,7 +119,8 @@ class Analysis():
     def get_matrix_attr_output(self, data):
         y_true = []
         y_pred = []
-        classes = ["Normal", "moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
+        # classes = ["Normal", "moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
+        classes = ["Normal", "Referable DR"]
         classes_ = ["Normal","mild nonproliferative diabetic retinopathy", "moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]
         for item in data["results"]:
             y_true.append(item["ground truth"])
@@ -124,6 +130,8 @@ class Analysis():
                 pred = "None"
             if pred in ["mild nonproliferative diabetic retinopathy"]:
                 pred = "Normal"
+            if pred in ["moderate nonproliferative diabetic retinopathy", "severe nonproliferative diabetic retinopathy", "proliferative diabetic retinopathy"]:
+                pred = "Referable DR"
             y_pred.append(pred)
         return y_true, y_pred, classes
     
