@@ -35,8 +35,8 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/llava-med-finetuned/${crop_emb}_${m}_${n}_rag_${test_num}_pics.json"
-log_path="./output/${dataset}/llava-med-finetuned/log/${crop_emb}_${m}_${n}_rag_${tet_num}_pics.log"
+output_path="./output/${dataset}/llava-med/${crop_emb}_${m}_${n}_rag_${test_num}_pics.json"
+log_path="./output/${dataset}/llava-med/log/${crop_emb}_${m}_${n}_rag_${tet_num}_pics.log"
 model_path="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
@@ -62,8 +62,8 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/llava-med-finetuned/${level_emb}_${crop_emb}_${m}_${n}_rag_${test_num}_pics.json"
-log_path="./output/${dataset}/llava-med-finetuned/log/${level_emb}_${crop_emb}_${m}_${n}_rag_${tet_num}_pics.log"
+output_path="./output/${dataset}/llava-med/${level_emb}_${crop_emb}_${m}_${n}_rag_${test_num}_pics.json"
+log_path="./output/${dataset}/llava-med/log/${level_emb}_${crop_emb}_${m}_${n}_rag_${tet_num}_pics.log"
 model_path="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
@@ -89,8 +89,8 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/llava-med-finetuned/${level_emb}_${m}_${n}_rag_${test_num}_pics2.json"
-log_path="./output/${dataset}/llava-med-finetuned/log/${level_emb}_${m}_${n}_rag_${tet_num}_pics2.log"
+output_path="./output/${dataset}/llava-med/${level_emb}_${m}_${n}_rag_${test_num}_pics2.json"
+log_path="./output/${dataset}/llava-med/log/${level_emb}_${m}_${n}_rag_${tet_num}_pics2.log"
 model_path="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
@@ -116,8 +116,8 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/llava-med-finetuned/${level_emb}_${m}_${n}_rag_${test_num}_pics2.json"
-log_path="./output/${dataset}/llava-med-finetuned/log/${level_emb}_${m}_${n}_rag_${tet_num}_pics2.log"
+output_path="./output/${dataset}/llava-med/${level_emb}_${m}_${n}_rag_${test_num}_pics2.json"
+log_path="./output/${dataset}/llava-med/log/${level_emb}_${m}_${n}_rag_${tet_num}_pics2.log"
 model_path="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
