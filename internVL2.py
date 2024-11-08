@@ -130,7 +130,7 @@ class InternVL2():
         pixel_values = torch.stack(pixel_values)
         return pixel_values
     
-    def inference(self, query_str, image_path ):
+    def inference_rag(self, query_str, image_path ):
         # retrivev and form context
         if self.chunk_m == 1 and self.chunk_n == 1:
             ret_c, ret_l= self.retrieve(image_path)
