@@ -1,3 +1,5 @@
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+
 # raw
 crop_emb=crop_emb_clip
 level_emb=level_emb_clip
