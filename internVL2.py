@@ -96,10 +96,10 @@ class InternVL2():
     
     def inference(self, image_path, question_str, ):
         # set the max number of tiles in `max_num`
-        pixel_values = self.load_image('./examples/image1.jpg', max_num=12).to(torch.bfloat16).cuda()
+        pixel_values = self.load_image(image_path, max_num=12).to(torch.bfloat16).cuda()
         generation_config = dict(max_new_tokens=1024, do_sample=False)
         # single-image single-round conversation (单图单轮对话)
-        question = '<image>\nPlease describe the image shortly.'
+        question = question_str
         response = self.model.chat(self.tokenizer, pixel_values, question, generation_config)
         print(f'User: {question}\nAssistant: {response}')
         return response
@@ -111,10 +111,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--image-folder", type=str)
     parser.add_argument("--output-path", type=str)
-    parser.add_argument("--model-path", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b")
+    parser.add_argument("--model-path", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/InternVL2-8B")
     parser.add_argument("--crop-emb-path", type=str, default=None)
     parser.add_argument("--level-emb-path", type=str, default=None)
     parser.add_argument("--layer", type=int, default=11)
     parser.add_argument("--dataset", type=str, default="DR")
     parser.add_argument("--query-str", type=str, default="what's the diagnosis level?")
     args = parser.parse_args()
+    test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
+    IV2 = InternVL2(model_path=args.model_path)
+    print(IV2.inference(test_img, args.query_str))
