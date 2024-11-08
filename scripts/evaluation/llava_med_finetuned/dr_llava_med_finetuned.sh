@@ -9,8 +9,8 @@ level_emb_path="./data/${level_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/llava-med-finetuned/raw_${m}_${n}_${test_num}.json"
-log_path="./output/${dataset}/llava-med-finetuned/log/raw_${m}_${n}_${tet_num}.log"
+output_path="./output/${dataset}/llava-med-finetuned/raw_${m}_${n}_${test_num}3.json"
+log_path="./output/${dataset}/llava-med-finetuned/log/raw_${m}_${n}_${tet_num}3.log"
 model_path="/home/hongyu/eye_llava_medllava_finetune_mistral"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
@@ -22,6 +22,7 @@ nohup python evaluation.py \
     --chunk-n ${n} \
     --use-rag True \
     --test-num ${test_num} \
+    --conv-mode mistral_instruct \
     >${log_path} 2>&1 &
 
 
