@@ -17,14 +17,14 @@ IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 
 class InternVL2():
-    def __init__(self, model_path= 'OpenGVLab/InternVL2-8B', ):
+    def __init__(self, args, ):
         self.model = AutoModel.from_pretrained(
-            model_path,
+            args.model_path,
             torch_dtype=torch.bfloat16,
             low_cpu_mem_usage=True,
             use_flash_attn=True,
             trust_remote_code=True).eval().cuda()
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, use_fast=False)
+        self.tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True, use_fast=False)
         self.top_k_c = args.top_k_c # forcrop emb
         self.top_k_l = args.top_k_l # for level emb
         diagnosing_level = {"Normal": "No lesion","Mild NPDR": "MAs only", "Moderate NPDR": "At least one hemorrhage or MA and/or at least one of the following: Retinal hemorrhages, Hard exudates, Cotton wool spots, Venous beading", "Severe NPDR": "Any of the following but no signs of PDR (4-2-1 rule): >20 intraretinal hemorrhages in each of four quadrants, definite venous, beading in two or more quadrants, Prominent IRMA in one or more quadrants", "PDR": "One of either: Neovascularization, Vitreous/preretinal hemorrhage"}
@@ -168,9 +168,15 @@ if __name__ == "__main__":
     parser.add_argument("--crop-emb-path", type=str, default=None)
     parser.add_argument("--level-emb-path", type=str, default=None)
     parser.add_argument("--layer", type=int, default=11)
+    parser.add_argument("--top-k-c", type=int, default=3)
+    parser.add_argument("--top-k-l", type=int, default=1)
+    parser.add_argument("--chunk-m", type=int, default=1)
+    parser.add_argument("--chunk-n", type=int, default=1)
     parser.add_argument("--dataset", type=str, default="DR")
     parser.add_argument("--query-str", type=str, default="what's the diagnosis level?")
+    parser.add_argument("--crop-emb-path", type=str, default=None)
+    parser.add_argument("--level-emb-path", type=str, default=None)
     args = parser.parse_args()
     test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
-    IV2 = InternVL2(model_path=args.model_path)
+    IV2 = InternVL2(args)
     print(IV2.inference(test_img, args.query_str))
