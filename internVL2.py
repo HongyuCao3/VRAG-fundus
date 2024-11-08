@@ -154,6 +154,10 @@ class InternVL2():
         return response, record_data
     
     def inference_mulit_turn(self, ):
+        # TODO: 第一轮要求给出基本诊断
+        # TODO：第二轮根据上次指出的病灶给出最相似的参考图要求做出轨迹和颜色判断
+        # TODO：第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
+        # TODO：第四轮要求根据之前的分析给出最终诊疗结果
         pass
 
 if __name__ == "__main__":
