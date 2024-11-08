@@ -8,6 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 
 # from VRAG_crop import VRAG
 from VRAG_L import VRAG
+from internVL2 import InternVL2
 
 
 class evaluation():
@@ -99,6 +100,7 @@ if __name__ == "__main__":
     parser.add_argument("--classic-emb-path", type=str, default=None)
     parser.add_argument("--layer", type=int, default=11)
     args = parser.parse_args()
-    vrag = VRAG(args) # llava, llava-med, llava-med-rag
+    # vrag = VRAG(args) # llava, llava-med, llava-med-rag
+    vrag = InternVL2(args)
     eva = evaluation(args, vrag)
     eva.test()
