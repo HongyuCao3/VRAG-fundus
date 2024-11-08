@@ -8,8 +8,12 @@ from PIL import Image
 from llama_index.core.schema import ImageDocument
 
 class ContextFormer():
-    def __init__(self):
-        pass
+    def __init__(self, use_pics):
+        self.use_pics = use_pics
+        diagnosing_level = {"Normal": "No lesion","Mild NPDR": "MAs only", "Moderate NPDR": "At least one hemorrhage or MA and/or at least one of the following: Retinal hemorrhages, Hard exudates, Cotton wool spots, Venous beading", "Severe NPDR": "Any of the following but no signs of PDR (4-2-1 rule): >20 intraretinal hemorrhages in each of four quadrants, definite venous, beading in two or more quadrants, Prominent IRMA in one or more quadrants", "PDR": "One of either: Neovascularization, Vitreous/preretinal hemorrhage"}
+        self.diagnosis_str = ""
+        for key, value in diagnosing_level.items():
+            self.diagnosis_str += f"{key}: {value}"
     
     def form_context(self, img_path, query_str, ret_c, ret_l):
         record_data = {}

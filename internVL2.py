@@ -27,10 +27,6 @@ class InternVL2():
         self.tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True, use_fast=False)
         self.top_k_c = args.top_k_c # forcrop emb
         self.top_k_l = args.top_k_l # for level emb
-        diagnosing_level = {"Normal": "No lesion","Mild NPDR": "MAs only", "Moderate NPDR": "At least one hemorrhage or MA and/or at least one of the following: Retinal hemorrhages, Hard exudates, Cotton wool spots, Venous beading", "Severe NPDR": "Any of the following but no signs of PDR (4-2-1 rule): >20 intraretinal hemorrhages in each of four quadrants, definite venous, beading in two or more quadrants, Prominent IRMA in one or more quadrants", "PDR": "One of either: Neovascularization, Vitreous/preretinal hemorrhage"}
-        self.diagnosis_str = ""
-        for key, value in diagnosing_level.items():
-            self.diagnosis_str += f"{key}: {value}"
         self.chunk_m = args.chunk_m
         self.chunk_n = args.chunk_n
         self.tmp_path = args.tmp_path
@@ -39,7 +35,7 @@ class InternVL2():
         self.level_emb_path = args.level_emb_path
         self.layer = args.layer
         self.load_embs()
-        self.context_former = ContextFormer()
+        self.context_former = ContextFormer(args.use_pics)
     
     def load_embs(self, ):
         if self.level_emb_path:
@@ -165,18 +161,18 @@ if __name__ == "__main__":
     parser.add_argument("--image-folder", type=str)
     parser.add_argument("--output-path", type=str)
     parser.add_argument("--model-path", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/InternVL2-8B")
-    parser.add_argument("--crop-emb-path", type=str, default=None)
-    parser.add_argument("--level-emb-path", type=str, default=None)
     parser.add_argument("--layer", type=int, default=11)
     parser.add_argument("--top-k-c", type=int, default=3)
     parser.add_argument("--top-k-l", type=int, default=1)
     parser.add_argument("--chunk-m", type=int, default=1)
     parser.add_argument("--chunk-n", type=int, default=1)
+    parser.add_argument("--tmp-path", type=str, default="./data/tmp")
     parser.add_argument("--dataset", type=str, default="DR")
     parser.add_argument("--query-str", type=str, default="what's the diagnosis level?")
     parser.add_argument("--crop-emb-path", type=str, default=None)
     parser.add_argument("--level-emb-path", type=str, default=None)
+    parser.add_argument("--use-pics", type=bool, default=False)
     args = parser.parse_args()
     test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
     IV2 = InternVL2(args)
-    print(IV2.inference(test_img, args.query_str))
+    print(IV2.inference(args.query_str, test_img))
