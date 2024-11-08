@@ -8,6 +8,8 @@ import torchvision.transforms as T
 from PIL import Image
 from torchvision.transforms.functional import InterpolationMode
 from transformers import AutoModel, AutoTokenizer
+from emb_builder import EmbBuilder
+from utils import split_image, delete_images, merge_dicts
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -22,6 +24,30 @@ class InternVL2():
             use_flash_attn=True,
             trust_remote_code=True).eval().cuda()
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, use_fast=False)
+        self.top_k_c = args.top_k_c # forcrop emb
+        self.top_k_l = args.top_k_l # for level emb
+        diagnosing_level = {"Normal": "No lesion","Mild NPDR": "MAs only", "Moderate NPDR": "At least one hemorrhage or MA and/or at least one of the following: Retinal hemorrhages, Hard exudates, Cotton wool spots, Venous beading", "Severe NPDR": "Any of the following but no signs of PDR (4-2-1 rule): >20 intraretinal hemorrhages in each of four quadrants, definite venous, beading in two or more quadrants, Prominent IRMA in one or more quadrants", "PDR": "One of either: Neovascularization, Vitreous/preretinal hemorrhage"}
+        self.diagnosis_str = ""
+        for key, value in diagnosing_level.items():
+            self.diagnosis_str += f"{key}: {value}"
+        self.chunk_m = args.chunk_m
+        self.chunk_n = args.chunk_n
+        self.tmp_path = args.tmp_path
+        self.use_pics = args.use_pics
+        self.crop_emb_path = args.crop_emb_path
+        self.level_emb_path = args.level_emb_path
+        self.layer = args.layer
+        self.load_embs()
+    
+    def load_embs(self, ):
+        if self.level_emb_path:
+            self.level_emb = EmbBuilder("./data/level/", self.level_emb_path)
+        else:
+            self.level_emb = None
+        if self.crop_emb_path:
+            self.crop_emb = EmbBuilder("./data/lesion/", self.crop_emb_path)
+        else:
+            self.crop_emb = None
     
     def build_transform(self, input_size):
         MEAN, STD = IMAGENET_MEAN, IMAGENET_STD
@@ -94,12 +120,12 @@ class InternVL2():
         pixel_values = torch.stack(pixel_values)
         return pixel_values
     
-    def inference(self, image_path, question_str, ):
+    def inference(self, query_str, image_path ):
         # set the max number of tiles in `max_num`
         pixel_values = self.load_image(image_path, max_num=12).to(torch.bfloat16).cuda()
         generation_config = dict(max_new_tokens=1024, do_sample=False)
         # single-image single-round conversation (单图单轮对话)
-        question = question_str
+        question = query_str
         response = self.model.chat(self.tokenizer, pixel_values, question, generation_config)
         print(f'User: {question}\nAssistant: {response}')
         return response
