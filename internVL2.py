@@ -9,6 +9,7 @@ from PIL import Image
 from torchvision.transforms.functional import InterpolationMode
 from transformers import AutoModel, AutoTokenizer
 from emb_builder import EmbBuilder
+from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts
 
 
@@ -38,6 +39,7 @@ class InternVL2():
         self.level_emb_path = args.level_emb_path
         self.layer = args.layer
         self.load_embs()
+        self.context_former = ContextFormer()
     
     def load_embs(self, ):
         if self.level_emb_path:
@@ -48,6 +50,18 @@ class InternVL2():
             self.crop_emb = EmbBuilder("./data/lesion/", self.crop_emb_path)
         else:
             self.crop_emb = None
+            
+    def retrieve(self, img_path):
+        ret_empty = {"img": [], "txt": [], "score": [], "metadata": []}
+        if self.crop_emb:
+            ret_c = self.crop_emb.get_detailed_similarities_crop(img_path, self.top_k_c)
+        else:
+            ret_c = ret_empty
+        if self.level_emb:
+            ret_l = self.level_emb.get_detailed_similarities(img_path, self.top_k_l, self.layer)
+        else:
+            ret_l = ret_empty
+        return ret_c, ret_l
     
     def build_transform(self, input_size):
         MEAN, STD = IMAGENET_MEAN, IMAGENET_STD
@@ -121,14 +135,27 @@ class InternVL2():
         return pixel_values
     
     def inference(self, query_str, image_path ):
+        # retrivev and form context
+        if self.chunk_m == 1 and self.chunk_n == 1:
+            ret_c, ret_l= self.retrieve(image_path)
+        else:
+            sub_imgs = split_image(image_path, self.tmp_path, self.chunk_m, self.chunk_n)
+            ret_cs = []
+            for sub_img in sub_imgs:
+                ret_c, ret_l= self.retrieve(sub_img)
+                ret_cs.append(ret_c)
+            ret_c = merge_dicts(ret_cs)
+        prompt, images, record_data = self.context_former.form_context(image_path, query_str, ret_c, ret_l)
         # set the max number of tiles in `max_num`
         pixel_values = self.load_image(image_path, max_num=12).to(torch.bfloat16).cuda()
+        # TODO:需要考虑输入多张图片
+        # pixel_values = torch.cat((pixel_values1, pixel_values2), dim=0)
         generation_config = dict(max_new_tokens=1024, do_sample=False)
         # single-image single-round conversation (单图单轮对话)
-        question = query_str
+        question = prompt
         response = self.model.chat(self.tokenizer, pixel_values, question, generation_config)
-        print(f'User: {question}\nAssistant: {response}')
-        return response
+        # print(f'User: {question}\nAssistant: {response}')
+        return response, record_data
     
     def inference_mulit_turn(self, ):
         pass
