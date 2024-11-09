@@ -171,6 +171,26 @@ def find_json_file(folder):
             return os.path.join(folder, filename)
     return None
 
+def find_longest_diagnosis_keys(response, diagnosing_level):
+    # 将response转换为小写以确保匹配时不区分大小写
+    response_lower = response.lower()
+    # 按键的长度降序排序
+    sorted_keys = sorted(diagnosing_level.keys(), key=lambda x: len(x), reverse=True)
+    # 初始化结果列表
+    result = []
+    # 遍历排序后的键
+    for key in sorted_keys:
+        # 将键也转换为小写进行比较
+        key_lower = key.lower()
+        if key_lower in response_lower:
+            # 如果找到匹配，则添加到结果列表中
+            result.append(key)
+            # 从response中移除已匹配的部分，避免后续误匹配
+            response_lower = response_lower.replace(key_lower, '')
+            # 由于只匹配一次，可以在这里跳出内层循环
+            break
+    return result
+
 if __name__ == "__main__":
     # split img
     # img_path = "./data/DR/multidr/BRSET_img00149.jpg"
