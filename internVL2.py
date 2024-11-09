@@ -159,11 +159,30 @@ class InternVL2():
         prompt, images, record_data = self.context_former.form_context(image_path, query_str, self.context_former.ret_empty, self.context_former.ret_empty)
         question = prompt
         generation_config = dict(max_new_tokens=1024, do_sample=False)
-        response, hisory = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=None, return_history=True)
-        # TODO：第二轮根据上次指出的病灶给出最相似的参考图要求做出轨迹和颜色判断
+        response, history = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=None, return_history=True)
+        
+        # 第二轮根据上次指出的病灶给出最相似的参考图要求做出轨迹和颜色判断
+        keys = find_longest_diagnosis_keys(response, self.context_former.lesion)
+        for key in keys:
+            ret_c = self.crop_emb.get_detailed_similarities_str_crop(image_path, key, 1)
+            # TODO:需要整合ret_c
+        prompt = self.context_former.form_context_c(image_path, query_str, ret_c)
+        question = prompt
+        response, history = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
+        
+        # 第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
         keys = find_longest_diagnosis_keys(response, self.context_former.diagnosing_level)
-        # TODO：第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
-        # TODO：第四轮要求根据之前的分析给出最终诊疗结果
+        for key in keys:
+            ret_l = self.level_emb.get_detailed_similarities_str(image_path, key, 1)
+            # TODO:需要整合ret_l
+        prompt = self.context_former.form_context_l(image_path, query_str, ret_l)
+        question = prompt
+        response, history = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
+        
+        # 第四轮要求根据之前的分析给出最终诊疗结果
+        prompt = self.context_former.form_context_all(image_path, query_str,)
+        question = prompt
+        response, history = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
         pass
 
 if __name__ == "__main__":
