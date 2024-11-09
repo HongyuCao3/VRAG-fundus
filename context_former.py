@@ -15,6 +15,7 @@ class ContextFormer():
         for key, value in self.diagnosing_level.items():
             self.diagnosis_str += f"{key}: {value}"
         self.ret_empty = {"img": [], "txt": [], "score": [], "metadata": []}
+        self.lesion = {"microaneurysm": "", "hemorrhage": "", "cotton wool spots": "", "exudates": ""}
     
     def form_context(self, img_path, query_str, ret_c, ret_l):
         record_data = {}
