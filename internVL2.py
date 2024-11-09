@@ -10,7 +10,7 @@ from torchvision.transforms.functional import InterpolationMode
 from transformers import AutoModel, AutoTokenizer
 from emb_builder import EmbBuilder
 from context_former import ContextFormer
-from utils import split_image, delete_images, merge_dicts
+from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -161,7 +161,7 @@ class InternVL2():
         generation_config = dict(max_new_tokens=1024, do_sample=False)
         response, hisory = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=None, return_history=True)
         # TODO：第二轮根据上次指出的病灶给出最相似的参考图要求做出轨迹和颜色判断
-        
+        keys = find_longest_diagnosis_keys(response, self.context_former.diagnosing_level)
         # TODO：第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
         # TODO：第四轮要求根据之前的分析给出最终诊疗结果
         pass
