@@ -153,9 +153,15 @@ class InternVL2():
         # print(f'User: {question}\nAssistant: {response}')
         return response, record_data
     
-    def inference_mulit_turn(self, ):
-        # TODO: 第一轮要求给出基本诊断
+    def inference_mulit_turn(self, query_str, image_path):
+        # 第一轮要求给出基本诊断
+        pixel_values = self.load_image(image_path, max_num=12).to(torch.bfloat16).cuda()
+        prompt, images, record_data = self.context_former.form_context(image_path, query_str, self.context_former.ret_empty, self.context_former.ret_empty)
+        question = prompt
+        generation_config = dict(max_new_tokens=1024, do_sample=False)
+        response, hisory = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=None, return_history=True)
         # TODO：第二轮根据上次指出的病灶给出最相似的参考图要求做出轨迹和颜色判断
+        
         # TODO：第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
         # TODO：第四轮要求根据之前的分析给出最终诊疗结果
         pass
