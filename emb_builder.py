@@ -267,6 +267,187 @@ class EmbBuilder():
         with open(correspondence_file, 'w') as f:
             json.dump(representation_data, f)
 
+    def filter_images_by_lesion(self, lesion_str):
+        """
+        根据指定字符串过滤图片。
+        
+        :param lesion_str: 需要在详细信息中包含的字符串
+        :return: 过滤后的图片名称列表
+        """
+        with open(self.json_file, 'r') as f:
+            image_details = json.load(f)
+        
+        filtered_images = [
+            detail['image_path']
+            for detail in image_details
+            if lesion_str.lower() in detail["dis"].lower()
+        ]
+        return filtered_images
+    
+    def find_similar_images_str(self, input_img, lesion_str, k=2, layer=11):
+        """
+        对于输入图片，计算其与emb_folder中保存的所有嵌入的相似度，
+        并返回最相似的前k个图像的原始路径。只包括详细信息中包含指定字符串的图片。
+        
+        :param input_img: 输入图片的路径
+        :param lesion_str: 需要在详细信息中包含的字符串
+        :param k: 返回最相似图像的数量，默认为5
+        :param layer: 特征提取层的索引
+        :return: 一个列表，包含最相似图像的原始路径和相似度分数
+        """
+        # 获取输入图片的嵌入
+        input_emb = self.get_layer_representation(input_img, layer_index=layer)
+        
+        # 确保输入嵌入是一个二维张量 (batch_size, feature_dim)
+        if len(input_emb.shape) == 4:
+            input_emb = input_emb.mean(dim=(2, 3))  # 全局平均池化
+        elif len(input_emb.shape) == 3:
+            input_emb = input_emb.mean(dim=2)  # 全局平均池化
+        else:
+            raise ValueError("Unexpected feature tensor shape")
+
+        # 加载文件夹中的所有嵌入
+        representations = self.load_image_representations(self.emb_folder)
+
+        # 过滤图片
+        filtered_images = self.filter_images_by_lesion(lesion_str)
+        filtered_representations = {img_name: rep for img_name, rep in representations.items() if img_name in filtered_images}
+
+        # 计算所有嵌入与输入嵌入的相似度
+        similarities = []
+        for img_name, rep in filtered_representations.items():
+            # 确保预加载的嵌入也是一个二维张量 (batch_size, feature_dim)
+            if len(rep.shape) == 4:
+                rep = rep.mean(dim=(2, 3))  # 全局平均池化
+            elif len(rep.shape) == 3:
+                rep = rep.mean(dim=2)  # 全局平均池化
+            else:
+                raise ValueError("Unexpected feature tensor shape")
+
+            # 计算余弦相似度
+            sim = cosine_similarity(input_emb, rep, dim=1)
+            similarities.append((img_name, sim.item()))
+
+        # 按相似度排序并选择前k个
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        top_k = similarities[:k]
+
+        # 获取最相似图像的原始路径
+        similar_images = [(os.path.join(self.img_path, img_name), sim) for img_name, sim in top_k]
+        return similar_images
+    
+    def get_detailed_similarities_str(self, input_img, lesion_str, k=5, layer=11):
+        """
+        获取输入图片与文件夹中保存的嵌入的相似度，并返回最相似的前k个图像的详细信息。
+        
+        :param input_img: 输入图片的路径
+        :param lesion_str: 需要在详细信息中包含的字符串
+        :param k: 返回最相似图像的数量，默认为5
+        :param layer: 特征提取层的索引
+        :return: 一个列表，包含最相似图像的score, dis, 和 imid
+        """
+        # 获取最相似的图像
+        similar_images = self.find_similar_images_str(input_img, lesion_str, k=k, layer=layer)
+
+        # 读取JSON文件中的详细信息
+        with open(self.json_file, 'r') as f:
+            image_details = json.load(f)
+
+        # 创建一个字典以便快速查找
+        image_dict = {os.path.basename(detail['image_path']): detail for detail in image_details}
+
+        # 获取详细的相似信息
+        score_ = []
+        txt_ = []
+        metadata_ = []
+        img_ = []
+        for img_path, score in similar_images:
+            img_name = os.path.basename(img_path)
+            if img_name in image_dict:
+                detail = image_dict[img_name]
+                score_.append(score)
+                txt_.append(detail["dis"])
+                metadata_.append(detail["imid"])
+                img_.append(img_path)
+        detailed_similarities = {"score": score_, "txt": txt_, "metadata": metadata_, "img": img_}
+
+        return detailed_similarities
+    
+    def find_similar_images_str_crop(self, input_img, k=2, layer=11, lesion_str=None):
+        """
+        对于输入图片，计算其与emb_folder中保存的所有嵌入的相似度，
+        并返回最相似的前k个图像的原始路径。
+
+        :param input_img: 输入图片的路径
+        :param k: 返回最相似图像的数量，默认为5
+        :param layer: 使用的神经网络层，默认为11
+        :param lesion_str: 只考虑文件名中包含此字符串的图像
+        :return: 一个列表，包含最相似图像的原始路径和相似度分数
+        """
+        # 获取输入图片的嵌入
+        input_emb = self.get_layer_representation(input_img, layer_index=layer)
+        
+        # 确保输入嵌入是一个二维张量 (batch_size, feature_dim)
+        if len(input_emb.shape) == 4:
+            input_emb = input_emb.mean(dim=(2, 3))  # 全局平均池化
+        elif len(input_emb.shape) == 3:
+            input_emb = input_emb.mean(dim=2)  # 全局平均池化
+        else:
+            raise ValueError("Unexpected feature tensor shape")
+
+        # 加载文件夹中的所有嵌入，并根据lesion_str过滤
+        representations = self.load_image_representations(self.emb_folder)
+        if lesion_str is not None:
+            representations = {img_name: rep for img_name, rep in representations.items() if lesion_str in img_name}
+
+        # 计算所有嵌入与输入嵌入的相似度
+        similarities = []
+        for img_name, rep in representations.items():
+            # 确保预加载的嵌入也是一个二维张量 (batch_size, feature_dim)
+            if len(rep.shape) == 4:
+                rep = rep.mean(dim=(2, 3))  # 全局平均池化
+            elif len(rep.shape) == 3:
+                rep = rep.mean(dim=2)  # 全局平均池化
+            else:
+                raise ValueError("Unexpected feature tensor shape")
+
+            # 计算余弦相似度
+            sim = cosine_similarity(input_emb, rep, dim=1)
+            similarities.append((img_name, sim.item()))
+
+        # 按相似度排序并选择前k个
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        top_k = similarities[:k]
+
+        # 获取最相似图像的原始路径
+        similar_images = [(os.path.join(self.img_path, img_name), sim) for img_name, sim in top_k]
+        return similar_images
+
+    def get_detailed_similarities_str_crop(self, input_img, k=5, lesion_str=None):
+        """
+        获取输入图片与文件夹中保存的嵌入的相似度，并返回最相似的前k个图像的详细信息。
+
+        :param input_img: 输入图片的路径
+        :param k: 返回最相似图像的数量，默认为5
+        :param lesion_str: 只考虑文件名中包含此字符串的图像
+        :return: 一个列表，包含最相似图像的score, dis, 和 imid
+        """
+        # 获取最相似的图像
+        similar_images = self.find_similar_images_str_crop(input_img, k=k, lesion_str=lesion_str)
+
+        # 获取详细的相似信息
+        score_ = []
+        txt_ = []
+        metadata_ = []
+        img_ = []
+        for img_path, score in similar_images:
+            score_.append(score)
+            txt_.append(img_path.split("/")[-1].split(".")[0])
+            metadata_.append(img_path)
+            img_.append("." + ".".join(img_path.split(".")[-2:]))
+        detailed_similarities = {"score": score_, "txt": txt_, "metadata": metadata_, "img": img_}
+
+        return detailed_similarities
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
