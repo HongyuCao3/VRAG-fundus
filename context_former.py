@@ -47,6 +47,57 @@ class ContextFormer():
         record_data.update({"prompt": prompt})
         return prompt, images, record_data
     
+    def form_context_c(self, img_path, query_str, ret_c):
+        record_data = {}
+        record_data.update({"ret_c": str(ret_c)})
+        record_data.update({"org": img_path})
+        image_documents = [ImageDocument(image_path=img_path)]
+        image_org = Image.open(img_path)
+        images= [image_org]
+        img = ret_c["img"]
+        if self.use_pics:
+            for res_img in img:
+                image_documents.append(ImageDocument(image_path=res_img))
+                # print(res_img)
+                image = Image.open(res_img)
+                images.append(image)
+        result_dict_c = dict(zip(ret_c["txt"], ret_c["score"]))
+        context_str_c = str(result_dict_c)
+        metadata_str = ret_c["metadata"]
+        prompt = "The second picture is the possible lesion " + context_str_c + " Please check the diagnosis again."
+        # prompt = self.build_diagnosis_string("", context_str_c, "", self.diagnosis_str, metadata_str, query_str)
+        record_data.update({"prompt": prompt})
+        return prompt, images, record_data
+    
+    def form_context_l(self, img_path, query_str, ret_l):
+        record_data = {}
+        record_data.update({"ret_c": str(ret_l)})
+        record_data.update({"org": img_path})
+        image_documents = [ImageDocument(image_path=img_path)]
+        image_org = Image.open(img_path)
+        images= [image_org]
+        img = ret_l["img"]
+        if self.use_pics:
+            for res_img in img:
+                image_documents.append(ImageDocument(image_path=res_img))
+                # print(res_img)
+                image = Image.open(res_img)
+                images.append(image)
+        result_dict_l = dict(zip(ret_l["txt"], ret_l["score"]))
+        context_str_l = str(result_dict_l)
+        metadata_str = ret_l["metadata"]
+        prompt = "The second picture is an example of the diagnosis level you have made " + context_str_l + " Please check the diagnosis again."
+        # prompt = self.build_diagnosis_string("", context_str_c, "", self.diagnosis_str, metadata_str, query_str)
+        record_data.update({"prompt": prompt})
+        return prompt, images, record_data
+    
+    def form_context_all(self, img_path, query_str):
+        record_data = {}
+        image_org = Image.open(img_path)
+        images = [image_org]
+        prompt = "According to previous chat history, " + query_str
+        return prompt, images, record_data
+        
     
     def build_diagnosis_string(self, context_str_l, context_str_c, context_str_cl, diagnosis_str, metadata_str, query_str):
         parts = []

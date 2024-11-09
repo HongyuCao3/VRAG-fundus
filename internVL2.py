@@ -166,21 +166,25 @@ class InternVL2():
         for key in keys:
             ret_c = self.crop_emb.get_detailed_similarities_str_crop(image_path, key, 1)
             # TODO:需要整合ret_c
-        prompt = self.context_former.form_context_c(image_path, query_str, ret_c)
+        pixel_values_c = self.load_image(ret_c["img"][0], max_num=12).to(torch.bfloat16).cuda()
+        pixel_values_c = torch.cat((pixel_values, pixel_values_c), dim=0)
+        prompt, images, record_data = self.context_former.form_context_c(image_path, query_str, ret_c)
         question = prompt
-        response, history = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
+        response, history = self.model.model.chat(self.tokenizer, pixel_values_c, question, generation_config, history=history, return_history=True)
         
         # 第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
         keys = find_longest_diagnosis_keys(response, self.context_former.diagnosing_level)
         for key in keys:
             ret_l = self.level_emb.get_detailed_similarities_str(image_path, key, 1)
             # TODO:需要整合ret_l
-        prompt = self.context_former.form_context_l(image_path, query_str, ret_l)
+        pixel_values_l = self.load_image(ret_l["img"][0], max_num=12).to(torch.bfloat16).cuda()
+        pixel_values_l = torch.cat((pixel_values, pixel_values_l), dim=0)
+        prompt, images, record_data = self.context_former.form_context_l(image_path, query_str, ret_l)
         question = prompt
-        response, history = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
+        response, history = self.model.model.chat(self.tokenizer, pixel_values_l, question, generation_config, history=history, return_history=True)
         
         # 第四轮要求根据之前的分析给出最终诊疗结果
-        prompt = self.context_former.form_context_all(image_path, query_str,)
+        prompt, images, record_data = self.context_former.form_context_all(image_path, query_str,)
         question = prompt
         response, history = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
         pass
