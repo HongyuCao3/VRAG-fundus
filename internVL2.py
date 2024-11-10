@@ -165,8 +165,10 @@ class InternVL2():
         
         # 第二轮根据上次指出的病灶给出最相似的参考图要求做出轨迹和颜色判断
         keys = find_longest_diagnosis_keys(response, self.context_former.lesion)
+        print("find lesion key word", end="")
+        print(keys)
         for key in keys:
-            ret_c = self.crop_emb.get_detailed_similarities_str_crop(image_path, key, 1)
+            ret_c = self.crop_emb.get_detailed_similarities_str_crop(image_path, lesion_str=key, 1)
             # TODO:需要整合ret_c
         pixel_values_c = self.load_image(ret_c["img"][0], max_num=12).to(torch.bfloat16).cuda()
         pixel_values_c = torch.cat((pixel_values, pixel_values_c), dim=0)
@@ -178,7 +180,7 @@ class InternVL2():
         
         # 第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
         keys = find_longest_diagnosis_keys(response, self.context_former.diagnosing_level)
-        print("find lesion key word", end="")
+        print("find level key word", end="")
         print(keys)
         for key in keys:
             ret_l = self.level_emb.get_detailed_similarities_str(image_path, key, 1)
