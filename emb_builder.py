@@ -2,6 +2,7 @@ import torch
 import os, json
 from transformers import CLIPModel, CLIPProcessor
 from PIL import Image
+from data_extractor import DataExtractor
 import argparse
 from torch.nn.functional import cosine_similarity
 from utils import find_json_file, convert_abbreviation_to_full_name
@@ -14,6 +15,7 @@ class EmbBuilder():
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
         self.json_file = find_json_file(self.img_path)
+        self.data_extractor = DataExtractor()
         if self.json_file is None:
             raise FileNotFoundError("JSON file not found in the specified folder.")
         
@@ -90,6 +92,27 @@ class EmbBuilder():
 
                 # Record the correspondence
                 representation_data[filename] = representation_file
+
+        # Save the correspondence data to a JSON file
+        correspondence_file = os.path.join(target_folder, 'correspondence.json')
+        with open(correspondence_file, 'w') as f:
+            json.dump(representation_data, f)
+            
+    def save_image_rep_classic(self, source_folder, target_folder, layer_index=11):
+        if not os.path.exists(target_folder):
+            os.makedirs(target_folder)
+        image_data = self.data_extractor.extract_image_data_classic(source_folder)
+        representation_data = {}
+        for image_path, text, meta_data in image_data:
+            file_path = os.path.join(source_folder, "/".join(image_path.split("/")[-2:]))
+            representation = self.get_layer_representation(file_path, layer_index)
+            
+            # Save the representation as a .pt file
+            representation_file = os.path.join(target_folder, f"{os.path.splitext(os.path.basename(image_path))[0]}.pt")
+            torch.save(representation, representation_file)
+
+            # Record the correspondence
+            representation_data[image_path] = representation_file
 
         # Save the correspondence data to a JSON file
         correspondence_file = os.path.join(target_folder, 'correspondence.json')
@@ -468,5 +491,6 @@ if __name__ == "__main__":
     # print(sim)
     # EB.save_image_representations(args.img_path, args.emb_path, args.layer)
     # print(EB.get_detailed_similarities(input_img))
-    EB.process_lesion_data(args.img_path, args.emb_path)
+    # EB.process_lesion_data(args.img_path, args.emb_path)
     # print(EB.get_detailed_similarities_crop(input_img))
+    EB.save_image_rep_classic(args.img_path, args.emb_path, args.layer)
