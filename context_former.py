@@ -122,11 +122,11 @@ class ContextFormer():
             parts.append(f"The possible diagnosing level and probability: {context_str_l}\n")
         if context_str_c != "{}":
             parts.append(f"The possible lesion and probability: {context_str_c}\n")
-        if context_str_cl != "{}":
-            parts.append(f"The possible diagnosing class and probability: {context_str_cl}\n")
+        # if context_str_cl != "{}":
+        #     parts.append(f"The possible diagnosing class and probability: {context_str_cl}\n")
         # if metadata_str != "[{}]":
         #     parts.append(f"Metadata: {metadata_str}\n")
-        
+        parts.append("Give the answer in format {\"level\": "", \"reasons\": ""}")
         parts.append("---------------------\n")
         parts.append(f"Query: {query_str}\n")
         parts.append("Answer: ")
