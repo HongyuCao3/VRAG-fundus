@@ -168,7 +168,7 @@ class InternVL2():
         print("find lesion key word", end="")
         print(keys)
         for key in keys:
-            ret_c = self.crop_emb.get_detailed_similarities_str_crop(image_path, lesion_str=key, 1)
+            ret_c = self.crop_emb.get_detailed_similarities_str_crop(image_path, lesion_str=key, k=1)
             # TODO:需要整合ret_c
         pixel_values_c = self.load_image(ret_c["img"][0], max_num=12).to(torch.bfloat16).cuda()
         pixel_values_c = torch.cat((pixel_values, pixel_values_c), dim=0)
@@ -183,7 +183,7 @@ class InternVL2():
         print("find level key word", end="")
         print(keys)
         for key in keys:
-            ret_l = self.level_emb.get_detailed_similarities_str(image_path, key, 1)
+            ret_l = self.level_emb.get_detailed_similarities_str(image_path, lesion_str=key, k=1)
             # TODO:需要整合ret_l
         pixel_values_l = self.load_image(ret_l["img"][0], max_num=12).to(torch.bfloat16).cuda()
         pixel_values_l = torch.cat((pixel_values, pixel_values_l), dim=0)

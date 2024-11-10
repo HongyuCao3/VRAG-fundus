@@ -398,16 +398,7 @@ class EmbBuilder():
         # 加载文件夹中的所有嵌入，并根据lesion_str过滤
         representations = self.load_image_representations(self.emb_folder)
         if lesion_str is not None:
-            print(lesion_str)
-            # print(representations)
-            representations_ = {}
-            for img_name, rep in representations.items():
-                print(img_name)
-                if lesion_str in img_name:
-                    representations_.update({img_name: rep})
-            representations = representations_
-                # print(rep)
-            # representations = {img_name: rep for img_name, rep in representations.items() if lesion_str in img_name}
+            representations = {img_name: rep for img_name, rep in representations.items() if lesion_str in img_name}
 
         # 计算所有嵌入与输入嵌入的相似度
         similarities = []
