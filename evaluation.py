@@ -17,6 +17,7 @@ class evaluation():
         self.model = model
         # self.test_path = args.test_path
         self.output_path = args.output_path
+        self.mode = args.mode
         if args.dataset == "DR":
             self.dataset = DRDataset(csv_file = './data/DR/multidr.csv',image_dir = './data/DR/multidr')
         self.test_num = args.test_num
@@ -38,7 +39,10 @@ class evaluation():
             img_name = images[0]
             
             # Perform inference
-            respond, record_data = self.model.inference_rag(self.query_str, img_name)
+            if self.mode == "Normal":
+                respond, record_data = self.model.inference_rag(self.query_str, img_name)
+            elif self.mode == "MulitTurn":
+                respond, record_data = self.model.inference_multi_turn(self.query_str, img_name)
             
             # Check if diagnosis is in respond
             is_correct = diagnosis in respond
@@ -99,6 +103,7 @@ if __name__ == "__main__":
     parser.add_argument("--level-emb-path", type=str, default=None)
     parser.add_argument("--classic-emb-path", type=str, default=None)
     parser.add_argument("--layer", type=int, default=11)
+    parser.add_argument("--mode", type=str, default="Normal")
     args = parser.parse_args()
     # vrag = VRAG(args) # llava, llava-med, llava-med-rag
     vrag = InternVL2(args)

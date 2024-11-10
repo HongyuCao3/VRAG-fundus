@@ -162,8 +162,8 @@ class InternVL2():
         question = prompt
         generation_config = dict(max_new_tokens=1024, do_sample=False)
         response, history = self.model.chat(self.tokenizer, pixel_values, question, generation_config, history=None, return_history=True)
-        print("Step 1: ", end="")
-        print(response)
+        # print("Step 1: ", end="")
+        # print(response)
         record_data_f.update({"step 1": {"response": response}})
         
         # 第二轮根据上次指出的病灶给出最相似的参考图要求做出轨迹和颜色判断
@@ -178,8 +178,8 @@ class InternVL2():
         prompt, images, record_data = self.context_former.form_context_c(image_path, query_str, ret_c)
         question = prompt
         response, history = self.model.chat(self.tokenizer, pixel_values_c, question, generation_config, history=history, return_history=True)
-        print("Step 2: ", end="")
-        print(response)
+        # print("Step 2: ", end="")
+        # print(response)
         record_data_f.update({"step 2": {"response": response, "record_data": record_data}})
         
         # 第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
@@ -194,16 +194,16 @@ class InternVL2():
         prompt, images, record_data = self.context_former.form_context_l(image_path, query_str, ret_l)
         question = prompt
         response, history = self.model.chat(self.tokenizer, pixel_values_l, question, generation_config, history=history, return_history=True)
-        print("Step 3: ", end="")
-        print(response)
+        # print("Step 3: ", end="")
+        # print(response)
         record_data_f.update({"step 3": {"response": response, "record_data": record_data}})
         
         # 第四轮要求根据之前的分析给出最终诊疗结果
         prompt, images, record_data = self.context_former.form_context_all(image_path, query_str,)
         question = prompt
         response, history = self.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
-        print("Step 4: ", end="")
-        print(response)
+        # print("Step 4: ", end="")
+        # print(response)
         record_data_f.update({"step 4": {"response": response, "record_data": record_data}})
         return response, record_data_f
 
