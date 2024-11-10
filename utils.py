@@ -191,6 +191,27 @@ def find_longest_diagnosis_keys(response, diagnosing_level):
             break
     return result
 
+def convert_abbreviation_to_full_name(abbreviation):
+    """
+    将输入的简称转换为对应的全称。
+
+    :param abbreviation: 输入的简称
+    :return: 对应的全称
+    """
+    # 定义映射表
+    diagnosis_mapping = {
+        "Normal": "Normal",
+        "Mild NPDR": "mild nonproliferative diabetic retinopathy",
+        "Moderate NPDR": "moderate nonproliferative diabetic retinopathy",
+        "Severe NPDR": "severe nonproliferative diabetic retinopathy",
+        "PDR": "proliferative diabetic retinopathy"
+    }
+    
+    # 转换为全称
+    full_name = diagnosis_mapping.get(abbreviation, abbreviation)
+    
+    return full_name
+
 if __name__ == "__main__":
     # split img
     # img_path = "./data/DR/multidr/BRSET_img00149.jpg"

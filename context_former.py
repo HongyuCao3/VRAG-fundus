@@ -55,7 +55,7 @@ class ContextFormer():
         
         parts.append("---------------------\n")
         parts.append(f"Query: {query_str}\n")
-        parts.append("Give the answer in format {\"level\": "", \"cause\": ""}")
+        parts.append("Give the answer in format {\"level\": "", \"reasons\": ""}")
         parts.append("Answer: ")
         
         prompt = "".join(parts)

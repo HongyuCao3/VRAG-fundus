@@ -4,7 +4,7 @@ from transformers import CLIPModel, CLIPProcessor
 from PIL import Image
 import argparse
 from torch.nn.functional import cosine_similarity
-from utils import find_json_file
+from utils import find_json_file, convert_abbreviation_to_full_name
 
 
 class EmbBuilder():
@@ -310,7 +310,11 @@ class EmbBuilder():
         representations = self.load_image_representations(self.emb_folder)
 
         # 过滤图片
+        lesion_str = convert_abbreviation_to_full_name(lesion_str) 
+        # print(lesion_str)
         filtered_images = self.filter_images_by_lesion(lesion_str)
+        filtered_images = [os.path.basename(i) for i in filtered_images]
+        # print(filtered_images)
         filtered_representations = {img_name: rep for img_name, rep in representations.items() if img_name in filtered_images}
 
         # 计算所有嵌入与输入嵌入的相似度
@@ -327,13 +331,14 @@ class EmbBuilder():
             # 计算余弦相似度
             sim = cosine_similarity(input_emb, rep, dim=1)
             similarities.append((img_name, sim.item()))
-
+        # print(similarities)
         # 按相似度排序并选择前k个
         similarities.sort(key=lambda x: x[1], reverse=True)
         top_k = similarities[:k]
 
         # 获取最相似图像的原始路径
         similar_images = [(os.path.join(self.img_path, img_name), sim) for img_name, sim in top_k]
+        # print(similar_images)
         return similar_images
     
     def get_detailed_similarities_str(self, input_img, lesion_str, k=5, layer=11):
@@ -355,7 +360,6 @@ class EmbBuilder():
 
         # 创建一个字典以便快速查找
         image_dict = {os.path.basename(detail['image_path']): detail for detail in image_details}
-
         # 获取详细的相似信息
         score_ = []
         txt_ = []
@@ -370,7 +374,6 @@ class EmbBuilder():
                 metadata_.append(detail["imid"])
                 img_.append(img_path)
         detailed_similarities = {"score": score_, "txt": txt_, "metadata": metadata_, "img": img_}
-
         return detailed_similarities
     
     def find_similar_images_str_crop(self, input_img, k=2, layer=11, lesion_str=None):
