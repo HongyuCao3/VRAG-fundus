@@ -47,6 +47,20 @@ class ContextFormer():
         record_data.update({"prompt": prompt})
         return prompt, images, record_data
     
+    def form_context_internvl_step1(self, img_path, query_str):
+        parts = []
+        
+        if self.diagnosis_str != "{}":
+            parts.append(f"Diagnosing Standard: {self.diagnosis_str}\n")
+        
+        parts.append("---------------------\n")
+        parts.append(f"Query: {query_str}\n")
+        parts.append("Give the answer in format {\"level\": "", \"cause\": ""}")
+        parts.append("Answer: ")
+        
+        prompt = "".join(parts)
+        return prompt
+    
     def form_context_c(self, img_path, query_str, ret_c):
         record_data = {}
         record_data.update({"ret_c": str(ret_c)})

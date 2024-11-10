@@ -156,7 +156,8 @@ class InternVL2():
     def inference_mulit_turn(self, query_str, image_path):
         # 第一轮要求给出基本诊断
         pixel_values = self.load_image(image_path, max_num=12).to(torch.bfloat16).cuda()
-        prompt, images, record_data = self.context_former.form_context(image_path, query_str, self.context_former.ret_empty, self.context_former.ret_empty)
+        # prompt, images, record_data = self.context_former.form_context(image_path, query_str, self.context_former.ret_empty, self.context_former.ret_empty)
+        prompt = self.context_former.form_context_internvl_step1(image_path, query_str)
         question = prompt
         generation_config = dict(max_new_tokens=1024, do_sample=False)
         response, history = self.model.chat(self.tokenizer, pixel_values, question, generation_config, history=None, return_history=True)
