@@ -178,6 +178,8 @@ class InternVL2():
         
         # 第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
         keys = find_longest_diagnosis_keys(response, self.context_former.diagnosing_level)
+        print("find lesion key word", end="")
+        print(keys)
         for key in keys:
             ret_l = self.level_emb.get_detailed_similarities_str(image_path, key, 1)
             # TODO:需要整合ret_l
