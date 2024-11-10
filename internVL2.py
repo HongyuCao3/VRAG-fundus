@@ -153,7 +153,7 @@ class InternVL2():
         # print(f'User: {question}\nAssistant: {response}')
         return response, record_data
     
-    def inference_mulit_turn(self, query_str, image_path):
+    def inference_multi_turn(self, query_str, image_path):
         record_data_f = {}
         # 第一轮要求给出基本诊断
         pixel_values = self.load_image(image_path, max_num=12).to(torch.bfloat16).cuda()
@@ -226,4 +226,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
     IV2 = InternVL2(args)
-    print(IV2.inference_mulit_turn(args.query_str, test_img))
+    print(IV2.inference_multi_turn(args.query_str, test_img))
