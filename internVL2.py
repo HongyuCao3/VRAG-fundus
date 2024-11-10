@@ -159,7 +159,9 @@ class InternVL2():
         prompt, images, record_data = self.context_former.form_context(image_path, query_str, self.context_former.ret_empty, self.context_former.ret_empty)
         question = prompt
         generation_config = dict(max_new_tokens=1024, do_sample=False)
-        response, history = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=None, return_history=True)
+        response, history = self.model.chat(self.tokenizer, pixel_values, question, generation_config, history=None, return_history=True)
+        print("Step 1: ", end="")
+        print(response)
         
         # 第二轮根据上次指出的病灶给出最相似的参考图要求做出轨迹和颜色判断
         keys = find_longest_diagnosis_keys(response, self.context_former.lesion)
@@ -170,7 +172,9 @@ class InternVL2():
         pixel_values_c = torch.cat((pixel_values, pixel_values_c), dim=0)
         prompt, images, record_data = self.context_former.form_context_c(image_path, query_str, ret_c)
         question = prompt
-        response, history = self.model.model.chat(self.tokenizer, pixel_values_c, question, generation_config, history=history, return_history=True)
+        response, history = self.model.chat(self.tokenizer, pixel_values_c, question, generation_config, history=history, return_history=True)
+        print("Step 2: ", end="")
+        print(response)
         
         # 第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
         keys = find_longest_diagnosis_keys(response, self.context_former.diagnosing_level)
@@ -181,13 +185,17 @@ class InternVL2():
         pixel_values_l = torch.cat((pixel_values, pixel_values_l), dim=0)
         prompt, images, record_data = self.context_former.form_context_l(image_path, query_str, ret_l)
         question = prompt
-        response, history = self.model.model.chat(self.tokenizer, pixel_values_l, question, generation_config, history=history, return_history=True)
+        response, history = self.model.chat(self.tokenizer, pixel_values_l, question, generation_config, history=history, return_history=True)
+        print("Step 3: ", end="")
+        print(response)
         
         # 第四轮要求根据之前的分析给出最终诊疗结果
         prompt, images, record_data = self.context_former.form_context_all(image_path, query_str,)
         question = prompt
-        response, history = self.model.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
-        pass
+        response, history = self.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
+        print("Step 4: ", end="")
+        print(response)
+        return response
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -208,4 +216,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
     IV2 = InternVL2(args)
-    print(IV2.inference(args.query_str, test_img))
+    print(IV2.inference_mulit_turn(args.query_str, test_img))
