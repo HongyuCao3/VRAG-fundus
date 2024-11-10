@@ -154,6 +154,7 @@ class InternVL2():
         return response, record_data
     
     def inference_mulit_turn(self, query_str, image_path):
+        record_data_f = {}
         # 第一轮要求给出基本诊断
         pixel_values = self.load_image(image_path, max_num=12).to(torch.bfloat16).cuda()
         # prompt, images, record_data = self.context_former.form_context(image_path, query_str, self.context_former.ret_empty, self.context_former.ret_empty)
@@ -163,6 +164,7 @@ class InternVL2():
         response, history = self.model.chat(self.tokenizer, pixel_values, question, generation_config, history=None, return_history=True)
         print("Step 1: ", end="")
         print(response)
+        record_data_f.update({"step 1": {"response": response}})
         
         # 第二轮根据上次指出的病灶给出最相似的参考图要求做出轨迹和颜色判断
         keys = find_longest_diagnosis_keys(response, self.context_former.lesion)
@@ -178,6 +180,7 @@ class InternVL2():
         response, history = self.model.chat(self.tokenizer, pixel_values_c, question, generation_config, history=history, return_history=True)
         print("Step 2: ", end="")
         print(response)
+        record_data_f.update({"step 2": {"response": response, "record_data": record_data}})
         
         # 第三轮根据基本诊断的几种可能给出最相似的参考图要求做出多图推理
         keys = find_longest_diagnosis_keys(response, self.context_former.diagnosing_level)
@@ -193,6 +196,7 @@ class InternVL2():
         response, history = self.model.chat(self.tokenizer, pixel_values_l, question, generation_config, history=history, return_history=True)
         print("Step 3: ", end="")
         print(response)
+        record_data_f.update({"step 3": {"response": response, "record_data": record_data}})
         
         # 第四轮要求根据之前的分析给出最终诊疗结果
         prompt, images, record_data = self.context_former.form_context_all(image_path, query_str,)
@@ -200,7 +204,8 @@ class InternVL2():
         response, history = self.model.chat(self.tokenizer, pixel_values, question, generation_config, history=history, return_history=True)
         print("Step 4: ", end="")
         print(response)
-        return response
+        record_data_f.update({"step 4": {"response": response, "record_data": record_data}})
+        return response, record_data_f
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
