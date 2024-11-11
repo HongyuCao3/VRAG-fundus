@@ -111,6 +111,38 @@ class Analysis:
         # 保存图像
         plt.savefig(res_path)
         plt.show()
+    
+    def save_binary_confusion_matrix(self, step, res_path, normalize=True):
+        """绘制并保存二元混淆矩阵"""
+        y_true = []
+        y_pred = []
+
+        for result in tqdm(self.data['results']):
+            ground_truth = result['ground truth']
+            try:
+                if step == 4:
+                    llm_respond = eval(result['llm respond'])
+                else:
+                    llm_respond = eval(result["record_data"][f"step {step}"]["response"])
+                llm_level = convert_abbreviation_to_full_name(llm_respond['level'])
+            except:
+                if step == 4:
+                    llm_respond = result['llm respond']
+                else:
+                    llm_respond = result["record_data"][f"step {step}"]["response"]
+                llm_level = find_longest_matching_class(llm_respond, self.classes)
+                llm_level = convert_abbreviation_to_full_name(llm_level)
+            
+            # 合并类别
+            binary_ground_truth = 'Normal' if convert_full_name_to_abbreviation(ground_truth) in ['Normal', 'Mild NPDR'] else 'Referable DR'
+            binary_llm_level = 'Normal' if convert_full_name_to_abbreviation(llm_level) in ['Normal', 'Mild NPDR'] else 'Referable DR'
+
+            y_true.append(binary_ground_truth)
+            y_pred.append(binary_llm_level)
+
+        cm = confusion_matrix(y_true, y_pred, labels=['Normal', 'Referable DR'])
+     
+        self.plot_confusion_matrix(cm, ['Normal', 'Referable DR'], res_path=res_path, normalize=normalize)
         
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -122,4 +154,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     AS = Analysis(args.file_path)
     print(AS.calculate_accuracy(args.step))
-    AS.save_confusion_matrix(args.step, args.res_path)
+    AS.save_binary_confusion_matrix(args.step, args.res_path)
