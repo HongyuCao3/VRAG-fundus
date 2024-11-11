@@ -1,3 +1,5 @@
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+
 classic_emb=classic_emb_clip
 dataset=ALL
 classic_emb_path="./data/${classic_emb}"
@@ -20,4 +22,5 @@ nohup python evaluation.py \
     --use-rag True \
     --use-pics True \
     --test-num ${test_num} \
+    --mode ${dataset} \
     >${log_path} 2>&1 &
