@@ -43,6 +43,9 @@ class evaluation():
                 respond, record_data = self.model.inference_rag(self.query_str, img_name)
             elif self.mode == "MulitTurn":
                 respond, record_data = self.model.inference_multi_turn(self.query_str, img_name)
+            elif self.mode == "MultiTurnCheck":
+                respond, record_data = self.model.inference_multi_turn_check(self.query_str, img_name)
+                
             
             # Check if diagnosis is in respond
             is_correct = diagnosis in respond
