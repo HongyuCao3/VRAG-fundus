@@ -57,7 +57,7 @@ class VRAG():
         self.level_emb_path = args.level_emb_path
         self.classic_emb_path = args.classic_emb_path
         self.layer = args.layer
-        self.context_former = ContextFormer()
+        self.context_former = ContextFormer(args.use_pics)
         self.load_embs()
     
     def load_embs(self, ):
