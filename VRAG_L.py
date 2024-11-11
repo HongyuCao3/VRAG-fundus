@@ -9,6 +9,7 @@ import math
 from transformers import set_seed, logging
 
 from emb_builder import EmbBuilder
+from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts
 
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
@@ -54,7 +55,9 @@ class VRAG():
         self.use_pics = args.use_pics
         self.crop_emb_path = args.crop_emb_path
         self.level_emb_path = args.level_emb_path
+        self.classic_emb_path = args.classic_emb_path
         self.layer = args.layer
+        self.context_former = ContextFormer()
         self.load_embs()
     
     def load_embs(self, ):
@@ -66,6 +69,10 @@ class VRAG():
             self.crop_emb = EmbBuilder("./data/lesion/", self.crop_emb_path)
         else:
             self.crop_emb = None
+        if self.classic_emb_path:
+            self.classic_emb = EmbBuilder("./data/Classic Images/", self.classic_emb_path)
+        else:
+            self.classic_emb = None
             
         
     def inference_rag(self, query_str, img_path):
@@ -82,6 +89,50 @@ class VRAG():
         
         # form context
         prompt, images, record_data = self.form_context(img_path, query_str, ret_c, ret_l)
+            
+        # do inference
+        set_seed(0)
+        disable_torch_init()
+        qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
+        if self.model.config.mm_use_im_start_end:
+            qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
+        else:
+            qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
+        conv = conv_templates[self.conv_mode].copy()
+        conv.append_message(conv.roles[0], qs)
+        conv.append_message(conv.roles[1], None)
+        prompt = conv.get_prompt()
+        
+        input_ids = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
+
+        image_tensor = process_images(images, self.image_processor, self.model.config)[0] 
+        
+        stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
+        keywords = [stop_str]
+        stopping_criteria = KeywordsStoppingCriteria(keywords, self.tokenizer, input_ids)
+        with torch.inference_mode():
+                output_ids = self.model.generate(
+                    input_ids,
+                    images=image_tensor.unsqueeze(0).half().cuda(),
+                    do_sample=True if self.temperature > 0 else False,
+                    temperature=self.temperature,
+                    top_p=self.top_p,
+                    num_beams=self.num_beams,
+                    # no_repeat_ngram_size=3,
+                    max_new_tokens=1024,
+                    use_cache=True)
+
+        outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+        # record_data.update({"outputs": outputs})
+        # delete_images()
+        return outputs, record_data
+    
+    def inference_rag_all(self, query_str, img_path):
+        # do retrieval
+        ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, self.top_k_cl)
+        
+        # form context
+        prompt, images, record_data = self.context_former.form_context_all(img_path, query_str, ret_cl)
             
         # do inference
         set_seed(0)
