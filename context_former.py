@@ -18,6 +18,32 @@ class ContextFormer():
         self.ret_empty = {"img": [], "txt": [], "score": [], "metadata": []}
         self.lesion = {"microaneurysm": "", "hemorrhage": "", "cotton wool spots": "", "exudates": ""}
     
+    def form_context_all(self, img_path, query_str, ret_cl):
+        record_data = {}
+        record_data.update({"ret_cl": str(ret_cl)})
+        record_data.update({"org": img_path})
+            # img, txt, score, metadata = node
+        # txt2img retrieve
+        # img, txt, score, metadata = retrieve_data.text_to_image_retrieve(img_path)
+        # print(score)
+        image_documents = [ImageDocument(image_path=img_path)]
+        image_org = Image.open(img_path)
+        images= [image_org]
+        img = ret_cl["img"]
+        if self.use_pics:
+            for res_img in img:
+                image_documents.append(ImageDocument(image_path=res_img))
+                # print(res_img)
+                image = Image.open(res_img)
+                images.append(image)
+        result_dict_cl = dict(zip(ret_cl["txt"], ret_cl["score"]))
+        context_str_cl = str(result_dict_cl)
+        metadata_str = ret_cl["metadata"]
+        metadata_str.extend(ret_cl["metadata"])
+        prompt = self.build_diagnosis_string_all("", "", context_str_cl, "", metadata_str, query_str)
+        record_data.update({"prompt": prompt})
+        return prompt, images, record_data
+    
     def form_context(self, img_path, query_str, ret_c, ret_l):
         record_data = {}
         record_data.update({"ret_c": str(ret_c)})
@@ -128,6 +154,24 @@ class ContextFormer():
         # if metadata_str != "[{}]":
         #     parts.append(f"Metadata: {metadata_str}\n")
         parts.append("Give the answer in format {\"level\": "", \"reasons\": ""}")
+        parts.append("---------------------\n")
+        parts.append(f"Query: {query_str}\n")
+        parts.append("Answer: ")
+        
+        return "".join(parts)
+    
+    def build_diagnosis_string_all(self, context_str_l, context_str_c, context_str_cl, diagnosis_str, metadata_str_all, query_str):
+        parts = []
+        
+        if context_str_cl != "{}":
+            parts.append(f"The possible diagnosis and probability: {context_str_cl}\n")
+        # if context_str_c != "{}":
+            # parts.append(f"The possible lesion and probability: {context_str_c}\n")
+        # if context_str_cl != "{}":
+        #     parts.append(f"The possible diagnosing class and probability: {context_str_cl}\n")
+        # if metadata_str != "[{}]":
+        #     parts.append(f"Metadata: {metadata_str}\n")
+        parts.append("Give the answer in format {\"diagnosis\": "", \"reasons\": ""}")
         parts.append("---------------------\n")
         parts.append(f"Query: {query_str}\n")
         parts.append("Answer: ")
