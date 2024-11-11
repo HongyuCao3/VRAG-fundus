@@ -98,7 +98,8 @@ class EyeImageDataset(Dataset):
         # if self.transform:
         #     image = self.transform(image)
 
-        return img_path, diagnosis, finding, modality, dataset, caption
+        return img_path, diagnosis,
+    # finding, modality, dataset, caption
     
 # Usage Example
 if __name__ == "__main__":

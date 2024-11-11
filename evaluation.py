@@ -3,7 +3,7 @@ import torch
 import os
 import json
 from tqdm import tqdm
-from dataset import DRDataset
+from dataset import DRDataset, EyeImageDataset
 from torch.utils.data import Dataset, DataLoader
 
 # from VRAG_crop import VRAG
@@ -20,6 +20,8 @@ class evaluation():
         self.mode = args.mode
         if args.dataset == "DR":
             self.dataset = DRDataset(csv_file = './data/DR/multidr.csv',image_dir = './data/DR/multidr')
+        if args.dataset == "All":
+            self.dataset = EyeImageDataset()
         self.test_num = args.test_num
         
     def test(self):
