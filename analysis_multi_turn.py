@@ -14,7 +14,8 @@ class Analysis:
         self.filepath = filepath
         self.data = self.load_data()
         # self.classes = list(convert_abbreviation_to_full_name.__closure__[0].cell_contents.keys())
-        self.accuracy = self.calculate_accuracy()
+        self.classes = ["Normal", "moderate PDR", "NPDR", "severe NPDR", "mild NPDR"]
+        # self.accuracy = self.calculate_accuracy()
 
     def load_data(self):
         """加载JSON文件中的数据"""
@@ -22,7 +23,7 @@ class Analysis:
             data = json.load(file)
         return data
 
-    def calculate_accuracy(self):
+    def calculate_accuracy(self, step):
         """计算准确率"""
         correct_count = 0
         total_count = len(self.data['results'])
@@ -30,18 +31,22 @@ class Analysis:
         for result in tqdm(self.data['results']):
             ground_truth = result['ground truth']
             try:
-                llm_respond = eval(result['llm respond'])
+                if step == 4:
+                    llm_respond = eval(result['llm respond'])
+                else:
+                    llm_respond = eval(result["record_data"][f"step {step}"]["response"])
                 llm_level = convert_abbreviation_to_full_name(llm_respond['level'])
             except:
-                llm_respond = result['llm respond']
+                if step == 4:
+                    llm_respond = result['llm respond']
+                else:
+                    llm_respond = result["record_data"][f"step {step}"]["response"]
+                llm_level = find_longest_matching_class(llm_respond, self.classes)
+                llm_level = convert_abbreviation_to_full_name(llm_level)
             if ground_truth == llm_level:
                 correct_count += 1
             
         return correct_count / total_count if total_count > 0 else 0
-
-    def get_accuracy(self):
-        """获取准确率"""
-        return self.accuracy
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -49,6 +54,7 @@ if __name__ == "__main__":
     parser.add_argument("--res-path", type=str, default="")
     parser.add_argument("--level-emb", type=bool, default=False)
     parser.add_argument("--num", type=int, default=-1)
+    parser.add_argument("--step", type=int, default=4)
     args = parser.parse_args()
     AS = Analysis(args.file_path)
-    print(AS.calculate_accuracy())
+    print(AS.calculate_accuracy(args.step))
