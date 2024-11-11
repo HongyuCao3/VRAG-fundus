@@ -3,6 +3,9 @@ import os, json, shutil
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
+import torch
+from torch.utils.data import Dataset
+from torchvision.io import read_image
 
 class DRDataset(Dataset):
     def __init__(self, csv_file, image_dir, transform=None):
@@ -64,23 +67,65 @@ class DRDataset(Dataset):
         with open(json_file_path, 'w') as json_file:
             json.dump(json_data, json_file, indent=4)
 
+
+class EyeImageDataset(Dataset):
+    def __init__(self, csv_file, img_dir, transform=None):
+        """
+        Args:
+            csv_file (string): Path to the csv file with annotations.
+            img_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied on a sample.
+        """
+        self.annotations = pd.read_csv(csv_file)
+        self.img_dir = img_dir
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.annotations)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        img_path = os.path.join(self.img_dir, self.annotations.iloc[idx, 0] + '.jpg')
+        # image = read_image(img_path)
+        diagnosis = self.annotations.iloc[idx, 1]
+        finding = self.annotations.iloc[idx, 1]
+        modality = self.annotations.iloc[idx, 3]
+        dataset = self.annotations.iloc[idx, 4]
+        caption = self.annotations.iloc[idx, 5]
+
+        # if self.transform:
+        #     image = self.transform(image)
+
+        return img_path, diagnosis, finding, modality, dataset, caption
+    
 # Usage Example
 if __name__ == "__main__":
     # Specify the path to your CSV and image directory
-    csv_file = './data/DR/multidr.csv'
-    image_dir = './data/DR/multidr'
+    # csv_file = './data/DR/multidr.csv'
+    # image_dir = './data/DR/multidr'
 
-    # Define transformations if needed
-    transform = transforms.Compose([
-        transforms.Resize((256, 256)),  # Resize to desired size
-        transforms.ToTensor(),            # Convert image to tensor
-    ])
+    # # Define transformations if needed
+    # transform = transforms.Compose([
+    #     transforms.Resize((256, 256)),  # Resize to desired size
+    #     transforms.ToTensor(),            # Convert image to tensor
+    # ])
 
-    # Create dataset and dataloader
-    dataset = DRDataset(csv_file=csv_file, image_dir=image_dir, transform=transform)
-    # dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
+    # # Create dataset and dataloader
+    # dataset = DRDataset(csv_file=csv_file, image_dir=image_dir, transform=transform)
+    # # dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
 
-    # # Iterate through the dataloader
-    # for images, diagnoses in dataloader:
-    #     print(images, diagnoses)
-    dataset.get_sample("./data/level/")
+    # # # Iterate through the dataloader
+    # # for images, diagnoses in dataloader:
+    # #     print(images, diagnoses)
+    # dataset.get_sample("./data/level/")
+    root_path = "/home/hongyu/"
+    # 使用示例
+    csv_file = root_path +'alldataset/cleaned_full.csv'
+    img_dir = root_path + 'alldataset/images'
+    eye_dataset = EyeImageDataset(csv_file=csv_file, img_dir=img_dir)
+
+    # 获取第一个样本
+    image,diagnosis, finding, modality, dataset, caption = eye_dataset[0]
+    print(f"Image path: {image}, diagnosis: {diagnosis}, Finding: {finding}, Modality: {modality}")
