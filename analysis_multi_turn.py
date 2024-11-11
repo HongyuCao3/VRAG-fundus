@@ -13,9 +13,7 @@ class Analysis:
     def __init__(self, filepath):
         self.filepath = filepath
         self.data = self.load_data()
-        # self.classes = list(convert_abbreviation_to_full_name.__closure__[0].cell_contents.keys())
         self.classes = ["Normal", "Mild NPDR", "Moderate NPDR", "Severe NPDR", "PDR"]
-        # self.accuracy = self.calculate_accuracy()
 
     def load_data(self):
         """加载JSON文件中的数据"""
@@ -78,34 +76,6 @@ class Analysis:
         cm = confusion_matrix(y_true, y_pred, labels=self.classes)
      
         self.plot_confusion_matrix(cm, self.classes, res_path=res_path, normalize=True)
-        # print(cm)
-        # fig, ax = plt.subplots()
-        # im = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        # ax.figure.colorbar(im, ax=ax)
-        # ax.set(xticks=np.arange(cm.shape[1]),
-        #        yticks=np.arange(cm.shape[0]),
-        #        xticklabels=self.classes, yticklabels=self.classes,
-        #        title="Confusion Matrix",
-        #        ylabel='True label',
-        #        xlabel='Predicted label')
-
-        # # Rotate the tick labels and set their alignment.
-        # plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-        #          rotation_mode="anchor")
-
-        # # Loop over data dimensions and create text annotations.
-        # fmt = 'd'
-        # thresh = cm.max() / 2.
-        # for i in range(cm.shape[0]):
-        #     for j in range(cm.shape[1]):
-        #         ax.text(j, i, format(cm[i, j], fmt),
-        #                 ha="center", va="center",
-        #                 color="white" if cm[i, j] > thresh else "black")
-        
-        # # Save the figure to the specified path
-        # fig.tight_layout()
-        # plt.savefig(res_path)
-        # print(f"Confusion matrix saved to {res_path}")
     
     def plot_confusion_matrix(self, cm, classes, res_path, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
         """
