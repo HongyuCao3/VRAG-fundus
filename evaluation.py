@@ -46,7 +46,7 @@ class evaluation():
             # Perform inference
             if self.mode == "Normal":
                 respond, record_data = self.model.inference_rag(self.query_str, img_name)
-            elif self.mode == "All":
+            elif self.mode == "ALL":
                 respond, record_data = self.model.inference_rag_all(self.query_str, img_name)
             elif self.mode == "MulitTurn":
                 respond, record_data = self.model.inference_multi_turn(self.query_str, img_name)
