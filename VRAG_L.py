@@ -129,7 +129,7 @@ class VRAG():
     
     def inference_rag_all(self, query_str, img_path):
         # do retrieval
-        ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, 1)
+        ret_cl = self.classic_emb.get_detailed_similarities(img_path, 1)
         
         # form context
         prompt, images, record_data = self.context_former.form_context_all(img_path, query_str, ret_cl)
