@@ -212,6 +212,31 @@ def convert_abbreviation_to_full_name(abbreviation):
     
     return full_name
 
+
+def convert_full_name_to_abbreviation(full_name):
+    """
+    将输入的全称转换为对应的简称。
+
+    :param full_name: 输入的全称
+    :return: 对应的简称
+    """
+    # 定义映射表
+    diagnosis_mapping = {
+        "Normal": "Normal",
+        "Mild NPDR": "mild nonproliferative diabetic retinopathy",
+        "Moderate NPDR": "moderate nonproliferative diabetic retinopathy",
+        "Severe NPDR": "severe nonproliferative diabetic retinopathy",
+        "PDR": "proliferative diabetic retinopathy"
+    }
+    
+    # 反转映射表
+    reverse_mapping = {v: k for k, v in diagnosis_mapping.items()}
+    
+    # 转换为简称
+    abbreviation = reverse_mapping.get(full_name, full_name)
+    
+    return abbreviation
+
 if __name__ == "__main__":
     # split img
     # img_path = "./data/DR/multidr/BRSET_img00149.jpg"
