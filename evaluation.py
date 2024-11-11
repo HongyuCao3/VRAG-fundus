@@ -20,7 +20,7 @@ class evaluation():
         self.mode = args.mode
         if args.dataset == "DR":
             self.dataset = DRDataset(csv_file = './data/DR/multidr.csv',image_dir = './data/DR/multidr')
-        if args.dataset == "All":
+        if args.dataset == "ALL":
             self.dataset = EyeImageDataset()
         self.test_num = args.test_num
         
