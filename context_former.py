@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 from PIL import Image
 from llama_index.core.schema import ImageDocument
+from utils import convert_abbreviation_to_full_name, convert_full_name_to_abbreviation
 
 class ContextFormer():
     def __init__(self, use_pics):
@@ -132,3 +133,19 @@ class ContextFormer():
         parts.append("Answer: ")
         
         return "".join(parts)
+    
+    def form_context_l_check(self, img_path, query_str, ret_l, keys):
+        record_data = {}
+        record_data.update({"ret_c": str(ret_l)})
+        record_data.update({"org": img_path})
+        result_dict_l = dict(zip(ret_l["txt"], ret_l["score"]))
+        context_str_l = str(result_dict_l)
+        metadata_str = ret_l["metadata"]
+        if ret_l["txt"][0] == keys[0] or ret_l["txt"][0] == convert_abbreviation_to_full_name(keys[0]):
+            prefix = "Your diagnosis may be accurate"
+        else:
+            prefix = "Your diagnosis may be inaccurate"
+        prompt = prefix + "The second picture is the matching result and probability " + context_str_l + " Please compare the two pictures and check the diagnosis of the first picture again." + "Give the answer in format {\"level\": "", \"reasons\": ""}"
+        # prompt = self.build_diagnosis_string("", context_str_c, "", self.diagnosis_str, metadata_str, query_str)
+        record_data.update({"prompt": prompt})
+        return prompt, None, record_data
