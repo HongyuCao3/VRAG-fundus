@@ -48,7 +48,7 @@ class Analysis:
             
         return correct_count / total_count if total_count > 0 else 0
     
-    def plot_confusion_matrix(self, step, res_path):
+    def save_confusion_matrix(self, step, res_path, normalize=True):
         """绘制并保存混淆矩阵"""
         y_true = []
         y_pred = []
@@ -68,39 +68,79 @@ class Analysis:
                     llm_respond = result["record_data"][f"step {step}"]["response"]
                 llm_level = find_longest_matching_class(llm_respond, self.classes)
                 llm_level = convert_abbreviation_to_full_name(llm_level)
-            
+            if not convert_full_name_to_abbreviation(llm_level) in self.classes:
+                print(llm_level)
+            if not convert_full_name_to_abbreviation(ground_truth) in self.classes:
+                print(ground_truth)
             y_true.append(convert_full_name_to_abbreviation(ground_truth))
             y_pred.append(convert_full_name_to_abbreviation(llm_level))
 
         cm = confusion_matrix(y_true, y_pred, labels=self.classes)
+     
+        self.plot_confusion_matrix(cm, self.classes, res_path=res_path, normalize=True)
+        # print(cm)
+        # fig, ax = plt.subplots()
+        # im = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+        # ax.figure.colorbar(im, ax=ax)
+        # ax.set(xticks=np.arange(cm.shape[1]),
+        #        yticks=np.arange(cm.shape[0]),
+        #        xticklabels=self.classes, yticklabels=self.classes,
+        #        title="Confusion Matrix",
+        #        ylabel='True label',
+        #        xlabel='Predicted label')
 
-        fig, ax = plt.subplots()
-        im = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        ax.figure.colorbar(im, ax=ax)
-        ax.set(xticks=np.arange(cm.shape[1]),
-               yticks=np.arange(cm.shape[0]),
-               xticklabels=self.classes, yticklabels=self.classes,
-               title="Confusion Matrix",
-               ylabel='True label',
-               xlabel='Predicted label')
+        # # Rotate the tick labels and set their alignment.
+        # plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+        #          rotation_mode="anchor")
 
-        # Rotate the tick labels and set their alignment.
-        plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-                 rotation_mode="anchor")
-
-        # Loop over data dimensions and create text annotations.
-        fmt = 'd'
-        thresh = cm.max() / 2.
-        for i in range(cm.shape[0]):
-            for j in range(cm.shape[1]):
-                ax.text(j, i, format(cm[i, j], fmt),
-                        ha="center", va="center",
-                        color="white" if cm[i, j] > thresh else "black")
+        # # Loop over data dimensions and create text annotations.
+        # fmt = 'd'
+        # thresh = cm.max() / 2.
+        # for i in range(cm.shape[0]):
+        #     for j in range(cm.shape[1]):
+        #         ax.text(j, i, format(cm[i, j], fmt),
+        #                 ha="center", va="center",
+        #                 color="white" if cm[i, j] > thresh else "black")
         
-        # Save the figure to the specified path
-        fig.tight_layout()
+        # # Save the figure to the specified path
+        # fig.tight_layout()
+        # plt.savefig(res_path)
+        # print(f"Confusion matrix saved to {res_path}")
+    
+    def plot_confusion_matrix(self, cm, classes, res_path, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
+        """
+        This function prints and plots the confusion matrix.
+        Normalization can be applied by setting `normalize=True`.
+        """
+        if normalize:
+            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+            print("Normalized confusion matrix")
+        else:
+            print('Confusion matrix, without normalization')
+
+        print(cm)
+
+        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+        plt.title(title)
+        plt.colorbar()
+        tick_marks = np.arange(len(classes))
+        plt.xticks(tick_marks, classes, rotation=45)
+        plt.yticks(tick_marks, classes)
+
+        fmt = '.2f' if normalize else 'd'
+        thresh = cm.max() / 2.
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            plt.text(j, i, format(cm[i, j], fmt),
+                    horizontalalignment="center",
+                    color="white" if cm[i, j] > thresh else "black")
+
+        plt.tight_layout()
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label')
+
+        # 保存图像
         plt.savefig(res_path)
-        print(f"Confusion matrix saved to {res_path}")
+        plt.show()
         
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -112,4 +152,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     AS = Analysis(args.file_path)
     print(AS.calculate_accuracy(args.step))
-    AS.plot_confusion_matrix(args.step, args.res_path)
+    AS.save_confusion_matrix(args.step, args.res_path)
