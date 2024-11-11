@@ -13,7 +13,7 @@ res_path="./output/${dataset}/internVL2/analysis/${level_emb}_${crop_emb}_${m}_$
 model_path="/home/hongyu/eye_llava_medllava_finetune_mistral"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
-python analysis.py \
+python analysis_multi_turn.py \
     --file-path ${output_path} \
     --res-path ${res_path} \
-    --level-emb ${level_emb_path}s
+    --level-emb ${level_emb_path}
