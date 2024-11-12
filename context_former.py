@@ -18,7 +18,7 @@ class ContextFormer():
         self.ret_empty = {"img": [], "txt": [], "score": [], "metadata": []}
         self.lesion = {"microaneurysm": "", "hemorrhage": "", "cotton wool spots": "", "exudates": ""}
     
-    def form_context_all(self, img_path, query_str, ret_cl):
+    def form_context_all_cl(self, img_path, query_str, ret_cl):
         record_data = {}
         record_data.update({"ret_cl": str(ret_cl)})
         record_data.update({"org": img_path})
