@@ -22,8 +22,8 @@ class evaluation():
             self.dataset = DRDataset(csv_file = './data/DR/multidr.csv',image_dir = './data/DR/multidr')
         if args.dataset == "ALL":
             root_path = "/home/hongyu/"
-            csv_file = root_path +'alldataset/cleaned_full.csv'
-            img_dir = root_path + 'alldataset/images'
+            csv_file = root_path +'partdataset/cleaned_part.csv'
+            img_dir = root_path + 'partdataset/images'
             self.dataset = EyeImageDataset(csv_file=csv_file, img_dir=img_dir)
         self.test_num = args.test_num
         
