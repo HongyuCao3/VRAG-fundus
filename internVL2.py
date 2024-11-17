@@ -246,7 +246,27 @@ class InternVL2():
         # print(response)
         record_data_f.update({"step 3": {"response": response, "record_data": record_data}})
         return response, record_data_f
-
+    
+    def inference_rag_all(self, query_str, img_path):
+        # do retrieval
+        if self.classic_emb == None:
+            ret_cl = self.context_former.ret_empty
+        else:
+            ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, 1)
+        # form context
+        prompt, images, record_data = self.context_former.form_context_all_cl(img_path, query_str, ret_cl)
+            
+        # do inference
+        pixel_values = self.load_image(img_path, max_num=12).to(torch.bfloat16).cuda()
+        # TODO:需要考虑输入多张图片
+        # pixel_values = torch.cat((pixel_values1, pixel_values2), dim=0)
+        generation_config = dict(max_new_tokens=1024, do_sample=False)
+        # single-image single-round conversation (单图单轮对话)
+        question = prompt
+        response = self.model.chat(self.tokenizer, pixel_values, question, generation_config)
+        # print(f'User: {question}\nAssistant: {response}')
+        return response, record_data
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--image-folder", type=str)

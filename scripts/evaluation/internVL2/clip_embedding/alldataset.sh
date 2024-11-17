@@ -21,7 +21,7 @@ nohup python evaluation.py \
     --use-rag True \
     --use-pics True \
     --test-num ${test_num} \
-    --mode Normal \
+    --mode ${dataset} \
     >${log_path} 2>&1 &
 
 # classic emb
