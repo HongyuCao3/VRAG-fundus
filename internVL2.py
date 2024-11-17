@@ -33,6 +33,7 @@ class InternVL2():
         self.use_pics = args.use_pics
         self.crop_emb_path = args.crop_emb_path
         self.level_emb_path = args.level_emb_path
+        self.classic_emb_path = args.classic_emb_path
         self.layer = args.layer
         self.load_embs()
         self.context_former = ContextFormer(args.use_pics)
@@ -46,6 +47,10 @@ class InternVL2():
             self.crop_emb = EmbBuilder("./data/lesion/", self.crop_emb_path)
         else:
             self.crop_emb = None
+        if self.classic_emb_path:
+            self.classic_emb = EmbBuilder("./data/Classic Images/", self.classic_emb_path)
+        else:
+            self.classic_emb = None
             
     def retrieve(self, img_path):
         ret_empty = {"img": [], "txt": [], "score": [], "metadata": []}
