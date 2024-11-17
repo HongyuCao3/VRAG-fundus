@@ -115,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("--layer", type=int, default=11)
     parser.add_argument("--mode", type=str, default="Normal")
     args = parser.parse_args()
-    vrag = VRAG(args) # llava, llava-med, llava-med-rag
-    # vrag = InternVL2(args)
+    # vrag = VRAG(args) # llava, llava-med, llava-med-rag
+    vrag = InternVL2(args)
     eva = evaluation(args, vrag)
     eva.test()
