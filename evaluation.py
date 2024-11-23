@@ -29,7 +29,7 @@ class evaluation():
             root_path = "/home/hongyu/"
             excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
             data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
-            dataset = MultiModalVQADataset(excel_file, data_dir)
+            self.dataset = MultiModalVQADataset(excel_file, data_dir)
         self.test_num = args.test_num
         
     def test(self):
