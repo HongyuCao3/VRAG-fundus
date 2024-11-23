@@ -182,3 +182,4 @@ if __name__ == "__main__":
     # 获取第一个样本
     image, diagnosis = dataset[0]
     print(f"Image path: {image}, Diagnosis: {diagnosis}")
+    print(len(dataset))
