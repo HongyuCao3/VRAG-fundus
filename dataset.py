@@ -100,6 +100,48 @@ class EyeImageDataset(Dataset):
 
         return img_path, diagnosis,
     # finding, modality, dataset, caption
+
+class MultiModalVQADataset(Dataset):
+    def __init__(self, excel_file, root_dir, transform=None):
+        """
+        Args:
+            excel_file (string): Path to the Excel file with annotations.
+            root_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied on a sample.
+        """
+        self.annotations_df = pd.read_excel(excel_file, sheet_name=None)  # Read all sheets
+        self.root_dir = root_dir
+        self.transform = transform
+        
+        # Flatten the DataFrame to a single list of dictionaries
+        self.samples = []
+        for sheet_name, df in self.annotations_df.items():
+            for index, row in df.iterrows():
+                img_path = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.jpg")
+                if os.path.exists(img_path):
+                    self.samples.append({
+                        'img_path': img_path,
+                        'diagnosis': row['Diagnosis']
+                    })
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = self.samples[idx]
+        img_path = sample['img_path']
+        diagnosis = sample['diagnosis']
+        
+        # Load image
+        image = read_image(img_path)
+        
+        if self.transform:
+            image = self.transform(image)
+
+        return img_path, diagnosis
     
 # Usage Example
 if __name__ == "__main__":
@@ -123,10 +165,20 @@ if __name__ == "__main__":
     # dataset.get_sample("./data/level/")
     root_path = "/home/hongyu/"
     # 使用示例
-    csv_file = root_path +'alldataset/cleaned_full.csv'
-    img_dir = root_path + 'alldataset/images'
-    eye_dataset = EyeImageDataset(csv_file=csv_file, img_dir=img_dir)
+    # csv_file = root_path +'alldataset/cleaned_full.csv'
+    # img_dir = root_path + 'alldataset/images'
+    # eye_dataset = EyeImageDataset(csv_file=csv_file, img_dir=img_dir)
 
+    # # 获取第一个样本
+    # image,diagnosis, finding, modality, dataset, caption = eye_dataset[0]
+    # print(f"Image path: {image}, diagnosis: {diagnosis}, Finding: {finding}, Modality: {modality}")
+    
+    excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
+    data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
+    
+    # 创建数据集实例
+    dataset = MultiModalVQADataset(excel_file, data_dir)
+    
     # 获取第一个样本
-    image,diagnosis, finding, modality, dataset, caption = eye_dataset[0]
-    print(f"Image path: {image}, diagnosis: {diagnosis}, Finding: {finding}, Modality: {modality}")
+    image, diagnosis = dataset[0]
+    print(f"Image path: {image}, Diagnosis: {diagnosis}")
