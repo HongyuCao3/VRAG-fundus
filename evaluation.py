@@ -3,7 +3,7 @@ import torch
 import os
 import json
 from tqdm import tqdm
-from dataset import DRDataset, EyeImageDataset
+from dataset import DRDataset, EyeImageDataset, MultiModalVQADataset
 from torch.utils.data import Dataset, DataLoader
 
 # from VRAG_crop import VRAG
@@ -25,6 +25,11 @@ class evaluation():
             csv_file = root_path +'partdataset/cleaned_part.csv'
             img_dir = root_path + 'partdataset/images'
             self.dataset = EyeImageDataset(csv_file=csv_file, img_dir=img_dir)
+        if args.dataset == "MultiModal":
+            root_path = "/home/hongyu/"
+            excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
+            data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
+            dataset = MultiModalVQADataset(excel_file, data_dir)
         self.test_num = args.test_num
         
     def test(self):
