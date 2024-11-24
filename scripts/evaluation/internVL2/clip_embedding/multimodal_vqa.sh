@@ -47,5 +47,5 @@ nohup python evaluation.py \
     --use-rag True \
     --use-pics True \
     --test-num ${test_num} \
-    --mode ${dataset} \
+    --mode ALL \
     >${log_path} 2>&1 &
