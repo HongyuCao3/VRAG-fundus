@@ -8,7 +8,8 @@ from torch.utils.data import Dataset, DataLoader
 
 # from VRAG_crop import VRAG
 from VRAG_L import VRAG
-from internVL2 import InternVL2
+# from internVL2 import InternVL2
+from VRAG_Framework.internVL2 import InternVL2
 
 
 class evaluation():

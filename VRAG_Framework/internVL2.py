@@ -9,6 +9,7 @@ from PIL import Image
 from torchvision.transforms.functional import InterpolationMode
 from transformers import AutoModel, AutoTokenizer
 from emb_builder import EmbBuilder
+from emb_module.emb_builder import ClassicEmbBuilder
 from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys
 
@@ -48,7 +49,7 @@ class InternVL2():
         else:
             self.crop_emb = None
         if self.classic_emb_path:
-            self.classic_emb = EmbBuilder("./data/Classic Images/", self.classic_emb_path)
+            self.classic_emb = ClassicEmbBuilder("./data/Classic Images/", self.classic_emb_path)
         else:
             self.classic_emb = None
             
