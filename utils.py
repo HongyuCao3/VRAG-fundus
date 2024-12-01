@@ -237,6 +237,23 @@ def convert_full_name_to_abbreviation(full_name):
     
     return abbreviation
 
+def expand_disease_abbreviation(abbreviation):
+    # 定义疾病简称和全称的映射关系
+    disease_full_names = {
+        'DR': 'Diabetic Retinopathy',
+        'dry AMD': 'Age-related Macular Degeneration (Dry form)',
+        'Glaucoma': 'Glaucoma',  # Glaucoma本身已经是全称
+        'Meta PM': 'Metamorphopsia',  # 假设Meta PM指的是视网膜变形
+        'wet AMD': 'Age-related Macular Degeneration (Wet form)'
+    }
+    
+    # 将输入转换为字符串并去除首尾空格
+    abbreviation = str(abbreviation).strip()
+    
+    # 查找并返回对应的全称，如果不存在则返回原输入
+    return disease_full_names.get(abbreviation, f"未知的疾病简称: {abbreviation}")
+
+
 if __name__ == "__main__":
     # split img
     # img_path = "./data/DR/multidr/BRSET_img00149.jpg"
