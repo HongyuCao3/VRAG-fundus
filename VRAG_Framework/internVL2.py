@@ -11,7 +11,7 @@ from transformers import AutoModel, AutoTokenizer
 from emb_builder import EmbBuilder
 from emb_module.emb_builder import ClassicEmbBuilder
 from context_former import ContextFormer
-from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys
+from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys, expand_disease_abbreviation
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
