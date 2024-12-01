@@ -32,8 +32,8 @@ classic_emb_path="./data/${classic_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/llava-med-finetuned/${classic_emb}_${m}_${n}_rag_${test_num}_pics.json"
-log_path="./output/${dataset}/llava-med-finetuned/log/${classic_emb}_${m}_${n}_rag_${test_num}_pics.log"
+output_path="./output/${dataset}/llava-med-finetuned/${classic_emb}_${m}_${n}_rag_${test_num}_pics2.json"
+log_path="./output/${dataset}/llava-med-finetuned/log/${classic_emb}_${m}_${n}_rag_${test_num}_pics2.log"
 model_path="/home/hongyu/eye_llava_medllava_finetune_mistral"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
