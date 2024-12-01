@@ -3,6 +3,7 @@ from PIL import Image
 import os, json
 
 from emb_module.emb_builder_ import ClassicEmbBuilder
+# 使用 pytest -s命令测试
 
 @pytest.fixture(scope="module")
 def classic_emb_builder():
