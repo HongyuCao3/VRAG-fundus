@@ -4,6 +4,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
 import torch
+from collections import Counter
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 
@@ -143,6 +144,29 @@ class MultiModalVQADataset(Dataset):
 
         return img_path, diagnosis
     
+class DiagnosisCounter:
+    def __init__(self, dataset):
+        """
+        Args:
+            dataset (MultiModalVQADataset): The dataset to analyze.
+        """
+        self.dataset = dataset
+        self.diagnosis_counts = None
+        
+    def count_diagnoses(self):
+        """Count the number of unique diagnoses in the dataset."""
+        diagnoses = [sample['diagnosis'] for sample in self.dataset.samples]
+        self.diagnosis_counts = Counter(diagnoses)
+        
+    def print_diagnoses(self):
+        """Print the list of unique diagnoses and their counts."""
+        if self.diagnosis_counts is None:
+            self.count_diagnoses()
+        
+        print("Unique diagnoses in the dataset:")
+        for diagnosis, count in self.diagnosis_counts.items():
+            print(f"{diagnosis}: {count}")
+            
 # Usage Example
 if __name__ == "__main__":
     # Specify the path to your CSV and image directory
@@ -180,6 +204,10 @@ if __name__ == "__main__":
     dataset = MultiModalVQADataset(excel_file, data_dir)
     
     # 获取第一个样本
-    image, diagnosis = dataset[0]
-    print(f"Image path: {image}, Diagnosis: {diagnosis}")
-    print(len(dataset))
+    # image, diagnosis = dataset[0]
+    # print(f"Image path: {image}, Diagnosis: {diagnosis}")
+    # print(len(dataset))
+    
+    # 计算diagnosis种类
+    diagnosis_counter = DiagnosisCounter(dataset)
+    diagnosis_counter.print_diagnoses()

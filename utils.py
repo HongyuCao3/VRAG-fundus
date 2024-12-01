@@ -241,10 +241,10 @@ def expand_disease_abbreviation(abbreviation):
     # 定义疾病简称和全称的映射关系
     disease_full_names = {
         'DR': 'Diabetic Retinopathy',
-        'dry AMD': 'Age-related Macular Degeneration (Dry form)',
+        'dry AMD': 'Dry Age-related Macular Degeneration',
         'Glaucoma': 'Glaucoma',  # Glaucoma本身已经是全称
         'Meta PM': 'Metamorphopsia',  # 假设Meta PM指的是视网膜变形
-        'wet AMD': 'Age-related Macular Degeneration (Wet form)'
+        'wet AMD': 'Wet Age-related Macular Degeneration'
     }
     
     # 将输入转换为字符串并去除首尾空格
