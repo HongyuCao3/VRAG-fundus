@@ -149,7 +149,10 @@ class MultiVQAAnalysis(BaseAnalysis):
 
         for result in self.data['results']:
             ground_truth = result['ground truth'].lower()
-            llm_respond = str(json.loads(result['llm respond']))
+            try:
+                llm_respond = str(json.loads(result['llm respond'])).lower()
+            except:
+                llm_respond = result["llm respond"].lower()
             # print(type(llm_respond))
             # diagnosis = llm_respond.get('diagnosis', '').lower()
 
