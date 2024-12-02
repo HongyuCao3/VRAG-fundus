@@ -161,7 +161,74 @@ class MultiVQAAnalysis(BaseAnalysis):
         
         accuracy = correct_count / total_count if total_count > 0 else 0
         return accuracy
+    
+    def calculate_confusion_matrix(self):
+        # 初始化变量用于存储所有的 ground truths 和 predictions
+        all_ground_truths = []
+        all_predictions = []
 
+        # 获取所有可能的类别
+        classes = set()
+        
+        for result in self.data['results']:
+            ground_truth = result['ground truth'].lower()
+            try:
+                llm_respond = str(json.loads(result['llm respond'])).lower()
+            except:
+                llm_respond = result["llm respond"].lower()
+
+            # 假设 llm_respond 是一个 JSON 字符串，其中包含 'diagnosis' 键作为预测结果
+            # 如果不是这种情况，您可能需要调整如何从 llm_respond 提取预测值
+            prediction = llm_respond if ground_truth in llm_respond else "incorrect"
+
+            # 添加到集合中以确保唯一性
+            classes.add(ground_truth)
+            classes.add(prediction)
+
+            # 将当前的 ground truth 和 prediction 添加到列表中
+            all_ground_truths.append(ground_truth)
+            all_predictions.append(prediction)
+
+        # 将集合转换为排序后的列表
+        classes = sorted(list(classes))
+        
+        # 计算混淆矩阵
+        cm = confusion_matrix(all_ground_truths, all_predictions, labels=classes)
+
+        # 使用父类的方法绘制混淆矩阵
+        res_path = 'confusion_matrix.png'
+        self.plot_confusion_matrix(cm, classes, res_path, normalize=True, title='Normalized Confusion Matrix')
+        
+    def plot_confusion_matrix(self, cm, classes, res_path, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues, annotate=False):
+        if normalize:
+            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+            print("Normalized confusion matrix")
+        else:
+            print('Confusion matrix, without normalization')
+        print(cm)
+        
+        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+        plt.title(title)
+        plt.colorbar()
+        tick_marks = np.arange(len(classes))
+        plt.xticks(tick_marks, classes, rotation=45)
+        plt.yticks(tick_marks, classes)
+        
+        if annotate:  # Check if annotation is needed
+            fmt = '.2f' if normalize else 'd'
+            thresh = cm.max() / 2.
+            for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+                plt.text(j, i,
+                        format(cm[i, j], fmt),
+                        horizontalalignment="center",
+                        color="white" if cm[i, j] > thresh else "black")
+        
+        plt.tight_layout()
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label')
+        plt.savefig(res_path)
+        plt.show()
+        
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file-path", type=str, default="")
@@ -181,4 +248,6 @@ if __name__ == "__main__":
     #     AS.save_binary_confusion_matrix(args.res_path)
         
     analysis = MultiVQAAnalysis(args.res_path)
+    cm = analysis.calculate_confusion_matrix()
     print(f"Accuracy: {analysis.calculate_accuracy():.4f}")
+    print(cm)
