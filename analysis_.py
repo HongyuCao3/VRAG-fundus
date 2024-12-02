@@ -139,6 +139,25 @@ class StepwiseAccuracyAnalysis(BaseAnalysis):
         # Implement the logic to save binary confusion matrix...
         pass
 
+class MultiVQAAnalysis(BaseAnalysis):
+    def __init__(self, filepath):
+        super().__init__(filepath)
+
+    def calculate_accuracy(self):
+        correct_count = 0
+        total_count = len(self.data['results'])
+
+        for result in self.data['results']:
+            ground_truth = result['ground truth'].lower()
+            llm_respond = str(json.loads(result['llm respond']))
+            # print(type(llm_respond))
+            # diagnosis = llm_respond.get('diagnosis', '').lower()
+
+            if ground_truth in llm_respond:
+                correct_count += 1
+        
+        accuracy = correct_count / total_count if total_count > 0 else 0
+        return accuracy
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -150,10 +169,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Determine which analysis to perform based on arguments or other criteria
-    if args.level_emb:
-        AS = DiabeticRetinopathyAnalysis(args.file_path, args.res_path, args.level_emb)
-        AS.analyze()
-    else:
-        AS = StepwiseAccuracyAnalysis(args.file_path, args.step)
-        print(AS.calculate_accuracy())
-        AS.save_binary_confusion_matrix(args.res_path)
+    # if args.level_emb:
+    #     AS = DiabeticRetinopathyAnalysis(args.file_path, args.res_path, args.level_emb)
+    #     AS.analyze()
+    # else:
+    #     AS = StepwiseAccuracyAnalysis(args.file_path, args.step)
+    #     print(AS.calculate_accuracy())
+    #     AS.save_binary_confusion_matrix(args.res_path)
+        
+    analysis = MultiVQAAnalysis(args.res_path)
+    print(f"Accuracy: {analysis.calculate_accuracy():.4f}")
