@@ -79,19 +79,42 @@ class evaluation():
                 'record_data': record_data,
                 'correct': is_correct
             })
-            gc.collect()
-            torch.cuda.empty_cache()
+            # Calculate accuracy
+            accuracy = correct_predictions / total_samples if total_samples > 0 else 0
+            if idx % 5 == 0:
+                self.save_results(results, accuracy)
+                results = []
+            # gc.collect()
+            # torch.cuda.empty_cache()
 
-        # Calculate accuracy
-        accuracy = correct_predictions / total_samples if total_samples > 0 else 0
 
         # Save results to a JSON file
-        with open(self.output_path, 'w') as json_file:
-            json.dump({'accuracy': accuracy, 'results': results}, json_file, indent=4)
-
+        # with open(self.output_path, 'w') as json_file:
+        #     json.dump({'accuracy': accuracy, 'results': results}, json_file, indent=4)
+        self.save_results(results, accuracy)
 
         return accuracy
     
+    def save_results(self, results, accuracy):
+        # Load existing data from file if it exists
+        try:
+            with open(self.output_path, 'r') as json_file:
+                existing_data = json.load(json_file)
+                existing_results = existing_data.get('results', [])
+        except FileNotFoundError:
+            existing_results = []
+
+        # Append new results to existing ones
+        updated_results = existing_results + results
+
+        # Save the updated data back to the JSON file without calculating accuracy
+        with open(self.output_path, 'w') as json_file:
+            json.dump({'results': updated_results}, json_file, indent=4)
+
+        # If we need to calculate and save accuracy, do it here
+        # Save the final accuracy
+        with open(self.output_path, 'w') as json_file:
+            json.dump({'accuracy': accuracy, 'results': updated_results}, json_file, indent=4)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
