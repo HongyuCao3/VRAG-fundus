@@ -4,7 +4,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
 import torch
-from collections import Counter
+from collections import Counter, OrderedDict
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 
@@ -115,15 +115,33 @@ class MultiModalVQADataset(Dataset):
         self.transform = transform
         
         # Flatten the DataFrame to a single list of dictionaries
-        self.samples = []
+        # self.samples = []
+        # for sheet_name, df in self.annotations_df.items():
+        #     for index, row in df.iterrows():
+        #         img_path = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.jpg")
+        #         if os.path.exists(img_path):
+        #             self.samples.append({
+        #                 'img_path': img_path,
+        #                 'diagnosis': row['Diagnosis']
+        #             })
+        self.annotations_df = pd.read_excel(excel_file, sheet_name=None)  # Read all sheets
+        self.root_dir = root_dir
+        self.transform = transform
+        
+        # Use an OrderedDict to preserve insertion order and remove duplicates based on img_path
+        samples_dict = OrderedDict()
+        
         for sheet_name, df in self.annotations_df.items():
             for index, row in df.iterrows():
                 img_path = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.jpg")
-                if os.path.exists(img_path):
-                    self.samples.append({
+                if os.path.exists(img_path) and img_path not in samples_dict:
+                    samples_dict[img_path] = {
                         'img_path': img_path,
                         'diagnosis': row['Diagnosis']
-                    })
+                    }
+        
+        # Convert the dictionary back into a list of dictionaries
+        self.samples = list(samples_dict.values())
 
     def __len__(self):
         return len(self.samples)
