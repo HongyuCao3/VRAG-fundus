@@ -79,8 +79,8 @@ class evaluation():
                 'record_data': record_data,
                 'correct': is_correct
             })
-            gc.collect()
-            torch.cuda.empty_cache()
+            # gc.collect()
+            # torch.cuda.empty_cache()
 
         # Calculate accuracy
         accuracy = correct_predictions / total_samples if total_samples > 0 else 0

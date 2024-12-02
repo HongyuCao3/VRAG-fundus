@@ -32,8 +32,8 @@ classic_emb_path="./data/${classic_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/internVL2/${classic_emb}_${m}_${n}_rag_${test_num}_pics2.json"
-log_path="./output/${dataset}/internVL2/log/${classic_emb}_${m}_${n}_rag_${test_num}_pics2.log"
+output_path="./output/${dataset}/internVL2/${classic_emb}_${m}_${n}_rag_${test_num}_pics3.json"
+log_path="./output/${dataset}/internVL2/log/${classic_emb}_${m}_${n}_rag_${test_num}_pics3.log"
 model_path="/home/hongyu/Visual-RAG-LLaVA-Med/Model/InternVL2-8B"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
