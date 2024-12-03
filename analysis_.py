@@ -162,14 +162,13 @@ class MultiVQAAnalysis(BaseAnalysis):
         accuracy = correct_count / total_count if total_count > 0 else 0
         return accuracy
     
-    def calculate_confusion_matrix(self):
+    def calculate_confusion_matrix(self, res_path):
         # 初始化变量用于存储所有的 ground truths 和 predictions
         all_ground_truths = []
         all_predictions = []
 
         # 获取所有可能的类别
         classes = set()
-        
         for result in self.data['results']:
             ground_truth = result['ground truth'].lower()
             try:
@@ -196,7 +195,6 @@ class MultiVQAAnalysis(BaseAnalysis):
         cm = confusion_matrix(all_ground_truths, all_predictions, labels=classes)
 
         # 使用父类的方法绘制混淆矩阵
-        res_path = 'confusion_matrix.png'
         self.plot_confusion_matrix(cm, classes, res_path, normalize=True, title='Normalized Confusion Matrix')
         
     def plot_confusion_matrix(self, cm, classes, res_path, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues, annotate=False):
@@ -223,6 +221,10 @@ class MultiVQAAnalysis(BaseAnalysis):
                         horizontalalignment="center",
                         color="white" if cm[i, j] > thresh else "black")
         
+        font_size = 8  # 您可以更改这个值以适应您的需求
+        tick_marks = np.arange(len(classes))
+        plt.xticks(tick_marks, classes, rotation=45, fontdict={'fontsize': font_size})
+        plt.yticks(tick_marks, classes, fontdict={'fontsize': font_size})
         plt.tight_layout()
         plt.ylabel('True label')
         plt.xlabel('Predicted label')
@@ -247,7 +249,7 @@ if __name__ == "__main__":
     #     print(AS.calculate_accuracy())
     #     AS.save_binary_confusion_matrix(args.res_path)
         
-    analysis = MultiVQAAnalysis(args.res_path)
-    cm = analysis.calculate_confusion_matrix()
+    analysis = MultiVQAAnalysis(args.file_path)
+    cm = analysis.calculate_confusion_matrix(args.res_path)
     print(f"Accuracy: {analysis.calculate_accuracy():.4f}")
     print(cm)
