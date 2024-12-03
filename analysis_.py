@@ -228,7 +228,7 @@ class MultiVQAAnalysis(BaseAnalysis):
                         horizontalalignment="center",
                         color="white" if cm[i, j] > thresh else "black")
         
-        font_size = 8  # 您可以更改这个值以适应您的需求
+        font_size = 6  # 您可以更改这个值以适应您的需求
         tick_marks = np.arange(len(classes))
         plt.xticks(tick_marks, classes, rotation=45, fontdict={'fontsize': font_size})
         plt.yticks(tick_marks, classes, fontdict={'fontsize': font_size})
