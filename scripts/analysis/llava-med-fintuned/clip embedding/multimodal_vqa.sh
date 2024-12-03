@@ -7,11 +7,13 @@ n=1
 test_num=-1
 output_path="./output/${dataset}/llava-med-finetuned/raw_${m}_${n}_rag_${test_num}3.json"
 log_path="./output/${dataset}/llava-med-finetuned/log/raw_${m}_${n}_rag_${test_num}3.log"
+res_path="./output/${dataset}/llava-med-finetuned/analysis/raw_${m}_${n}_rag_${test_num}3.png"
 model_path="/home/hongyu/eye_llava_medllava_finetune_mistral"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python analysis_.py \
-    --res-path ${output_path}
+    --file-path ${output_path} \
+    --res-path ${res_path}
 
 # classic emb
 classic_emb=classic_emb_clip
@@ -22,8 +24,10 @@ n=1
 test_num=-1
 output_path="./output/${dataset}/llava-med-finetuned/${classic_emb}_${m}_${n}_rag_${test_num}_pics3.json"
 log_path="./output/${dataset}/llava-med-finetuned/log/${classic_emb}_${m}_${n}_rag_${test_num}_pics3.log"
+res_path="./output/${dataset}/llava-med-finetuned/analysis/${classic_emb}_${m}_${n}_rag_${test_num}_pics3.png"
 model_path="/home/hongyu/eye_llava_medllava_finetune_mistral"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 python analysis_.py \
-    --res-path ${output_path}
+    --file-path ${output_path} \
+    --res-path ${res_path}
