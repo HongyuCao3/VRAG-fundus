@@ -168,7 +168,7 @@ class MultiVQAAnalysis(BaseAnalysis):
         all_predictions = []
 
         # 获取所有可能的类别
-        classes = set()
+        classes = set(['age-related macular degeneration', 'branch retinal artery occlusion', 'branch retinal vein occlusion', 'central retinal artery occlusion', 'central retinal vein occlusion', 'central serous chorioretinopathy', 'choroidal melanoma', 'coats disease', 'diabetic retinopathy', 'dry age-related macular degeneration', 'epiretinal membrane', 'familial exudative vitreoretinopathy', 'glaucoma', 'macular hole', 'pathologic myopia', 'retinal detachment', 'retinal vein occlusion', 'vogt-koyanagi-harada disease', 'wet age-related macular degeneration'])
         for result in self.data['results']:
             ground_truth = result['ground truth'].lower()
             try:
@@ -178,19 +178,26 @@ class MultiVQAAnalysis(BaseAnalysis):
 
             # 假设 llm_respond 是一个 JSON 字符串，其中包含 'diagnosis' 键作为预测结果
             # 如果不是这种情况，您可能需要调整如何从 llm_respond 提取预测值
-            prediction = llm_respond if ground_truth in llm_respond else "incorrect"
+            if ground_truth in llm_respond:
+                prediction = ground_truth 
+            else:
+                for c in classes:
+                     if c in llm_respond:
+                         prediction = c
+                if prediction is None:
+                    prediction = "incorrect"
 
             # 添加到集合中以确保唯一性
             classes.add(ground_truth)
-            classes.add(prediction)
+            # classes.add(prediction)
 
             # 将当前的 ground truth 和 prediction 添加到列表中
-            all_ground_truths.append(ground_truth)
-            all_predictions.append(prediction)
+            all_ground_truths.append(ground_truth.lower())
+            all_predictions.append(prediction.lower())
 
         # 将集合转换为排序后的列表
         classes = sorted(list(classes))
-        
+        # print(classes)
         # 计算混淆矩阵
         cm = confusion_matrix(all_ground_truths, all_predictions, labels=classes)
 
