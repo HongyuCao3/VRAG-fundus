@@ -103,7 +103,7 @@ class EyeImageDataset(Dataset):
     # finding, modality, dataset, caption
 
 class MultiModalVQADataset(Dataset):
-    def __init__(self, excel_file, root_dir, transform=None):
+    def __init__(self, excel_file, root_dir, transform=None, sheet_names = ["CFP", "FFA", "ultrasound", "OCT", "slitlamp"]):
         """
         Args:
             excel_file (string): Path to the Excel file with annotations.
@@ -113,17 +113,6 @@ class MultiModalVQADataset(Dataset):
         self.annotations_df = pd.read_excel(excel_file, sheet_name=None)  # Read all sheets
         self.root_dir = root_dir
         self.transform = transform
-        
-        # Flatten the DataFrame to a single list of dictionaries
-        # self.samples = []
-        # for sheet_name, df in self.annotations_df.items():
-        #     for index, row in df.iterrows():
-        #         img_path = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.jpg")
-        #         if os.path.exists(img_path):
-        #             self.samples.append({
-        #                 'img_path': img_path,
-        #                 'diagnosis': row['Diagnosis']
-        #             })
         self.annotations_df = pd.read_excel(excel_file, sheet_name=None)  # Read all sheets
         self.root_dir = root_dir
         self.transform = transform
@@ -132,6 +121,10 @@ class MultiModalVQADataset(Dataset):
         samples_dict = OrderedDict()
         
         for sheet_name, df in self.annotations_df.items():
+            # select according to sheet_name
+            if sheet_name not in sheet_names:
+                print("ignore " + sheet_name + " modal")
+                continue
             for index, row in df.iterrows():
                 img_path = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.jpg")
                 if os.path.exists(img_path) and img_path not in samples_dict:
@@ -219,7 +212,8 @@ if __name__ == "__main__":
     data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
     
     # 创建数据集实例
-    dataset = MultiModalVQADataset(excel_file, data_dir)
+    sheet_names = ["CFP"]
+    dataset = MultiModalVQADataset(excel_file, data_dir, sheet_names=sheet_names)
     
     # 获取第一个样本
     # image, diagnosis = dataset[0]
