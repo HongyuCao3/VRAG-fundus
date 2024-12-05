@@ -10,6 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 from VRAG_Framework.VRAG_L import VRAG
 # from internVL2 import InternVL2
 from VRAG_Framework.internVL2 import InternVL2
+from VRAG_Framework.internVL2_finetuned import InternVL2_finetuned
 
 sheet_names=["CFP"]
 
@@ -125,6 +126,6 @@ if __name__ == "__main__":
     parser.add_argument("--mode", type=str, default="Normal")
     args = parser.parse_args()
     # vrag = VRAG(args) # llava, llava-med, llava-med-rag
-    vrag = InternVL2(args)
+    vrag = InternVL2_finetuned(args)
     eva = evaluation(args, vrag)
     eva.test()

@@ -24,6 +24,7 @@ class InternVL2_finetuned():
             torch_dtype=torch.bfloat16,
             low_cpu_mem_usage=True,
             use_flash_attn=True,
+            device_map={"":0},
             trust_remote_code=True).eval().cuda()
         self.tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True, use_fast=False)
         # self.model, self.tokenizer = load_model_and_tokenizer(args.model_path) 
