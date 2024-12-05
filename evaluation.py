@@ -11,6 +11,7 @@ from VRAG_Framework.VRAG_L import VRAG
 # from internVL2 import InternVL2
 from VRAG_Framework.internVL2 import InternVL2
 
+sheet_names=["CFP"]
 
 class evaluation():
     def __init__(self, args, model):
@@ -30,7 +31,7 @@ class evaluation():
             root_path = "/home/hongyu/"
             excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
             data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
-            self.dataset = MultiModalVQADataset(excel_file, data_dir)
+            self.dataset = MultiModalVQADataset(excel_file, data_dir, sheet_names=sheet_names)
         self.test_num = args.test_num
         
     def test(self):
