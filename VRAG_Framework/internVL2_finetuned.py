@@ -10,22 +10,29 @@ from torchvision.transforms.functional import InterpolationMode
 from transformers import AutoModel, AutoTokenizer
 from emb_builder import EmbBuilder
 from emb_module.emb_builder import ClassicEmbBuilder
+from internvl_chat.modeling_internvl_chat import InternVLChatModel
 from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys, expand_disease_abbreviation
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
+load_8bit=False
 
 class InternVL2_finetuned():
     def __init__(self, args, ):
-        self.model = AutoModel.from_pretrained(
+        # self.model = AutoModel.from_pretrained(
+        #     args.model_path,
+        #     torch_dtype=torch.bfloat16,
+        #     low_cpu_mem_usage=True,
+        #     use_flash_attn=True,
+        #     device_map={"":0},
+        #     trust_remote_code=True).eval().cuda()
+        self.model = InternVLChatModel.from_pretrained(
             args.model_path,
-            torch_dtype=torch.bfloat16,
-            low_cpu_mem_usage=True,
-            use_flash_attn=True,
-            device_map={"":0},
-            trust_remote_code=True).eval().cuda()
+            load_in_8bit=load_8bit,
+            torch_dtype=torch.float16,
+            device_map='auto').eval()
         self.tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True, use_fast=False)
         # self.model, self.tokenizer = load_model_and_tokenizer(args.model_path) 
         self.top_k_c = args.top_k_c # forcrop emb
