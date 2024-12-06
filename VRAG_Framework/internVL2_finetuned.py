@@ -18,7 +18,7 @@ from utils import split_image, delete_images, merge_dicts, find_longest_diagnosi
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
-load_8bit=False
+load_8bit=True
 
 class InternVL2_finetuned():
     def __init__(self, args, ):
