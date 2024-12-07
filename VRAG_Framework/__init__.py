@@ -3,7 +3,7 @@ import math
 
 import torch
 from internvl.model.internvl_chat import InternVLChatConfig, InternVLChatModel
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, AutoModel
 
 def split_model(num_layers, vit_alpha=0.5):
     device_map = {}
@@ -36,7 +36,8 @@ def load_model_and_tokenizer(args):
     kwargs = {'device_map': device_map} if args.auto else {}
     tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True, use_fast=False)
     model = InternVLChatModel.from_pretrained(
-        args.model_path, low_cpu_mem_usage=True, torch_dtype=torch.float16,
+        args.model_path, 
+        low_cpu_mem_usage=True, torch_dtype=torch.float16,
         load_in_8bit=args.load_in_8bit, load_in_4bit=args.load_in_4bit, device_map="auto",**kwargs).eval()
     # 去掉low_cpu_mem_usage可以运行
     if not args.load_in_8bit and not args.load_in_4bit and not args.auto:
