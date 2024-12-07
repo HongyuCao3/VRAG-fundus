@@ -171,10 +171,11 @@ class ContextFormer():
         #     parts.append(f"The possible diagnosing class and probability: {context_str_cl}\n")
         # if metadata_str != "[{}]":
         #     parts.append(f"Metadata: {metadata_str}\n")
-        parts.append("Give the answer in format {\"diagnosis\": "", \"reasons\": ""}")
-        parts.append("---------------------\n")
-        parts.append(f"Query: {query_str}\n")
-        parts.append("Answer: ")
+        # parts.append("Give the answer in format {\"diagnosis\": "", \"reasons\": ""}")
+        # parts.append("---------------------\n")
+        # parts.append(f"Query: {query_str}\n")
+        parts.append(query_str)
+        # parts.append("Answer: ")
         
         return "".join(parts)
     

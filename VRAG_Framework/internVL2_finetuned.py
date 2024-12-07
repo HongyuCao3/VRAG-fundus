@@ -276,7 +276,7 @@ class InternVL2_finetuned():
         prompt, images, record_data = self.context_former.form_context_all_cl(img_path, query_str, ret_cl)
             
         # do inference
-        pixel_values = self.load_image(img_path, max_num=12).to(torch.bfloat16).cuda()
+        pixel_values = self.load_image(img_path, max_num=12).to(torch.float16).cuda()
         # TODO:需要考虑输入多张图片
         # pixel_values = torch.cat((pixel_values1, pixel_values2), dim=0)
         # generation_config = dict(max_new_tokens=1024, do_sample=False)
