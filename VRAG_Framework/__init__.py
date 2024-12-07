@@ -38,6 +38,7 @@ def load_model_and_tokenizer(args):
     model = InternVLChatModel.from_pretrained(
         args.model_path, low_cpu_mem_usage=True, torch_dtype=torch.bfloat16,
         load_in_8bit=args.load_in_8bit, load_in_4bit=args.load_in_4bit, **kwargs).eval()
+    # 去掉low_cpu_mem_usage可以运行
     if not args.load_in_8bit and not args.load_in_4bit and not args.auto:
         model = model.cuda()
         # model.to("cuda:0")
