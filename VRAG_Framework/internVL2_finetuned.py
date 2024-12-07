@@ -14,7 +14,7 @@ from emb_module.emb_builder import ClassicEmbBuilder
 from internvl.model.internvl_chat.modeling_internvl_chat import InternVLChatModel
 from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys, expand_disease_abbreviation
-from internvl.model import load_model_and_tokenizer
+from VRAG_Framework import load_model_and_tokenizer
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -36,7 +36,7 @@ class InternVL2_finetuned():
         #     torch_dtype=torch.bfloat16,
         #     device_map='auto').eval()
         # self.tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True, use_fast=False)
-        self.model, self.tokenizer = load_model_and_tokenizer(args.model_path) 
+        self.model, self.tokenizer = load_model_and_tokenizer(args) 
         self.top_k_c = args.top_k_c # forcrop emb
         self.top_k_l = args.top_k_l # for level emb
         self.chunk_m = args.chunk_m
@@ -307,6 +307,9 @@ if __name__ == "__main__":
     parser.add_argument("--crop-emb-path", type=str, default=None)
     parser.add_argument("--level-emb-path", type=str, default=None)
     parser.add_argument("--use-pics", type=bool, default=False)
+    parser.add_argument('--load-in-8bit', action='store_true')
+    parser.add_argument('--load-in-4bit', action='store_true')
+    parser.add_argument('--auto', action='store_true')
     args = parser.parse_args()
     test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
     IV2 = InternVL2_finetuned(args)
