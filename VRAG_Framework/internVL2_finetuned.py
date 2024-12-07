@@ -14,6 +14,7 @@ from emb_module.emb_builder import ClassicEmbBuilder
 from internvl.model.internvl_chat.modeling_internvl_chat import InternVLChatModel
 from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys, expand_disease_abbreviation
+from internvl.model import load_model_and_tokenizer
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -29,13 +30,13 @@ class InternVL2_finetuned():
         #     use_flash_attn=True,
         #     device_map={"":0},
         #     trust_remote_code=True).eval().cuda()
-        self.model = InternVLChatModel.from_pretrained(
-            args.model_path,
-            load_in_8bit=load_8bit,
-            torch_dtype=torch.bfloat16,
-            device_map='auto').eval()
-        self.tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True, use_fast=False)
-        # self.model, self.tokenizer = load_model_and_tokenizer(args.model_path) 
+        # self.model = InternVLChatModel.from_pretrained(
+        #     args.model_path,
+        #     load_in_8bit=load_8bit,
+        #     torch_dtype=torch.bfloat16,
+        #     device_map='auto').eval()
+        # self.tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True, use_fast=False)
+        self.model, self.tokenizer = load_model_and_tokenizer(args.model_path) 
         self.top_k_c = args.top_k_c # forcrop emb
         self.top_k_l = args.top_k_l # for level emb
         self.chunk_m = args.chunk_m
@@ -276,10 +277,17 @@ class InternVL2_finetuned():
         pixel_values = self.load_image(img_path, max_num=12).to(torch.bfloat16).cuda()
         # TODO:需要考虑输入多张图片
         # pixel_values = torch.cat((pixel_values1, pixel_values2), dim=0)
-        generation_config = dict(max_new_tokens=1024, do_sample=False)
+        # generation_config = dict(max_new_tokens=1024, do_sample=False)
+        generation_config = dict(
+                num_beams=args.num_beams,
+                # max_new_tokens=ds_collections[ds_name]['max_new_tokens'],
+                min_new_tokens=1,
+                do_sample=True if args.temperature > 0 else False,
+                temperature=args.temperature,
+        )
         # single-image single-round conversation (单图单轮对话)
         question = prompt
-        response = self.model.chat(self.tokenizer, pixel_values, question, generation_config)
+        response = self.model.chat(self.tokenizer, pixel_values, question, generation_config, verbose=True)
         # print(f'User: {question}\nAssistant: {response}')
         return response, record_data
     
