@@ -46,6 +46,8 @@ class InternVL2_finetuned():
         self.crop_emb_path = args.crop_emb_path
         self.level_emb_path = args.level_emb_path
         self.classic_emb_path = args.classic_emb_path
+        self.num_beams = args.num_beams
+        self.temperature = args.temperature
         self.layer = args.layer
         self.load_embs()
         self.context_former = ContextFormer(args.use_pics)
@@ -279,11 +281,11 @@ class InternVL2_finetuned():
         # pixel_values = torch.cat((pixel_values1, pixel_values2), dim=0)
         # generation_config = dict(max_new_tokens=1024, do_sample=False)
         generation_config = dict(
-                num_beams=args.num_beams,
+                num_beams=self.num_beams,
                 # max_new_tokens=ds_collections[ds_name]['max_new_tokens'],
                 min_new_tokens=1,
-                do_sample=True if args.temperature > 0 else False,
-                temperature=args.temperature,
+                do_sample=True if self.temperature > 0 else False,
+                temperature=self.temperature,
         )
         # single-image single-round conversation (单图单轮对话)
         question = prompt

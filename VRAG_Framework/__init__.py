@@ -40,4 +40,5 @@ def load_model_and_tokenizer(args):
         load_in_8bit=args.load_in_8bit, load_in_4bit=args.load_in_4bit, **kwargs).eval()
     if not args.load_in_8bit and not args.load_in_4bit and not args.auto:
         model = model.cuda()
+        # model.to("cuda:0")
     return model, tokenizer

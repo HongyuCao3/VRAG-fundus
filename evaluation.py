@@ -123,6 +123,7 @@ if __name__ == "__main__":
     parser.add_argument("--level-emb-path", type=str, default=None)
     parser.add_argument("--classic-emb-path", type=str, default=None)
     parser.add_argument("--layer", type=int, default=11)
+    parser.add_argument('--dynamic', action='store_true')
     parser.add_argument("--mode", type=str, default="Normal")
     parser.add_argument('--load-in-8bit', action='store_true')
     parser.add_argument('--load-in-4bit', action='store_true')

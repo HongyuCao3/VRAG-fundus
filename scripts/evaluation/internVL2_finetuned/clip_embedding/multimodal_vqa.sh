@@ -10,7 +10,7 @@ n=1
 test_num=3
 output_path="./output/${dataset}/${model_name}/raw_${m}_${n}_rag_${test_num}_pics3.json"
 log_path="./output/${dataset}/${model_name}/log/raw_${m}_${n}_rag_${test_num}_pics3.log"
-model_path="/home/hongyu/Visual-RAG-LLaVA-Med/Model/internvl2_8b_internlm2_7b_dynamic_res_2nd_finetune_lora_fulldataset"
+model_path="/home/hongyu/InternVL/internvl2_8b_internlm2_7b_dynamic_res_2nd_finetune_lora_fulldataset"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
 nohup python evaluation.py \
@@ -23,6 +23,7 @@ nohup python evaluation.py \
     --use-pics True \
     --test-num ${test_num} \
     --mode ALL \
+    --dynamic \
     >${log_path} 2>&1 &
 
 
