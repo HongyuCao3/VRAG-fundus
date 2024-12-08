@@ -7,7 +7,7 @@ from dataset import DRDataset, EyeImageDataset, MultiModalVQADataset
 from torch.utils.data import Dataset, DataLoader
 
 # from VRAG_crop import VRAG
-from VRAG_Framework.VRAG_L import VRAG
+# from VRAG_Framework.VRAG_L import VRAG
 # from internVL2 import InternVL2
 from VRAG_Framework.internVL2 import InternVL2
 from VRAG_Framework.internVL2_finetuned import InternVL2_finetuned
