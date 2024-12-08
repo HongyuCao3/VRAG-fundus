@@ -43,7 +43,7 @@ class InternVLChatModel(PreTrainedModel):
     _no_split_modules = ['InternVisionModel', 'LlamaDecoderLayer', 'InternLM2DecoderLayer',
                          'Phi3DecoderLayer', 'Qwen2DecoderLayer']
     _supports_flash_attn_2 = True
-    supports_gradient_checkpointing = True
+    supports_gradient_checkpointing=True
 
     def __init__(self, config: InternVLChatConfig, vision_model=None, language_model=None):
         super().__init__(config)
@@ -236,7 +236,60 @@ class InternVLChatModel(PreTrainedModel):
             loss = loss_fct(shift_logits, shift_labels)
             if ignore_flag:
                 loss = loss * 0.0
+        '''
+        loss = None
+        if labels is not None and loss_weight is not None:
+            loss_weight = torch.tensor(loss_weight, dtype=torch.float32, device=labels.device)
+            shift_logits = logits[..., :-1, :].contiguous()
+            shift_labels = labels[..., 1:].contiguous()
+            shift_weights = loss_weight[..., 1:].contiguous()
 
+            loss_fct = CrossEntropyLoss(reduction='none')
+            shift_logits = shift_logits.view(-1, self.language_model.config.vocab_size)
+            shift_labels = shift_labels.view(-1)
+            shift_weights = shift_weights.view(-1)
+
+            shift_labels = shift_labels.to(shift_logits.device)
+            shift_weights = shift_weights.to(shift_logits.device)
+            loss = loss_fct(shift_logits, shift_labels)
+
+            # 检查预测中是否存在GT
+            predicted_ids = torch.argmax(shift_logits, dim=1)
+            gt_exists_in_pred = (predicted_ids == shift_labels)
+
+            # 根据匹配结果调整损失
+            modified_loss = torch.where(gt_exists_in_pred, loss * 0.2, loss * 1.0)
+
+            shift_weights_sum = shift_weights.sum()
+            if loss_reduction_all_gather:
+                dist.all_reduce(shift_weights_sum, op=dist.ReduceOp.AVG)
+            print('modified_loss',modified_loss)
+            loss = modified_loss * shift_weights
+            loss = loss.sum() / shift_weights_sum
+            if ignore_flag:
+                loss = loss * 0.0
+        elif labels is not None:
+            shift_logits = logits[..., :-1, :].contiguous()
+            shift_labels = labels[..., 1:].contiguous()
+
+            loss_fct = CrossEntropyLoss()
+            shift_logits = shift_logits.view(-1, self.language_model.config.vocab_size)
+            shift_labels = shift_labels.view(-1)
+
+            shift_labels = shift_labels.to(shift_logits.device)
+            loss = loss_fct(shift_logits, shift_labels)
+
+            # 检查预测中是否存在GT
+            predicted_ids = torch.argmax(shift_logits, dim=1)
+            gt_exists_in_pred = (predicted_ids == shift_labels)
+
+            # 根据匹配结果调整损失
+            loss = torch.where(gt_exists_in_pred, loss * 0.2, loss * 1.0)
+            loss = loss.mean()
+            #print('loss',loss)
+            if ignore_flag:
+                loss = loss * 0.0   
+        '''
         if not return_dict:
             output = (logits,) + outputs[1:]
             return (loss,) + output if loss is not None else output
