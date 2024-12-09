@@ -109,16 +109,23 @@ class EyeImageDataset(Dataset):
             n (int, optional): Maximum number of entries to return. If None, all matching entries are returned.
 
         Returns:
-            list: A list of dictionaries, each representing a sample with the specified diagnosis.
+            list: A list of dictionaries, each representing a sample with the specified diagnosis and img_name.
         """
-        # Filter annotations DataFrame by the given diagnosis
+        # Filter annotations DataFrame by the given diagnosis using the correct column name
         filtered_df = self.annotations[self.annotations.iloc[:, 1] == diagnosis]
 
         # Apply limit if n is specified and valid
         if n is not None and isinstance(n, int) and n > 0:
             filtered_df = filtered_df.head(n)
 
-        return filtered_df.to_dict(orient='records')
+        # Add 'img_name' column to the filtered DataFrame
+        
+        filtered_df['img_name'] = filtered_df.iloc[:, 0].astype(str) + '.jpg'
+
+        # Create a list of dictionaries containing 'img_name' and 'diagnosis'
+        entries = filtered_df[['img_name']].to_dict(orient='records')
+    
+        return entries
 
 class MultiModalVQADataset(Dataset):
     def __init__(self, excel_file, root_dir, transform=None, sheet_names = ["CFP", "FFA", "ultrasound", "OCT", "slitlamp"]):

@@ -33,7 +33,8 @@ class DiagnosisImageCopier:
                 
             # Copy each image to the corresponding diagnosis subdirectory
             for entry in entries:
-                img_path = entry['img_path']
+                img_name = entry['img_name']
+                img_path = os.path.join(eye_dataset.img_dir, img_name)
                 base_name = os.path.basename(img_path)
                 target_path = os.path.join(diag_dir, base_name)
                 
