@@ -34,11 +34,12 @@ classic_emb_path="./data/${classic_emb}"
 m=1
 n=1
 test_num=-1
-output_path="./output/${dataset}/internVL2/${classic_emb}_${m}_${n}_rag_${test_num}_pics3.json"
-log_path="./output/${dataset}/internVL2/log/${classic_emb}_${m}_${n}_rag_${test_num}_pics3.log"
-model_path="/home/hongyu/Visual-RAG-LLaVA-Med/Model/InternVL2-8B"
+model_name="internVL2_finetuned"
+output_path="./output/${dataset}/${model_name}/${classic_emb}_${m}_${n}_rag_${test_num}_pics3.json"
+log_path="./output/${dataset}/${model_name}/log/${classic_emb}_${m}_${n}_rag_${test_num}_pics3.log"
+model_path="/home/hongyu/InternVL/internvl2_8b_internlm2_7b_dynamic_res_2nd_finetune_lora_fulldataset"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
-conda activate llava-med
+conda activate internvl_louwei
 nohup python evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \
