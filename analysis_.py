@@ -168,7 +168,20 @@ class MultiVQAAnalysis(BaseAnalysis):
         all_predictions = []
 
         # 获取所有可能的类别
-        classes = set(['age-related macular degeneration', 'branch retinal artery occlusion', 'branch retinal vein occlusion', 'central retinal artery occlusion', 'central retinal vein occlusion', 'central serous chorioretinopathy', 'choroidal melanoma', 'coats disease', 'diabetic retinopathy', 'dry age-related macular degeneration', 'epiretinal membrane', 'familial exudative vitreoretinopathy', 'glaucoma', 'macular hole', 'pathologic myopia', 'retinal detachment', 'retinal vein occlusion', 'vogt-koyanagi-harada disease', 'wet age-related macular degeneration'])
+        classes = set(['diabetic retinopathy',
+        'age-related macular degeneration',
+        'central retinal vein occlusion',
+        'branch retinal vein occlusion',
+        'central retinal artery occlusion',
+        'branch retinal artery occlusion',
+        'central serous chorioretinopathy',
+        'retinal detachment',
+        'Coats Disease',
+        'macular hole',
+        'pathologic myopia',
+        'glaucoma',
+        'epiretinal membrane'])
+        # classes = set(['age-related macular degeneration', 'branch retinal artery occlusion', 'branch retinal vein occlusion', 'central retinal artery occlusion', 'central retinal vein occlusion', 'central serous chorioretinopathy', 'choroidal melanoma', 'coats disease', 'diabetic retinopathy', 'dry age-related macular degeneration', 'epiretinal membrane', 'familial exudative vitreoretinopathy', 'glaucoma', 'macular hole', 'pathologic myopia', 'retinal detachment', 'retinal vein occlusion', 'vogt-koyanagi-harada disease', 'wet age-related macular degeneration'])
         for result in self.data['results']:
             ground_truth = result['ground truth'].lower()
             try:
@@ -188,7 +201,7 @@ class MultiVQAAnalysis(BaseAnalysis):
                     prediction = "incorrect"
 
             # 添加到集合中以确保唯一性
-            classes.add(ground_truth)
+            # classes.add(ground_truth)
             # classes.add(prediction)
 
             # 将当前的 ground truth 和 prediction 添加到列表中
