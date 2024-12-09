@@ -101,6 +101,24 @@ class EyeImageDataset(Dataset):
 
         return img_path, diagnosis,
     # finding, modality, dataset, caption
+    
+    def get_entries_by_diagnosis(self, diagnosis, n=None):
+        """
+        Args:
+            diagnosis (string): The diagnosis to filter the dataset entries by.
+            n (int, optional): Maximum number of entries to return. If None, all matching entries are returned.
+
+        Returns:
+            list: A list of dictionaries, each representing a sample with the specified diagnosis.
+        """
+        # Filter annotations DataFrame by the given diagnosis
+        filtered_df = self.annotations[self.annotations.iloc[:, 1] == diagnosis]
+
+        # Apply limit if n is specified and valid
+        if n is not None and isinstance(n, int) and n > 0:
+            filtered_df = filtered_df.head(n)
+
+        return filtered_df.to_dict(orient='records')
 
 class MultiModalVQADataset(Dataset):
     def __init__(self, excel_file, root_dir, transform=None, sheet_names = ["CFP", "FFA", "ultrasound", "OCT", "slitlamp"]):
@@ -154,6 +172,19 @@ class MultiModalVQADataset(Dataset):
             image = self.transform(image)
 
         return img_path, diagnosis
+    
+    def get_entries_by_diagnosis(self, diagnosis):
+        """
+        Args:
+            diagnosis (string): The diagnosis to filter the dataset entries by.
+
+        Returns:
+            list: A list of dictionaries, each representing a sample with the specified diagnosis.
+        """
+        # Filter samples by the given diagnosis and return them as a list
+        filtered_samples = [sample for sample in self.samples if sample['diagnosis'] == diagnosis]
+        
+        return filtered_samples
     
 class DiagnosisCounter:
     def __init__(self, dataset):
