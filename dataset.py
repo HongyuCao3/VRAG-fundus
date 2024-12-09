@@ -109,22 +109,24 @@ class EyeImageDataset(Dataset):
             n (int, optional): Maximum number of entries to return. If None, all matching entries are returned.
 
         Returns:
-            list: A list of dictionaries, each representing a sample with the specified diagnosis and img_name.
+            list: A list of dictionaries, each representing a unique sample with the specified diagnosis and img_name.
         """
         # Filter annotations DataFrame by the given diagnosis using the correct column name
         filtered_df = self.annotations[self.annotations.iloc[:, 1] == diagnosis]
+
+        # Add 'img_name' column to the filtered DataFrame
+        filtered_df['img_name'] = filtered_df.iloc[:, 0].astype(str) + '.jpg'
+
+        # Remove duplicates based on 'img_name' and 
+        filtered_df.drop_duplicates(subset=['img_name'], inplace=True)
 
         # Apply limit if n is specified and valid
         if n is not None and isinstance(n, int) and n > 0:
             filtered_df = filtered_df.head(n)
 
-        # Add 'img_name' column to the filtered DataFrame
-        
-        filtered_df['img_name'] = filtered_df.iloc[:, 0].astype(str) + '.jpg'
-
-        # Create a list of dictionaries containing 'img_name' and 'diagnosis'
+        # Create a list of dictionaries containing 'img_name' 
         entries = filtered_df[['img_name']].to_dict(orient='records')
-    
+
         return entries
 
 class MultiModalVQADataset(Dataset):

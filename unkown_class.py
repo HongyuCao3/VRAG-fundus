@@ -52,7 +52,7 @@ if __name__ == "__main__":
     eye_dataset = EyeImageDataset(csv_file=csv_file, img_dir=img_dir)
 
     print(eye_dataset.get_entries_by_diagnosis("macular hole", 2))
-    copier = DiagnosisImageCopier(eye_dataset, target_dir='Classic Images')
+    copier = DiagnosisImageCopier(eye_dataset, target_dir='./data/Classic Images')
     
     # 定义诊断列表
     d_list = ["macular hole"]  # 示例诊断列表
