@@ -12,7 +12,7 @@ output_path="./output/${dataset}/${model_name}/raw_${m}_${n}_rag_${test_num}_pic
 log_path="./output/${dataset}/${model_name}/log/raw_${m}_${n}_rag_${test_num}_pics3.log"
 model_path="/home/hongyu/InternVL/internvl2_8b_internlm2_7b_dynamic_res_2nd_finetune_lora_fulldataset"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
-conda activate llava-med
+conda activate internvl_louwei
 nohup python evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \

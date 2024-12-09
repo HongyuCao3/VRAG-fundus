@@ -43,7 +43,7 @@ def load_model_and_tokenizer(args):
     kwargs = {'device_map': device_map} if args.auto else {}
     tokenizer = AutoTokenizer.from_pretrained(args.checkpoint, trust_remote_code=True, use_fast=False)
     model = InternVLChatModel.from_pretrained(
-        args.checkpoint, low_cpu_mem_usage=True, torch_dtype=torch.bfloat16,
+        args.checkpoint, low_cpu_mem_usage=False, torch_dtype=torch.bfloat16,
         load_in_8bit=args.load_in_8bit, load_in_4bit=args.load_in_4bit, **kwargs).eval()
     if not args.load_in_8bit and not args.load_in_4bit and not args.auto:
         model = model.cuda()
