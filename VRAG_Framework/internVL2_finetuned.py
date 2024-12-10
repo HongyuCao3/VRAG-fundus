@@ -274,7 +274,7 @@ class InternVL2_finetuned():
         if self.classic_emb == None:
             ret_cl = self.context_former.ret_empty
         else:
-            ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, 3)
+            ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, 2)
             
         # filter logic
         if self.filter:
