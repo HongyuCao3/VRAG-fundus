@@ -130,6 +130,8 @@ if __name__ == "__main__":
     parser.add_argument('--auto', action='store_true')
     parser.add_argument('--filter', action='store_true')
     parser.add_argument('--check', action='store_true')
+    parser.add_argument('--t-check', type=float, default=0.7)
+    parser.add_argument('--t-filter', type=float, default=0.5)
     args = parser.parse_args()
     # vrag = VRAG(args) # llava, llava-med, llava-med-rag
     vrag = InternVL2_finetuned(args)

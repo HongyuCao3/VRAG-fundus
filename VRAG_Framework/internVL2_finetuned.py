@@ -52,10 +52,12 @@ class InternVL2_finetuned():
         self.layer = args.layer
         self.filter = args.filter
         self.check = args.check
+        self.t_check = args.t_check
+        self.t_filter = args.t_filter
         self.load_embs()
         self.context_former = ContextFormer(args.use_pics)
-        self.vrag_filter = VRAGFilter(self.context_former)
-        self.checker = Checker()
+        self.vrag_filter = VRAGFilter(self.context_former, threshold=self.t_filter)
+        self.checker = Checker(threshold=self.t_check)
     
     def load_embs(self, ):
         if self.level_emb_path:
