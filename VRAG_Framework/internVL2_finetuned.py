@@ -15,6 +15,7 @@ from internvl.model.internvl_chat.modeling_internvl_chat import InternVLChatMode
 from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys, expand_disease_abbreviation
 from VRAG_Framework import load_model_and_tokenizer
+from vrag_filter import VRAGFilter
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -49,8 +50,10 @@ class InternVL2_finetuned():
         self.num_beams = args.num_beams
         self.temperature = args.temperature
         self.layer = args.layer
+        self.filter = args.filter
         self.load_embs()
         self.context_former = ContextFormer(args.use_pics)
+        self.vrag_filter = VRAGFilter(self.context_former)
     
     def load_embs(self, ):
         if self.level_emb_path:
@@ -272,6 +275,10 @@ class InternVL2_finetuned():
             ret_cl = self.context_former.ret_empty
         else:
             ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, 1)
+            
+        # filter logic
+        if self.filter:
+            ret_cl = self.vrag_filter.filter_multi_modal_vqa(ret_cl)
         # form context
         prompt, images, record_data = self.context_former.form_context_all_cl(img_path, query_str, ret_cl)
             
