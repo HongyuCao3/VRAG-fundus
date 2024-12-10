@@ -55,7 +55,7 @@ if __name__ == "__main__":
     copier = DiagnosisImageCopier(eye_dataset, target_dir='./data/Classic Images')
     
     # 定义诊断列表
-    d_list = ["macular hole"]  # 示例诊断列表
+    d_list = ["macular hole", "Coats Disease","central serous chorioretinopathy"]  # 诊断列表
     
     # 复制图像
     copier.copy_images_for_diagnoses(d_list)
