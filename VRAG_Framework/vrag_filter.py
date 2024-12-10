@@ -9,7 +9,11 @@ class VRAGFilter():
     def filter_multi_modal_vqa(self, ret_cl):
         # 如果是finetune存在的就不用rag
         # print(ret_cl["txt"][0])
-        if ret_cl['txt'][0] not in self.multi_modal_vqa_classes:
+        flag=False
+        for i in range(len(ret_cl['txt'])):
+            if ret_cl['txt'][i] in self.multi_modal_vqa_classes:
+                flag=True
+        if not flag:
             return self.context_former.ret_empty
         else:
             return ret_cl

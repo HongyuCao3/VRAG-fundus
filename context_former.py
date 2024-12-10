@@ -146,9 +146,9 @@ class ContextFormer():
         if diagnosis_str != "{}":
             parts.append(f"Diagnosing Standard: {diagnosis_str}\n")
         if context_str_l != "{}":
-            parts.append(f"The possible diagnosing level and probability: {context_str_l}\n")
+            parts.append(f"The possible diagnosing level and similarity: {context_str_l}\n")
         if context_str_c != "{}":
-            parts.append(f"The possible lesion and probability: {context_str_c}\n")
+            parts.append(f"The possible lesion and similarity: {context_str_c}\n")
         # if context_str_cl != "{}":
         #     parts.append(f"The possible diagnosing class and probability: {context_str_cl}\n")
         # if metadata_str != "[{}]":
@@ -164,7 +164,7 @@ class ContextFormer():
         parts = []
         
         if context_str_cl != "{}":
-            parts.append(f"The possible diagnosis and probability: {context_str_cl}\n")
+            parts.append(f"The possible diagnosis and similarity: {context_str_cl}\n")
         # if context_str_c != "{}":
             # parts.append(f"The possible lesion and probability: {context_str_c}\n")
         # if context_str_cl != "{}":
@@ -190,7 +190,7 @@ class ContextFormer():
             prefix = "Your diagnosis may be accurate"
         else:
             prefix = "Your diagnosis may be inaccurate"
-        prompt = prefix + "The second picture is the matching result and probability " + context_str_l + " Please compare the two pictures and check the diagnosis of the first picture again." + "Give the answer in format {\"level\": "", \"reasons\": ""}"
+        prompt = prefix + "The second picture is the matching result and similarity " + context_str_l + " Please compare the two pictures and check the diagnosis of the first picture again." + "Give the answer in format {\"level\": "", \"reasons\": ""}"
         # prompt = self.build_diagnosis_string("", context_str_c, "", self.diagnosis_str, metadata_str, query_str)
         record_data.update({"prompt": prompt})
         return prompt, None, record_data
