@@ -16,7 +16,7 @@ from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys, expand_disease_abbreviation
 from VRAG_Framework import load_model_and_tokenizer
 from VRAG_Framework.vrag_filter import VRAGFilter
-
+from VRAG_Framework.checker import Checker
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
@@ -51,9 +51,11 @@ class InternVL2_finetuned():
         self.temperature = args.temperature
         self.layer = args.layer
         self.filter = args.filter
+        self.check = args.check
         self.load_embs()
         self.context_former = ContextFormer(args.use_pics)
         self.vrag_filter = VRAGFilter(self.context_former)
+        self.checker = Checker()
     
     def load_embs(self, ):
         if self.level_emb_path:
@@ -275,7 +277,7 @@ class InternVL2_finetuned():
             ret_cl = self.context_former.ret_empty
         else:
             ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, 2)
-            
+        ret_cl_ = ret_cl
         # filter logic
         if self.filter:
             ret_cl = self.vrag_filter.filter_multi_modal_vqa(ret_cl)
@@ -297,6 +299,11 @@ class InternVL2_finetuned():
         # single-image single-round conversation (单图单轮对话)
         question = prompt
         response = self.model.chat(self.tokenizer, pixel_values, question, generation_config, verbose=True)
+        if self.check:
+            flag, check_str = self.checker.check_multi_modal_vqa(response, ret_cl_)
+            if not flag:
+                # prompt_, images, record_data = self.context_former.form_context_all_cl(img_path, query_str, ret_cl_)
+                response = self.model.chat(self.tokenizer, pixel_values, check_str+question, generation_config, verbose=True)
         # print(f'User: {question}\nAssistant: {response}')
         return response, record_data
     
