@@ -251,7 +251,7 @@ def expand_disease_abbreviation(abbreviation):
     abbreviation = str(abbreviation).strip()
     
     # 查找并返回对应的全称，如果不存在则返回原输入
-    return disease_full_names.get(abbreviation, f"未知的疾病简称: {abbreviation}")
+    return disease_full_names.get(abbreviation, f"{abbreviation}")
 
 
 if __name__ == "__main__":
