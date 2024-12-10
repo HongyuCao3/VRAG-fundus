@@ -79,4 +79,5 @@ nohup python evaluation.py \
     --use-pics True \
     --test-num ${test_num} \
     --mode ALL \
+    --filter ${filter}\
     >${log_path} 2>&1 &
