@@ -11,7 +11,7 @@ class VRAGFilter():
         # print(ret_cl["txt"][0])
         flag=False
         for i in range(len(ret_cl['txt'])):
-            if ret_cl['txt'][i] in self.multi_modal_vqa_classes:
+            if ret_cl['txt'][i] in self.multi_modal_vqa_classes and ret_cl['score'][i] >= 0.5:
                 flag=True
         if not flag:
             return self.context_former.ret_empty

@@ -92,7 +92,7 @@ test_num=-1
 filter=True
 check=True
 model_name="internVL2_finetuned"
-save_tmp=${classic_emb}_${m}_${n}_rag_${test_num}_filter_${filter}_check_${check}_2d
+save_tmp=${classic_emb}_${m}_${n}_rag_${test_num}_filter2_${filter}_check2_${check}_2d
 output_path="./output/${dataset}/${model_name}/${save_tmp}.json"
 log_path="./output/${dataset}/${model_name}/log/${save_tmp}.log"
 model_path="/home/hongyu/InternVL/internvl2_8b_internlm2_7b_dynamic_res_2nd_finetune_lora_fulldataset"
@@ -109,6 +109,6 @@ nohup python evaluation.py \
     --use-pics True \
     --test-num ${test_num} \
     --mode ALL \
-    --filter \
     --check \
+    --filter \
     >${log_path} 2>&1 &
