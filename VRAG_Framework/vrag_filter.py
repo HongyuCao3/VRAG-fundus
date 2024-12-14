@@ -2,8 +2,11 @@ from context_former import ContextFormer
 
 class VRAGFilter():
     def __init__(self, context_former, threshold=0.5):
-        self.multi_modal_vqa_classes = ['Coats Disease',
-        'macular hole', 'central serous chorioretinopathy']
+        self.multi_modal_vqa_classes = [
+        # 'Coats Disease',
+        'macular hole', 
+        # 'central serous chorioretinopathy'
+        ]
         self.context_former = context_former
         self.threshold = threshold
     

@@ -72,3 +72,20 @@ conda activate internvl_louwei
 python analysis_.py \
     --file-path ${output_path} \
     --res-path ${res_path} 
+
+# filter+check
+filter=True
+check=True
+t_filter=0.5
+t_check=0.5
+model=internVL2_finetuned
+save_tmp=${classic_emb}_${m}_${n}_rag_${test_num}_filter_${t_filter}_check_${t_check}_2d_mh
+output_path="./output/${dataset}/${model}/${save_tmp}.json"
+log_path="./output/${dataset}/${model}/log/${save_tmp}.log"
+res_path="./output/${dataset}/${model}/analysis/${save_tmp}.png"
+model_path="/home/hongyu/Visual-RAG-LLaVA-Med/Model/InternVL2-8B"
+cd /home/hongyu/Visual-RAG-LLaVA-Med
+conda activate internvl_louwei
+python analysis_.py \
+    --file-path ${output_path} \
+    --res-path ${res_path} 
