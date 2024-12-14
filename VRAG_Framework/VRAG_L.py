@@ -31,6 +31,8 @@ from llama_index.core.response.notebook_utils import display_source_node
 from llama_index.core.indices.multi_modal.base import MultiModalVectorStoreIndex
 from llama_index.embeddings.clip import ClipEmbedding
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from VRAG_Framework.vrag_filter import VRAGFilter
+from VRAG_Framework.checker import Checker
 
 class VRAG():
     def __init__(self, args):
@@ -59,7 +61,13 @@ class VRAG():
         self.classic_emb_path = args.classic_emb_path
         self.layer = args.layer
         self.context_former = ContextFormer(args.use_pics)
+        self.filter = args.filter
+        self.check = args.check
+        self.t_check = args.t_check
+        self.t_filter = args.t_filter
         self.load_embs()
+        self.vrag_filter = VRAGFilter(self.context_former, threshold=self.t_filter)
+        self.checker = Checker(threshold=self.t_check)
     
     def load_embs(self, ):
         if self.level_emb_path:
@@ -134,10 +142,56 @@ class VRAG():
             ret_cl = self.context_former.ret_empty
         else:
             ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, 1)
+            
+        ret_cl_ = ret_cl
+        if self.filter:
+            ret_cl = self.vrag_filter.filter_multi_modal_vqa(ret_cl)
         # form context
         prompt, images, record_data = self.context_former.form_context_all_cl(img_path, query_str, ret_cl)
             
         # do inference
+        # set_seed(0)
+        # disable_torch_init()
+        # qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
+        # if self.model.config.mm_use_im_start_end:
+        #     qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
+        # else:
+        #     qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
+        # conv = conv_templates[self.conv_mode].copy()
+        # conv.append_message(conv.roles[0], qs)
+        # conv.append_message(conv.roles[1], None)
+        # prompt = conv.get_prompt()
+        
+        # input_ids = tokenizer_image_token(prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
+
+        # image_tensor = process_images(images, self.image_processor, self.model.config)[0] 
+        
+        # stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
+        # keywords = [stop_str]
+        # stopping_criteria = KeywordsStoppingCriteria(keywords, self.tokenizer, input_ids)
+        # with torch.inference_mode():
+        #         output_ids = self.model.generate(
+        #             input_ids,
+        #             images=image_tensor.unsqueeze(0).half().cuda(),
+        #             do_sample=True if self.temperature > 0 else False,
+        #             temperature=self.temperature,
+        #             top_p=self.top_p,
+        #             num_beams=self.num_beams,
+        #             # no_repeat_ngram_size=3,
+        #             max_new_tokens=1024,
+        #             use_cache=True)
+
+        # outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+        # delete_images()
+        outputs = self.model_chat(images, prompt)
+        record_data.update({"outputs": outputs})
+        if self.check:
+            flag, check_str = self.checker.check_multi_modal_vqa(outputs, ret_cl_)
+            if not flag:
+                outputs = self.model_chat(self, images, check_str+prompt)
+        return outputs, record_data
+    
+    def model_chat(self, images, prompt):
         set_seed(0)
         disable_torch_init()
         qs = prompt.replace(DEFAULT_IMAGE_TOKEN, '').strip()
@@ -170,9 +224,7 @@ class VRAG():
                     use_cache=True)
 
         outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        # record_data.update({"outputs": outputs})
-        # delete_images()
-        return outputs, record_data
+        return outputs
     
     def form_context(self, img_path, query_str, ret_c, ret_l):
         record_data = {}
