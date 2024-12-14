@@ -59,7 +59,6 @@ m=1
 n=1
 test_num=-1
 t_filter=0.5
-t_check=0.5
 model_name=llava-med-finetuned
 save_tmp=${classic_emb}_${m}_${n}_rag_${test_num}_filter_${t_filter}_check_${t_check}_2d_mh
 output_path="./output/${dataset}/${model_name}/${save_tmp).json"
@@ -79,4 +78,6 @@ nohup python evaluation_llava.py \
     --use-pics True \
     --test-num ${test_num} \
     --mode ALL \
+    --filter \
+    --t-filter ${t_filter} \
     >${log_path} 2>&1 &
