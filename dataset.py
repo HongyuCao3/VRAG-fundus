@@ -252,7 +252,7 @@ if __name__ == "__main__":
     data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
     
     # 创建数据集实例
-    sheet_names = ["CFP"]
+    sheet_names = ["FFA"]
     dataset = MultiModalVQADataset(excel_file, data_dir, sheet_names=sheet_names)
     
     # 获取第一个样本
