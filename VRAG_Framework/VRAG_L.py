@@ -188,7 +188,7 @@ class VRAG():
         if self.check:
             flag, check_str = self.checker.check_multi_modal_vqa(outputs, ret_cl_)
             if not flag:
-                outputs = self.model_chat(self, images, check_str+prompt)
+                outputs = self.model_chat(images, check_str+prompt)
         return outputs, record_data
     
     def model_chat(self, images, prompt):
