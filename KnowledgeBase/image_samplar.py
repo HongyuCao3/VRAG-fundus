@@ -1,5 +1,6 @@
 import shutil, os
 from tqdm import tqdm
+from argparse import ArgumentParser
 from dataset import MultiModalVQADataset, EyeImageDataset
 
 class DiagnosisImageCopier:
@@ -45,17 +46,21 @@ class DiagnosisImageCopier:
                     print(f"Unable to copy file {img_path}. Error: {e}")
                     
 if __name__ == "__main__":
+    parser = ArgumentParser()
     root_path = "/home/hongyu/"
     cur_path = "/home/hongyu/Visual-RAG-LLaVA-Med"    
     csv_file = root_path +'alldataset/cleaned_full.csv'
     img_dir = root_path + 'alldataset/images'
+    parser.add_argument("--tgt-dir", type=str, default=cur_path+"/KnowledgeBase/emb_savings/Classic Images")
+    parser.add_argument("--diag-list", nargs='+', type=str, default=["macular hole", "Coats Disease","central serous chorioretinopathy"])
+    args = parser.parse_args()
+    
     eye_dataset = EyeImageDataset(csv_file=csv_file, img_dir=img_dir)
-
-    print(eye_dataset.get_entries_by_diagnosis("macular hole", 2))
-    copier = DiagnosisImageCopier(eye_dataset, target_dir='./data/Classic Images')
+    # print(eye_dataset.get_entries_by_diagnosis("macular hole", 2))
+    copier = DiagnosisImageCopier(eye_dataset, target_dir=args.tgt_dir)
     
     # 定义诊断列表
-    d_list = ["macular hole", "Coats Disease","central serous chorioretinopathy"]  # 诊断列表
+    # d_list = ["macular hole", "Coats Disease","central serous chorioretinopathy"]  # 诊断列表
     
     # 复制图像
-    copier.copy_images_for_diagnoses(d_list)
+    copier.copy_images_for_diagnoses(args.diag_list)
