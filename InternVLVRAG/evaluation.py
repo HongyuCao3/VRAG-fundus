@@ -1,9 +1,12 @@
 import argparse
 import torch
-import os
+import os, sys
 import json, gc
 from tqdm import tqdm
-from dataset import DRDataset, EyeImageDataset, MultiModalVQADataset
+sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
+from Datasets.DRDataset import DRDataset
+from Datasets.eye_image_dataset import EyeImageDataset
+from Datasets.multi_modal_vqa_dataset import MultiModalVQADataset
 from torch.utils.data import Dataset, DataLoader
 
 # from VRAG_crop import VRAG
