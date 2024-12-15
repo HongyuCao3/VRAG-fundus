@@ -30,7 +30,7 @@ class evaluation():
             root_path = "/home/hongyu/"
             excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
             data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
-            self.dataset = MultiModalVQADataset(excel_file, data_dir)
+            self.dataset = MultiModalVQADataset(excel_file, data_dir, sheet_names=args.sheet_names)
         self.test_num = args.test_num
         
     def test(self):
@@ -149,6 +149,7 @@ if __name__ == "__main__":
     parser.add_argument('--check', action='store_true')
     parser.add_argument('--t-check', type=float, default=0.7)
     parser.add_argument('--t-filter', type=float, default=0.5)
+    parser.add_argument("--sheet-names", nargs='+', type=str, default=["CFP"])
     args = parser.parse_args()
     vrag = VRAG(args) # llava, llava-med, llava-med-rag
     # vrag = InternVL2(args)
