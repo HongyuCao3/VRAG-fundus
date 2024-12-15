@@ -3,3 +3,5 @@ segmentation/
 data/
 __pycache__/
 output/
+KnowledgeBase/emb_savings/
+KnowledgeBase/img_savings/
