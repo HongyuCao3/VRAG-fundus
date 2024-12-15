@@ -2,8 +2,9 @@ import shutil, os, sys
 from tqdm import tqdm
 from argparse import ArgumentParser
 # from dataset import MultiModalVQADataset, EyeImageDataset
+sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 print(sys.path)
-from datasets.eye_image_dataset import EyeImageDataset
+from Datasets.eye_image_dataset import EyeImageDataset
 
 class DiagnosisImageCopier:
     def __init__(self, dataset, target_dir='classic images'):
