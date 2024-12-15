@@ -146,7 +146,8 @@ class MultiModalVQADataset(Dataset):
         
         # Use an OrderedDict to preserve insertion order and remove duplicates based on img_path
         samples_dict = OrderedDict()
-        
+        image_extensions = ['*.jpg', '*.jpeg', '*.png', '*.bmp', '*.gif']
+        # print(self.annotations_df.keys())
         for sheet_name, df in self.annotations_df.items():
             # select according to sheet_name
             if sheet_name not in sheet_names:
@@ -154,12 +155,18 @@ class MultiModalVQADataset(Dataset):
                 continue
             for index, row in df.iterrows():
                 img_path = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.jpg")
+                # print(img_path)
+                img_path2 = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.png")
                 if os.path.exists(img_path) and img_path not in samples_dict:
                     samples_dict[img_path] = {
                         'img_path': img_path,
                         'diagnosis': row['Diagnosis']
                     }
-        
+                elif os.path.exists(img_path2) and img_path2 not in samples_dict:
+                    samples_dict[img_path] = {
+                        'img_path': img_path2,
+                        'diagnosis': row['Diagnosis']
+                    }
         # Convert the dictionary back into a list of dictionaries
         self.samples = list(samples_dict.values())
 
@@ -252,7 +259,7 @@ if __name__ == "__main__":
     data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
     
     # 创建数据集实例
-    sheet_names = ["OCT"]
+    sheet_names = ['OCT']
     dataset = MultiModalVQADataset(excel_file, data_dir, sheet_names=sheet_names)
     
     # 获取第一个样本
