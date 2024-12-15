@@ -4,6 +4,7 @@ from transformers import CLIPModel, CLIPProcessor
 from PIL import Image
 from data_extractor import DataExtractor
 import argparse
+from pathlib import Path
 from torch.nn.functional import cosine_similarity
 from utils import find_json_file, convert_abbreviation_to_full_name, expand_disease_abbreviation
 
@@ -504,7 +505,11 @@ class ClassicEmbBuilder(EmbBuilder):
             txt_f = expand_disease_abbreviation(folder_name)
             txt_.append(txt_f) # folder name
             metadata_.append(img_path)
-            img_.append("." + ".".join(img_path.split(".")[-2:]))
+            # print(img_path)
+            if Path(img_path).is_absolute():
+                img_.append(img_path)
+            else:
+                img_.append("." + ".".join(img_path.split(".")[-2:]))
         detailed_similarities = {"score":score_, "txt": txt_, "metadata": metadata_, "img": img_}
 
         return detailed_similarities
