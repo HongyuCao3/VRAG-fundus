@@ -7,7 +7,6 @@ import torch
 from collections import Counter, OrderedDict
 from torch.utils.data import Dataset
 from torchvision.io import read_image
-
 class EyeImageDataset(Dataset):
     def __init__(self, csv_file, img_dir, transform=None):
         """

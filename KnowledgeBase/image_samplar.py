@@ -2,7 +2,7 @@ import shutil, os
 from tqdm import tqdm
 from argparse import ArgumentParser
 # from dataset import MultiModalVQADataset, EyeImageDataset
-from ..datasets.eye_image_dataset import EyeImageDataset
+from datasets.eye_image_dataset import EyeImageDataset
 
 class DiagnosisImageCopier:
     def __init__(self, dataset, target_dir='classic images'):
