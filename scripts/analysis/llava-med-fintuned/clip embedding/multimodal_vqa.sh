@@ -45,7 +45,7 @@ model_name="llava-med-finetuned"
 save_tmp=${classic_emb}_${m}_${n}_rag_${test_num}_filter_${t_filter}_check_${t_check}_2d_mh
 output_path="./output/${dataset}/${model_name}/${save_tmp}.json"
 log_path="./output/${dataset}/${model_name}/log/${save_tmp}.log"
-res_path="./output/${dataset}/${model_name}.png"
+res_path="./output/${dataset}/${model_name}/analysis/${save_tmp}.png"
 model_path="/home/hongyu/eye_llava_medllava_finetune_mistral"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
 conda activate llava-med
