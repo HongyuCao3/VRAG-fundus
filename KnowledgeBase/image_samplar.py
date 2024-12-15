@@ -1,7 +1,8 @@
-import shutil, os
+import shutil, os, sys
 from tqdm import tqdm
 from argparse import ArgumentParser
 # from dataset import MultiModalVQADataset, EyeImageDataset
+print(sys.path)
 from datasets.eye_image_dataset import EyeImageDataset
 
 class DiagnosisImageCopier:
