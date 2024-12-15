@@ -115,5 +115,5 @@ nohup python evaluation_llava.py \
     --filter \
     --check \
     --t-filter ${t_filter} \
-    --t-checker ${t_check} \
+    --t-check ${t_check} \
     >${log_path} 2>&1 &
