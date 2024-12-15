@@ -1,9 +1,10 @@
 import torch
-import os, json
+import os, json, sys
 from transformers import CLIPModel, CLIPProcessor
 from PIL import Image
 from data_extractor import DataExtractor
 import argparse
+sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 from torch.nn.functional import cosine_similarity
 from utils import find_json_file, convert_abbreviation_to_full_name
 
