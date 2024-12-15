@@ -18,19 +18,7 @@ from llava.conversation import conv_templates, SeparatorStyle
 from llava.model.builder import load_pretrained_model
 from llava.utils import disable_torch_init
 from llava.mm_utils import tokenizer_image_token, get_model_name_from_path, KeywordsStoppingCriteria, process_images
-from llama_index.core import (ServiceContext, 
-                               SimpleDirectoryReader,
-                               SimpleDirectoryReader,
-                               StorageContext,
-                               load_index_from_storage,
-                               Settings)
-from llama_index.core.schema import ImageNode
 from llama_index.core.schema import ImageDocument
-from llama_index.vector_stores.qdrant import QdrantVectorStore
-from llama_index.core.response.notebook_utils import display_source_node
-from llama_index.core.indices.multi_modal.base import MultiModalVectorStoreIndex
-from llama_index.embeddings.clip import ClipEmbedding
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from VRAG_Framework.vrag_filter import VRAGFilter
 from VRAG_Framework.checker import Checker
 
