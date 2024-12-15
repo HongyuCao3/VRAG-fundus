@@ -29,6 +29,7 @@ nohup python ./InternVLVRAG/evaluation.py \
     --test-num ${test_num} \
     --mode ALL \
     --dynamic \
+    --sheet-names ${sheet_names} \
     >${log_path} 2>&1 &
 
 
@@ -36,7 +37,7 @@ nohup python ./InternVLVRAG/evaluation.py \
 classic_emb=classic_emb_ffa
 dataset=MultiModal
 cur_path="/home/hongyu/Visual-RAG-LLaVA-Med"
-emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
+classic_emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
 model_name="finetuned"
 sheet_names="FFA"
 m=1
@@ -61,13 +62,14 @@ nohup python ./InternVLVRAG/evaluation.py \
     --use-pics True \
     --test-num ${test_num} \
     --mode ALL \
+    --sheet-names ${sheet_names} \
     >${log_path} 2>&1 &
 
 # filter
 classic_emb=classic_emb_ffa
 dataset=MultiModal
 cur_path="/home/hongyu/Visual-RAG-LLaVA-Med"
-emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
+classic_emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
 model_name="finetuned"
 sheet_names="FFA"
 m=1
@@ -93,13 +95,14 @@ nohup python ./InternVLVRAG/evaluation.py \
     --test-num ${test_num} \
     --mode ALL \
     --filter \
+    --sheet-names ${sheet_names} \
     >${log_path} 2>&1 &
 
 # filter+check
 classic_emb=classic_emb_ffa
 dataset=MultiModal
 cur_path="/home/hongyu/Visual-RAG-LLaVA-Med"
-emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
+classic_emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
 model_name="finetuned"
 sheet_names="FFA"
 m=1
@@ -128,4 +131,5 @@ nohup python ./InternVLVRAG/evaluation.py  \
     --filter \
     --t-check ${t_check} \
     --t-filter ${t_filter} \
+    --sheet-names ${sheet_names} \
     >${log_path} 2>&1 &
