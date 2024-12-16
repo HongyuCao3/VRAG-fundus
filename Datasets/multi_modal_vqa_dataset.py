@@ -34,12 +34,17 @@ class MultiModalVQADataset(Dataset):
                 continue
             for index, row in df.iterrows():
                 img_path = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.jpg")
+                img_path2 = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.png")
                 if os.path.exists(img_path) and img_path not in samples_dict:
                     samples_dict[img_path] = {
                         'img_path': img_path,
                         'diagnosis': row['Diagnosis']
                     }
-        
+                elif os.path.exists(img_path2) and img_path2 not in samples_dict:
+                    samples_dict[img_path] = {
+                        'img_path': img_path2,
+                        'diagnosis': row['Diagnosis']
+                    }
         # Convert the dictionary back into a list of dictionaries
         self.samples = list(samples_dict.values())
 
