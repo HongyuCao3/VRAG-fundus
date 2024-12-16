@@ -95,6 +95,7 @@ nohup python ./InternVLVRAG/evaluation.py \
     --test-num ${test_num} \
     --mode ALL \
     --filter \
+    --t-filter ${t_filter}
     --sheet-names ${sheet_names} \
     >${log_path} 2>&1 &
 
