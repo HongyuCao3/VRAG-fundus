@@ -56,7 +56,7 @@ class InternVL2_finetuned():
         self.t_filter = args.t_filter
         self.load_embs()
         self.context_former = ContextFormer(args.use_pics)
-        self.vrag_filter = VRAGFilter(self.context_former, threshold=self.t_filter)
+        self.vrag_filter = VRAGFilter(self.context_former, threshold=self.t_filter, sheet_names=args.sheet_names)
         self.checker = Checker(threshold=self.t_check)
     
     def load_embs(self, ):
