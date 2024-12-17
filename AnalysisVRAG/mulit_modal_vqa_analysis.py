@@ -91,8 +91,8 @@ class MultiVQAAnalysis(BaseAnalysis):
                 prediction = ground_truth 
             else:
                 for c in classes:
-                     if c in llm_respond:
-                         prediction = c
+                     if c.lower() in llm_respond:
+                         prediction = c.lower()
                 if prediction is None:
                     prediction = "incorrect"
 
