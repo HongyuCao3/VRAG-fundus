@@ -9,11 +9,13 @@ from sklearn.metrics import confusion_matrix
 import itertools
 import ast
 from AnalysisVRAG.base import BaseAnalysis
+from AnalysisVRAG.class_combiner import ClassCombiner
 
 class MultiVQAAnalysis(BaseAnalysis):
     def __init__(self, args):
         super().__init__(args.file_path)
         self.sheet_names = args.sheet_names
+        self.combiner = ClassCombiner()
 
     def calculate_accuracy(self):
         correct_count = 0
@@ -80,7 +82,8 @@ class MultiVQAAnalysis(BaseAnalysis):
                             "retinal detachment",
                             "retinoschisis",
                             "retinal vein occlusion",
-                            "wet age-related macular degeneration"})
+                            # "wet age-related macular degeneration"
+                            })
             # classes = set(classes)
         print(self.sheet_names)
         for result in self.data['results']:
@@ -90,6 +93,7 @@ class MultiVQAAnalysis(BaseAnalysis):
             except:
                 llm_respond = result["llm respond"].lower()
 
+            ground_truth = self.combiner.combine(ground_truth)
             # 假设 llm_respond 是一个 JSON 字符串，其中包含 'diagnosis' 键作为预测结果
             # 如果不是这种情况，您可能需要调整如何从 llm_respond 提取预测值
             if ground_truth in llm_respond:
