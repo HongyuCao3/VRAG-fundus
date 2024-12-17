@@ -68,7 +68,7 @@ class MultiVQAAnalysis(BaseAnalysis):
                             "choroidal melanoma", 
                             "coats disease", 
                             "familial exudative vitreoretinopathy", 
-                            "vogt-koyanagi-Harada disease"})
+                            "vogt-koyanagi-harada disease"})
             # classes = set(classes)
             
         if "OCT" in self.sheet_names:
