@@ -12,7 +12,7 @@ from AnalysisVRAG.base import BaseAnalysis
 
 class MultiVQAAnalysis(BaseAnalysis):
     def __init__(self, args):
-        super().__init__(args.filepath)
+        super().__init__(args.file_path)
         self.sheet_names = args.sheet_names
 
     def calculate_accuracy(self):
@@ -40,7 +40,7 @@ class MultiVQAAnalysis(BaseAnalysis):
         all_predictions = []
 
         # 获取所有可能的类别
-        classes = []
+        classes = set([])
         if "CFP" in self.sheet_names:
             classes = set(['diabetic retinopathy',
             'age-related macular degeneration',
@@ -56,7 +56,7 @@ class MultiVQAAnalysis(BaseAnalysis):
             'glaucoma',
             'epiretinal membrane'])
         if "FFA" in self.sheet_names:
-            classes.append(["diabetic retinopathy", 
+            classes.update({"diabetic retinopathy", 
                             # "wet age-related macular degeneration", 
                             # "dry age-related macular degeneration", 
                             "age-related macular degeneration",
@@ -66,11 +66,11 @@ class MultiVQAAnalysis(BaseAnalysis):
                             "choroidal melanoma", 
                             "Coats Disease", 
                             "familial exudative vitreoretinopathy", 
-                            "Vogt-Koyanagi-Harada disease"])
-            classes = set(classes)
+                            "Vogt-Koyanagi-Harada disease"})
+            # classes = set(classes)
             
         if "OCT" in self.sheet_names:
-            classes.append(["cystoid macular edema", 
+            classes.update({"cystoid macular edema", 
                             "central serous chorioretinopathy",
                             # "dry age-related macular degeneration",
                             "age-related macular degeneration",
@@ -80,8 +80,9 @@ class MultiVQAAnalysis(BaseAnalysis):
                             "retinal detachment",
                             "retinoschisis",
                             "retinal vein occlusion",
-                            "wet age-related macular degeneration"])
-            classes = set(classes)
+                            "wet age-related macular degeneration"})
+            # classes = set(classes)
+        print(self.sheet_names)
         for result in self.data['results']:
             ground_truth = result['ground truth'].lower()
             try:
@@ -94,10 +95,12 @@ class MultiVQAAnalysis(BaseAnalysis):
             if ground_truth in llm_respond:
                 prediction = ground_truth 
             else:
+                flag=False
                 for c in classes:
                      if c.lower() in llm_respond:
                          prediction = c.lower()
-                if prediction is None:
+                         flag=True
+                if not flag:
                     prediction = "incorrect"
 
             # 添加到集合中以确保唯一性
