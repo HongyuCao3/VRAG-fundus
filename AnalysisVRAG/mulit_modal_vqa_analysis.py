@@ -66,9 +66,9 @@ class MultiVQAAnalysis(BaseAnalysis):
                             "branch retinal vein occlusion", 
                             "central serous chorioretinopathy",
                             "choroidal melanoma", 
-                            "Coats Disease", 
+                            "coats disease", 
                             "familial exudative vitreoretinopathy", 
-                            "Vogt-Koyanagi-Harada disease"})
+                            "vogt-koyanagi-Harada disease"})
             # classes = set(classes)
             
         if "OCT" in self.sheet_names:
