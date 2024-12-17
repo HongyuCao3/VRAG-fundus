@@ -52,7 +52,7 @@ class MultiVQAAnalysis(BaseAnalysis):
             'branch retinal artery occlusion',
             'central serous chorioretinopathy',
             'retinal detachment',
-            'Coats Disease',
+            'coats disease',
             'macular hole',
             'pathologic myopia',
             'glaucoma',
