@@ -1,4 +1,5 @@
-import os
+import os, sys
+sys.path.append("/home/hongyu/Visual-RAG-LLaVA-Med")
 import json
 import argparse
 from collections import defaultdict
