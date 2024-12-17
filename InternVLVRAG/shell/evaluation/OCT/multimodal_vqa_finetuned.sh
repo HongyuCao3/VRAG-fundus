@@ -1,3 +1,5 @@
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+
 # raw
 classic_emb=classic_emb_oct
 dataset=MultiModal
@@ -109,8 +111,8 @@ sheet_names="OCT"
 m=1
 n=1
 test_num=-1
-t_check=-1
-t_filter=0.7
+t_check=0.5
+t_filter=0.5
 save_tmp=${classic_emb}_${m}_${n}_rag_${test_num}_filter_${t_filter}_check_${t_check}_modality_${sheet_names}
 output_path=${cur_path}"/InternVLVRAG/output/${dataset}/${model_name}/${save_tmp}.json"
 log_path=${cur_path}"/InternVLVRAG/output/${dataset}/${model_name}/log/${save_tmp}.log"
