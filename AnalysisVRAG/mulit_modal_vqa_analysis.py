@@ -10,8 +10,9 @@ import ast
 from AnalysisVRAG.base import BaseAnalysis
 
 class MultiVQAAnalysis(BaseAnalysis):
-    def __init__(self, filepath):
-        super().__init__(filepath)
+    def __init__(self, args):
+        super().__init__(args.filepath)
+        self.sheet_names = args.sheet_names
 
     def calculate_accuracy(self):
         correct_count = 0
@@ -38,20 +39,45 @@ class MultiVQAAnalysis(BaseAnalysis):
         all_predictions = []
 
         # 获取所有可能的类别
-        classes = set(['diabetic retinopathy',
-        'age-related macular degeneration',
-        'central retinal vein occlusion',
-        'branch retinal vein occlusion',
-        'central retinal artery occlusion',
-        'branch retinal artery occlusion',
-        'central serous chorioretinopathy',
-        'retinal detachment',
-        'Coats Disease',
-        'macular hole',
-        'pathologic myopia',
-        'glaucoma',
-        'epiretinal membrane'])
-        # classes = set(['age-related macular degeneration', 'branch retinal artery occlusion', 'branch retinal vein occlusion', 'central retinal artery occlusion', 'central retinal vein occlusion', 'central serous chorioretinopathy', 'choroidal melanoma', 'coats disease', 'diabetic retinopathy', 'dry age-related macular degeneration', 'epiretinal membrane', 'familial exudative vitreoretinopathy', 'glaucoma', 'macular hole', 'pathologic myopia', 'retinal detachment', 'retinal vein occlusion', 'vogt-koyanagi-harada disease', 'wet age-related macular degeneration'])
+        classes = []
+        if "CFP" in self.sheet_names:
+            classes = set(['diabetic retinopathy',
+            'age-related macular degeneration',
+            'central retinal vein occlusion',
+            'branch retinal vein occlusion',
+            'central retinal artery occlusion',
+            'branch retinal artery occlusion',
+            'central serous chorioretinopathy',
+            'retinal detachment',
+            'Coats Disease',
+            'macular hole',
+            'pathologic myopia',
+            'glaucoma',
+            'epiretinal membrane'])
+        if "FFA" in self.sheet_names:
+            classes.append(["diabetic retinopathy", 
+                            "wet age-related macular degeneration", 
+                            "dry age-related macular degeneration", 
+                            "central retinal vein occlusion", 
+                            "branch retinal vein occlusion", 
+                            "central serous chorioretinopathy",
+                            "choroidal melanoma", 
+                            "Coats Disease", 
+                            "familial exudative vitreoretinopathy", 
+                            "Vogt-Koyanagi-Harada disease"])
+            classes = set(classes)
+            
+        if "OCT" in self.sheet_names:
+            classes.append(["cystoid macular edema", 
+                            "central serous chorioretinopathy",
+                            "dry age-related macular degeneration",
+                            "epiretinal membrane" "macular hole",
+                            "polypoidal choroidal vasculopathy",
+                            "retinal detachment",
+                            "retinoschisis",
+                            "retinal vein occlusion",
+                            "wet age-related macular degeneration"])
+            classes = set(classes)
         for result in self.data['results']:
             ground_truth = result['ground truth'].lower()
             try:

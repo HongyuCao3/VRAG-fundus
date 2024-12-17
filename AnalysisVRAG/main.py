@@ -12,7 +12,7 @@ if __name__ == "__main__":
     parser.add_argument("--step", type=int, default=4)
     parser.add_argument("--sheet-names", type=str, nargs='+', default=["CFP"])
     args = parser.parse_args()
-    analysis = MultiVQAAnalysis(args.file_path)
+    analysis = MultiVQAAnalysis(args)
     cm = analysis.calculate_confusion_matrix(args.res_path)
     print(f"Accuracy: {analysis.calculate_accuracy():.4f}")
     print(cm)
