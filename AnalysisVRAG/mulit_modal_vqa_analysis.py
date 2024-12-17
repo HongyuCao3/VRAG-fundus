@@ -56,8 +56,9 @@ class MultiVQAAnalysis(BaseAnalysis):
             'epiretinal membrane'])
         if "FFA" in self.sheet_names:
             classes.append(["diabetic retinopathy", 
-                            "wet age-related macular degeneration", 
-                            "dry age-related macular degeneration", 
+                            # "wet age-related macular degeneration", 
+                            # "dry age-related macular degeneration", 
+                            "age-related macular degeneration",
                             "central retinal vein occlusion", 
                             "branch retinal vein occlusion", 
                             "central serous chorioretinopathy",
@@ -70,8 +71,10 @@ class MultiVQAAnalysis(BaseAnalysis):
         if "OCT" in self.sheet_names:
             classes.append(["cystoid macular edema", 
                             "central serous chorioretinopathy",
-                            "dry age-related macular degeneration",
-                            "epiretinal membrane" "macular hole",
+                            # "dry age-related macular degeneration",
+                            "age-related macular degeneration",
+                            "epiretinal membrane",
+                            "macular hole",
                             "polypoidal choroidal vasculopathy",
                             "retinal detachment",
                             "retinoschisis",
