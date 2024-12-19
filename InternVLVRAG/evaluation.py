@@ -2,11 +2,12 @@ import argparse
 import torch
 import os, sys
 import json, gc
+import pandas as pd
 from tqdm import tqdm
 sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 from Datasets.DRDataset import DRDataset
 from Datasets.eye_image_dataset import EyeImageDataset
-from Datasets.multi_modal_vqa_dataset import MultiModalVQADataset
+from Datasets.multi_modal_vqa_dataset import MultiModalVQADataset, MultiModalVQADataset2
 from torch.utils.data import Dataset, DataLoader
 
 # from VRAG_crop import VRAG
@@ -22,6 +23,7 @@ class evaluation():
         # self.test_path = args.test_path
         self.output_path = args.output_path
         self.mode = args.mode
+        self.dataset_name = args.dataset
         if args.dataset == "DR":
             self.dataset = DRDataset(csv_file = './data/DR/multidr.csv',image_dir = './data/DR/multidr')
         if args.dataset == "ALL":
@@ -34,6 +36,11 @@ class evaluation():
             excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
             data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
             self.dataset = MultiModalVQADataset(excel_file, data_dir, sheet_names=args.sheet_names)
+        if args.dataset == "MultiModalVQA":
+            root_path = "/home/hongyu/"
+            excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
+            data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
+            self.dataset = MultiModalVQADataset2(excel_file, data_dir, sheet_names=args.sheet_names)
         self.test_num = args.test_num
         
     def test(self):
@@ -95,7 +102,32 @@ class evaluation():
 
         return accuracy
     
-    
+    def test2(self):
+        total_samples = len(self.dataset)
+        results = []
+        dataloader = DataLoader(self.dataset, batch_size=1, shuffle=False)
+
+        for images, diagnosis, query, answer in tqdm(dataloader):
+            if self.test_num != -1 and idx >= self.test_num:
+                break
+            idx += 1
+            diagnosis = diagnosis[0]
+            img_name = images[0]
+            if self.mode == "ALL":
+                respond, record_data = self.model.inference_rag_all(query, img_name)
+            results.append({
+                'img_name': img_name,
+                'diagnosis': diagnosis,
+                'llm respond': respond,
+                'record_data': record_data,
+                'query': query,
+                'answer': answer
+            })
+            df = pd.DataFrame(results)
+
+        # 将 DataFrame 保存为 CSV 文件
+        df.to_csv(self.output_path, index=False, encoding='utf-8')
+                
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b")
@@ -138,4 +170,4 @@ if __name__ == "__main__":
     # vrag = VRAG(args) # llava, llava-med, llava-med-rag
     vrag = InternVL2_finetuned(args)
     eva = evaluation(args, vrag)
-    eva.test()
+    eva.test2()
