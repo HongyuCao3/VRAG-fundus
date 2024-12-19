@@ -37,6 +37,7 @@ classic_emb=classic_emb_clip
 dataset=MultiModalVQA
 cur_path="/home/hongyu/Visual-RAG-LLaVA-Med"
 emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
+classic_emb_path="./data/${classic_emb}"
 model_name="finetuned"
 sheet_names="CFP"
 m=1
