@@ -114,7 +114,9 @@ class MultiModalVQADataset2(MultiModalVQADataset):
                 elif os.path.exists(img_path2) :
                     samples_dict[img_path] = {
                         'img_path': img_path2,
-                        'diagnosis': row['Diagnosis']
+                        'diagnosis': row['Diagnosis'],
+                        'Q': row["Q"],
+                        "A": row["A"]
                     }
         # Convert the dictionary back into a list of dictionaries
         self.samples = list(samples_dict.values())
