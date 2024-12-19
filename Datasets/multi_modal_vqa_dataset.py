@@ -79,3 +79,27 @@ class MultiModalVQADataset(Dataset):
         filtered_samples = [sample for sample in self.samples if sample['diagnosis'] == diagnosis]
         
         return filtered_samples
+    
+class MultiModalVQADataset2(MultiModalVQADataset):
+    def __init__(self, excel_file, root_dir, transform=None, sheet_names=["CFP", "FFA", "ultrasound", "OCT", "slitlamp"]):
+        super().__init__(excel_file, root_dir, transform, sheet_names)
+        
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = self.samples[idx]
+        img_path = sample['img_path']
+        diagnosis = sample['diagnosis']
+        query = sample['Q']
+        ground_truth = sample['A']
+        # Load image
+        image = read_image(img_path)
+        
+        if self.transform:
+            image = self.transform(image)
+
+        return img_path, diagnosis, query, ground_truth
+    
+    def __len__(self):
+        return len(self.samples)
