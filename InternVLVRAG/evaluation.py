@@ -141,7 +141,6 @@ class evaluation():
             if self.test_num != -1 and idx >= self.test_num:
                 break
             idx += 1
-            diagnosis = diagnosis[0]
             img_name = images[0]
             if self.mode == "ALL":
                 respond, record_data = self.model.inference_rag_all(query[0], img_name)
