@@ -8,6 +8,7 @@ sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 from Datasets.DRDataset import DRDataset
 from Datasets.eye_image_dataset import EyeImageDataset
 from Datasets.multi_modal_vqa_dataset import MultiModalVQADataset, MultiModalVQADataset2
+from Datasets.lesion_balanced_dataset import LesionBalancedDataset
 from torch.utils.data import Dataset, DataLoader
 
 # from VRAG_crop import VRAG
@@ -41,6 +42,10 @@ class evaluation():
             excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
             data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
             self.dataset = MultiModalVQADataset2(excel_file, data_dir, sheet_names=args.sheet_names)
+        if args.dataset == "LesionBalanced":
+            root_dir = "/home/hongyu/Visual-RAG-LLaVA-Med"
+            excel_file = "./data/lesion balanced dataset_new_20241210.xlsx"
+            self.dataset = LesionBalancedDataset(excel_file, root_dir)
         self.test_num = args.test_num
         
     def test(self):
@@ -127,7 +132,31 @@ class evaluation():
 
         # 将 DataFrame 保存为 CSV 文件
         df.to_csv(self.output_path, index=False, encoding='utf-8')
-                
+        
+    def test_lesion_balanced(self):
+        results = []
+        dataloader = DataLoader(self.dataset, batch_size=1, shuffle=False)
+        idx = 0
+        for images, query, answer in tqdm(dataloader):
+            if self.test_num != -1 and idx >= self.test_num:
+                break
+            idx += 1
+            diagnosis = diagnosis[0]
+            img_name = images[0]
+            if self.mode == "ALL":
+                respond, record_data = self.model.inference_rag_all(query[0], img_name)
+            results.append({
+                'img_name': img_name,
+                'llm respond': respond,
+                'record_data': record_data,
+                'query': query[0],
+                'answer': answer[0]
+            })
+            df = pd.DataFrame(results)
+
+        # 将 DataFrame 保存为 CSV 文件
+        df.to_csv(self.output_path, index=False, encoding='utf-8')
+        
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b")
@@ -170,4 +199,5 @@ if __name__ == "__main__":
     # vrag = VRAG(args) # llava, llava-med, llava-med-rag
     vrag = InternVL2_finetuned(args)
     eva = evaluation(args, vrag)
-    eva.test2()
+    # eva.test2()
+    eva.test_lesion_balanced()
