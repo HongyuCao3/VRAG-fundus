@@ -9,11 +9,11 @@ model_name="finetuned"
 sheet_names="New"
 m=1
 n=1
-test_num=5
+test_num=-1
 t_check=-1
 t_filter=-1
 save_tmp=raw_${m}_${n}_rag_${test_num}_filter_${t_filter}_check_${t_check}_modality_${sheet_names}
-output_path=${cur_path}"/InternVLVRAG/output/${dataset}/${model_name}/${save_tmp}.json"
+output_path=${cur_path}"/InternVLVRAG/output/${dataset}/${model_name}/${save_tmp}.csv"
 log_path=${cur_path}"/InternVLVRAG/output/${dataset}/${model_name}/log/${save_tmp}.log"
 model_path="/home/hongyu/InternVL/internvl2_8b_internlm2_7b_dynamic_res_2nd_finetune_lora_fulldataset"
 cd /home/hongyu/Visual-RAG-LLaVA-Med
