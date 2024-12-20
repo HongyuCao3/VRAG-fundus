@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 from torchvision.io import read_image
 
 class LesionBalancedDataset(Dataset):
-    def __init__(self, excel_file, root_dir, transform=None, sheet_names = ["CFP", "FFA", "ultrasound", "OCT", "slitlamp"]):
+    def __init__(self, excel_file, root_dir, transform=None, sheet_names = ["New"]):
         """
         Args:
             excel_file (string): Path to the Excel file with annotations.
@@ -30,8 +30,8 @@ class LesionBalancedDataset(Dataset):
                 print("ignore " + sheet_name + " modal")
                 continue
             for index, row in df.iterrows():
-                img_path = row["impath"].replace("/home/danli/data/public/alldataset", "/home/hongyu/alldataset/images")
-                img_path2 = row["impath"].replace("/home/danli/data/public/alldataset", "/home/hongyu/alldataset/images")
+                img_path = row["impath"].replace("/home/danli/data/public/alldatasets", "/home/hongyu/alldataset/images")
+                img_path2 = row["impath"].replace("/home/danli/data/public/alldatasets", "/home/hongyu/alldataset/images")
                 # img_path = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.jpg")
                 # img_path2 = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.png")
                 if os.path.exists(img_path):
@@ -70,3 +70,15 @@ class LesionBalancedDataset(Dataset):
             image = self.transform(image)
 
         return img_path, query, answer
+    
+if __name__ == "__main__":
+    root_dir = "/home/hongyu/Visual-RAG-LLaVA-Med"
+    excel_file = "./data/lesion balanced dataset_new_20241210.xlsx"
+    lb = LesionBalancedDataset(excel_file, root_dir)
+    dataloader = DataLoader(lb, batch_size=1, shuffle=True)
+    for batch_idx, (paths, queries, answers) in enumerate(dataloader):
+        if batch_idx == 0:  # 只打印第一个batch的信息
+            print(f"Batch {batch_idx + 1} paths: {paths}")
+            print(f"Batch {batch_idx + 1} queries: {queries}")
+            print(f"Batch {batch_idx + 1} answers: {answers}")
+            break
