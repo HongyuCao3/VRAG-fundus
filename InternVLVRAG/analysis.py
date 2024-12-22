@@ -7,10 +7,12 @@ import numpy as np
 import pandas as pd
 
 class LesionBalancedAnalysis():
-    def __init__(self, file_path, res_path):
+    def __init__(self, res_path, map_path, save_path):
         self.res_path = res_path
         self.classes = ["Normal", "Referable DR"]
         self.df = pd.read_csv(self.res_path)
+        self.map_path = map_path
+        self.mapping_df = pd.read_excel('mapping relationship.xlsx')
     
     def analysis_modality(self):
         cfp_count_answer, cfp_count_gt, cfp_acc = self.cal_cfp_acc()
@@ -66,3 +68,14 @@ class LesionBalancedAnalysis():
         right_eye_count_answer = right_eye_gt['llm respond'].str.contains("right eye", case=False).sum()
         right_eye_accuracy = right_eye_count_answer / right_eye_count_gt
         return right_eye_count_answer, right_eye_count_gt, right_eye_accuracy
+    
+    def analysis_diagnosis(self):
+        pass
+    
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--res-path", type=str,default="")
+    parser.add_argument("--save-path", type=str, default="")
+    parser.add_argument("--map-path", type=str, default='mapping relationship.xlsx')
+    args = parser.parse_args()
+    lba = LesionBalancedAnalysis(args.res_path, args.map_path, args.save_path)
