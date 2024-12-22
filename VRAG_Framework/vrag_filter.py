@@ -3,11 +3,11 @@ from context_former import ContextFormer
 class VRAGFilter():
     def __init__(self, context_former, threshold=0.5, sheet_names=["CFP"]):
         self.multi_modal_vqa_classes = []
-        if "CFP" in sheet_names:
+        if "CFP" in sheet_names or "New" in sheet_names:
             self.multi_modal_vqa_classes.append("macular hole")
-        if "FFA" in sheet_names:
+        if "FFA" in sheet_names or "New" in sheet_names:
             self.multi_modal_vqa_classes.extend(["branch retinal vein occlusion", "Coats Disease", "familial exudative vitreoretinopathy", "Vogt-Koyanagi-Harada disease"])
-        if "OCT" in sheet_names:
+        if "OCT" in sheet_names or "New" in sheet_names:
             self.multi_modal_vqa_classes.extend(["crystoid macular edema", "polypoidal choroidal vasculopathy", "retinal detachment", "retinoschisis"])
         # self.multi_modal_vqa_classes = [
         # 'Coats Disease',
