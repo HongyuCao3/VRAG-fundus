@@ -13,7 +13,7 @@ class LesionBalancedAnalysis():
         self.df = pd.read_csv(self.res_path)
         self.map_path = map_path
         self.save_path = save_path
-        self.mapping_df = pd.read_excel('mapping relationship.xlsx')
+        self.mapping_df = pd.read_excel(self.map_path)
     
     def analysis_modality(self):
         cfp_count_answer, cfp_count_gt, cfp_acc = self.cal_cfp_acc()

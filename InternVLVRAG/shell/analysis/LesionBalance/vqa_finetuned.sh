@@ -14,8 +14,9 @@ save_tmp=raw_${m}_${n}_rag_${test_num}_filter_${t_filter}_check_${t_check}_modal
 output_path=${cur_path}"/InternVLVRAG/output/${dataset}/${model_name}/${save_tmp}.csv"
 log_path=${cur_path}"/InternVLVRAG/output/${dataset}/${model_name}/log/${save_tmp}.log"
 save_path=${cur_path}"/InternVLVRAG/output/${dataset}/${model_name}/analysis/${save_tmp}.json"
+map_path="./data/mapping_relationship.xlsx"
 conda activate internvl_louwei
 python ./InternVLVRAG/analysis.py \
     --res-path ${output_path} \
-    --map-path ${} \
+    --map-path ${map_path} \
     --save-path ${save_path}
