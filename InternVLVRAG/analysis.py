@@ -12,6 +12,7 @@ class LesionBalancedAnalysis():
         self.classes = ["Normal", "Referable DR"]
         self.df = pd.read_csv(self.res_path)
         self.map_path = map_path
+        self.save_path = save_path
         self.mapping_df = pd.read_excel('mapping relationship.xlsx')
     
     def analysis_modality(self):
@@ -72,6 +73,14 @@ class LesionBalancedAnalysis():
     def analysis_diagnosis(self):
         pass
     
+    def analysis(self):
+        modality = self.analysis_modality()
+        eye = self.analysis_eye()
+        diag = self.analysis_diagnosis()
+        fin_res = {"modality": modality, "eye": eye, "diag": diag}
+        with open(self.save_path, 'w', encoding='utf-8') as f:
+            json.dump(fin_res, f)
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--res-path", type=str,default="")
@@ -79,3 +88,4 @@ if __name__ == "__main__":
     parser.add_argument("--map-path", type=str, default='mapping relationship.xlsx')
     args = parser.parse_args()
     lba = LesionBalancedAnalysis(args.res_path, args.map_path, args.save_path)
+    lba.analysis()
