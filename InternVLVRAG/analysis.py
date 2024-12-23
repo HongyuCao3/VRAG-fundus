@@ -71,7 +71,34 @@ class LesionBalancedAnalysis():
         return right_eye_count_answer, right_eye_count_gt, right_eye_accuracy
     
     def analysis_diagnosis(self):
-        pass
+        # Create input to general diagnosis mapping dictionary
+        mapping_dict = dict(zip(self.mapping_df['input'], self.mapping_df['general diagnosis']))
+
+        # Extract diagnosis
+        self.df['diagnosis'] = self.df['answer'].str.extract(r'The possible diagnosis of this image is (.+?)\.')[0]
+
+        # Calculate correct diagnosis count
+        correct_diagnosis_count = 0
+        diagnosis_count = 0
+
+        # Iterate through each row, check if answer contains general diagnosis or its reverse mapping in mapping relationship.xlsx
+        for index, row in self.df.iterrows():
+            # Get corresponding general diagnosis
+            general_diagnosis = mapping_dict.get(row['diagnosis'])
+
+            if general_diagnosis is not None:
+                diagnosis_count += 1
+                # Collect all possible inputs
+                possible_inputs = self.mapping_df[self.mapping_df['general diagnosis'] == general_diagnosis]['input'].tolist()
+
+                # Check if answer contains general diagnosis or its corresponding inputs
+                if general_diagnosis in row['answer'] or any(input_item in row['answer'] for input_item in possible_inputs):
+                    correct_diagnosis_count += 1
+
+        # Calculate diagnosis accuracy
+        diagnosis_accuracy = correct_diagnosis_count / diagnosis_count if diagnosis_count > 0 else 0
+        print(f"Diagnosis accuracy: {diagnosis_accuracy:.2%}")
+        return diagnosis_accuracy
     
     def analysis(self):
         modality = self.analysis_modality()
