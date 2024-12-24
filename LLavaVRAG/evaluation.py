@@ -1,10 +1,11 @@
 import argparse
 import torch
-import os
+import os, sys
 import json, gc
 import pandas as pd
 from tqdm import tqdm
 from torch.utils.data import Dataset, DataLoader
+sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 from Datasets.DRDataset import DRDataset
 from Datasets.eye_image_dataset import EyeImageDataset
 from Datasets.multi_modal_vqa_dataset import MultiModalVQADataset, MultiModalVQADataset2
