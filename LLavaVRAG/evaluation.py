@@ -147,7 +147,7 @@ class evaluation():
                 'query': query[0],
                 'answer': answer[0]
             })
-            df = pd.DataFrame(results)
+        df = pd.DataFrame(results)
 
         # 将 DataFrame 保存为 CSV 文件
         df.to_csv(self.output_path, index=False, encoding='utf-8')
