@@ -129,7 +129,7 @@ class VRAG():
         if self.classic_emb == None:
             ret_cl = self.context_former.ret_empty
         else:
-            ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, 1)
+            ret_cl = self.classic_emb.get_detailed_similarities_crop(img_path, 2)
             
         ret_cl_ = ret_cl
         if self.filter:
