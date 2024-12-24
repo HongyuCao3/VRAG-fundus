@@ -22,7 +22,8 @@ class LesionBalancedDataset(Dataset):
         self.annotations_df = pd.read_excel(excel_file, sheet_name=None)  # Read all sheets
         self.root_dir = root_dir
         self.transform = transform
-        samples_dict = OrderedDict()
+        # samples_dict = OrderedDict()
+        samples_dict = []
         
         for sheet_name, df in self.annotations_df.items():
             # select according to sheet_name
@@ -35,22 +36,23 @@ class LesionBalancedDataset(Dataset):
                 # img_path = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.jpg")
                 # img_path2 = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.png")
                 if os.path.exists(img_path):
-                    samples_dict[img_path] = {
+                    samples_dict.append({
                         'img_path': img_path,
                         'Q': row["Q"],
                         "A": row["A"]
-                    }
+                    })
                 elif os.path.exists(img_path2) :
-                    samples_dict[img_path] = {
+                    samples_dict.append({
                         'img_path': img_path2,
                         'Q': row["Q"],
                         "A": row["A"]
-                    }
+                    })
                 else:
                     print("Image Not Found: ")
                     print(img_path)
         # Convert the dictionary back into a list of dictionaries
-        self.samples = list(samples_dict.values())
+        # self.samples = list(samples_dict.values())
+        self.samples = samples_dict
         
     def __len__(self):
         return len(self.samples)
