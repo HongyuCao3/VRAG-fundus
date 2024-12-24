@@ -36,7 +36,6 @@ classic_emb=classic_emb_ffa
 dataset=MultiModalVQA
 cur_path="/home/hongyu/Visual-RAG-LLaVA-Med"
 emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
-classic_emb_path="./data/${classic_emb}"
 model_name="internvl"
 sheet_names="FFA"
 m=1
@@ -54,7 +53,7 @@ nohup python ./InternVLVRAG/evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \
     --model-path ${model_path} \
-    --classic-emb-path ${classic_emb_path} \
+    --classic-emb-path ${emb_path} \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \
