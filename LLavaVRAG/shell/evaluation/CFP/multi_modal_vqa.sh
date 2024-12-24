@@ -6,10 +6,11 @@ dataset=MultiModalVQA
 cur_path="/home/hongyu/Visual-RAG-LLaVA-Med"
 emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
 model_name="llava-med"
+sheet_names="CFP"
 m=1
 n=1
 test_num=-1
-save_tmp=${classic_emb}_${m}_${n}_rag_${test_num}_filter_${t_filter}_check_${t_check}_modality_$
+save_tmp=raw_${m}_${n}_rag_${test_num}_filter_${t_filter}_check_${t_check}_modality_$
 output_path=${cur_path}"/LLavaVRAG/output/${dataset}/${model_name}/${save_tmp}.csv"
 log_path=${cur_path}"/LLavaVRAG/output/${dataset}/${model_name}/log/${save_tmp}.log"
 model_path="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b"
@@ -19,6 +20,7 @@ nohup python ./LLavaVRAG/evaluation.py \
     --dataset ${dataset} \
     --output-path ${output_path} \
     --model-path ${model_path} \
+    --conv-mode mistral_instruct \
     --chunk-m ${m} \
     --chunk-n ${n} \
     --use-rag True \

@@ -21,7 +21,7 @@ from llava.mm_utils import tokenizer_image_token, get_model_name_from_path, Keyw
 from llama_index.core.schema import ImageDocument
 from VRAG_Framework.vrag_filter import VRAGFilter
 from VRAG_Framework.checker import Checker
-
+from transformers import AutoModelForCausalLM
 class VRAG():
     def __init__(self, args):
         self.model_path = args.model_path

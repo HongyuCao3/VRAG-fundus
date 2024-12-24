@@ -19,6 +19,7 @@ class evaluation():
     def __init__(self, args, model):
         self.query_str = args.query_str
         self.model = model
+        self.test_num =args.test_num
         # self.test_path = args.test_path
         self.output_path = args.output_path
         self.mode = args.mode
