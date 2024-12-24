@@ -124,7 +124,55 @@ class evaluation():
         # Save the final accuracy
         with open(self.output_path, 'w') as json_file:
             json.dump({'accuracy': accuracy, 'results': updated_results}, json_file, indent=4)
-    
+    def test2(self):
+        total_samples = len(self.dataset)
+        results = []
+        dataloader = DataLoader(self.dataset, batch_size=1, shuffle=False)
+        idx = 0
+        for images, diagnosis, query, answer in tqdm(dataloader):
+            if self.test_num != -1 and idx >= self.test_num:
+                break
+            idx += 1
+            diagnosis = diagnosis[0]
+            img_name = images[0]
+            if self.mode == "ALL":
+                respond, record_data = self.model.inference_rag_all(query[0], img_name)
+            results.append({
+                'img_name': img_name,
+                'diagnosis': diagnosis,
+                'llm respond': respond,
+                'record_data': record_data,
+                'query': query[0],
+                'answer': answer[0]
+            })
+            df = pd.DataFrame(results)
+
+        # 将 DataFrame 保存为 CSV 文件
+        df.to_csv(self.output_path, index=False, encoding='utf-8')
+        
+    def test_lesion_balanced(self):
+        results = []
+        dataloader = DataLoader(self.dataset, batch_size=1, shuffle=False)
+        idx = 0
+        for images, query, answer in tqdm(dataloader):
+            if self.test_num != -1 and idx >= self.test_num:
+                break
+            idx += 1
+            img_name = images[0]
+            if self.mode == "ALL":
+                respond, record_data = self.model.inference_rag_all(query[0], img_name)
+            results.append({
+                'img_name': img_name,
+                'llm respond': respond,
+                'record_data': record_data,
+                'query': query[0],
+                'answer': answer[0]
+            })
+            df = pd.DataFrame(results)
+
+        # 将 DataFrame 保存为 CSV 文件
+        df.to_csv(self.output_path, index=False, encoding='utf-8')
+        
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b")
@@ -163,4 +211,4 @@ if __name__ == "__main__":
     vrag = VRAG(args) # llava, llava-med, llava-med-rag
     # vrag = InternVL2(args)
     eva = evaluation(args, vrag)
-    eva.test()
+    eva.test2()
