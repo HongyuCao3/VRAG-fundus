@@ -3,13 +3,14 @@ import torch
 import os
 import json, gc
 from tqdm import tqdm
-from dataset import DRDataset, EyeImageDataset, MultiModalVQADataset
 from torch.utils.data import Dataset, DataLoader
-
+from Datasets.DRDataset import DRDataset
+from Datasets.eye_image_dataset import EyeImageDataset
+from Datasets.multi_modal_vqa_dataset import MultiModalVQADataset, MultiModalVQADataset2
+from Datasets.lesion_balanced_dataset import LesionBalancedDataset
 # from VRAG_crop import VRAG
-from VRAG_Framework.VRAG_L import VRAG
-# from internVL2 import InternVL2
-from VRAG_Framework.internVL2 import InternVL2
+# from VRAG_Framework.VRAG_L import VRAG
+from LLavaVRAG.VRAG.VRAG_L import VRAG
 
 
 class evaluation():
@@ -31,7 +32,15 @@ class evaluation():
             excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
             data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
             self.dataset = MultiModalVQADataset(excel_file, data_dir, sheet_names=args.sheet_names)
-        self.test_num = args.test_num
+        if args.dataset == "MultiModalVQA":
+            root_path = "/home/hongyu/"
+            excel_file = root_path + "Visual-RAG-LLaVA-Med/data/"+ 'Multimodal VQA Dataset/Multimodal VQA dataset_1015.xlsx'
+            data_dir = root_path + "Visual-RAG-LLaVA-Med/data/" + 'Multimodal VQA Dataset'
+            self.dataset = MultiModalVQADataset2(excel_file, data_dir, sheet_names=args.sheet_names)
+        if args.dataset == "LesionBalanced":
+            root_dir = "/home/hongyu/Visual-RAG-LLaVA-Med"
+            excel_file = "./data/lesion balanced dataset_new_20241210.xlsx"
+            self.dataset = LesionBalancedDataset(excel_file, root_dir)
         
     def test(self):
         correct_predictions = 0
