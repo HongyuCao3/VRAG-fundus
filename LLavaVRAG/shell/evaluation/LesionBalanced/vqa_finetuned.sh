@@ -61,7 +61,7 @@ nohup python ./LLavaVRAG/evaluation.py \
     --sheet-names ${sheet_names} \
     >${log_path} 2>&1 &
 
-# classic cfp
+# classic ffa
 classic_emb=classic_emb_ffa
 dataset=LesionBalanced
 cur_path="/home/hongyu/Visual-RAG-LLaVA-Med"
