@@ -198,5 +198,7 @@ if __name__ == "__main__":
     # vrag = VRAG(args) # llava, llava-med, llava-med-rag
     vrag = InternVL2_finetuned(args)
     eva = evaluation(args, vrag)
-    eva.test2()
-    # eva.test_lesion_balanced()
+    if args.dataset=="LesionBalanced":
+        eva.test_lesion_balanced()
+    elif args.dataset== "MultiModalVQA":
+        eva.test2()
