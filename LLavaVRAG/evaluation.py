@@ -218,3 +218,5 @@ if __name__ == "__main__":
         eva.test2()
     elif args.dataset == "LesionBalanced":
         eva.test_lesion_balanced()
+    elif args.dataset == "MultiModal":
+        eva.test()
