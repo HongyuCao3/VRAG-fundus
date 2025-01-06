@@ -202,3 +202,5 @@ if __name__ == "__main__":
         eva.test_lesion_balanced()
     elif args.dataset== "MultiModalVQA":
         eva.test2()
+    elif args.dataset == "MultiModal":
+        eva.test()
