@@ -1,9 +1,9 @@
-classic_emb=classic_emb_cfp
+classic_emb=classic_emb_ffa
 dataset=MultiModal
 cur_path="/home/hongyu/Visual-RAG-LLaVA-Med"
 emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
 model_name="finetuned"
-sheet_names="CFP"
+sheet_names="FFA"
 m=1
 n=1
 test_num=-1
@@ -18,12 +18,12 @@ python ./AnalysisVRAG/main.py \
     --res-path ${save_path}  \
     --sheet-names ${sheet_names}
 
-classic_emb=classic_emb_cfp
+classic_emb=classic_emb_ffa
 dataset=MultiModal
 cur_path="/home/hongyu/Visual-RAG-LLaVA-Med"
 emb_path=${cur_path}"/KnowledgeBase/emb_savings/"${classic_emb}
 model_name="finetuned"
-sheet_names="CFP"
+sheet_names="FFA"
 m=1
 n=1
 test_num=-1
