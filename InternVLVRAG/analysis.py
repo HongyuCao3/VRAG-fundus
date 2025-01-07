@@ -150,14 +150,14 @@ class MultiModalClassificationAnalysis():
 
         for result in self.data['results']:
             ground_truth = result['ground truth'].lower()
-            ground_truth = self.mapping.to_general(ground_truth)
+            ground_truth = self.mapping.to_general(ground_truth).lower()
             try:
                 llm_respond = str(json.loads(result['llm respond'])).lower()
             except:
                 llm_respond = result["llm respond"].lower()
             # print(type(llm_respond))
             # diagnosis = llm_respond.get('diagnosis', '').lower()
-
+            # print(llm_respond)
             if ground_truth in llm_respond:
                 correct_count += 1
         
@@ -188,14 +188,14 @@ class MultiModalClassificationAnalysis():
         # classes = set(['age-related macular degeneration', 'branch retinal artery occlusion', 'branch retinal vein occlusion', 'central retinal artery occlusion', 'central retinal vein occlusion', 'central serous chorioretinopathy', 'choroidal melanoma', 'coats disease', 'diabetic retinopathy', 'dry age-related macular degeneration', 'epiretinal membrane', 'familial exudative vitreoretinopathy', 'glaucoma', 'macular hole', 'pathologic myopia', 'retinal detachment', 'retinal vein occlusion', 'vogt-koyanagi-harada disease', 'wet age-related macular degeneration'])
         for result in self.data['results']:
             ground_truth = result['ground truth'].lower()
-            ground_truth = self.mapping.to_general(ground_truth)
+            # ground_truth = self.mapping.to_general(ground_truth)
             try:
                 llm_respond = str(json.loads(result['llm respond'])).lower()
             except:
                 llm_respond = result["llm respond"].lower()
-
             # 假设 llm_respond 是一个 JSON 字符串，其中包含 'diagnosis' 键作为预测结果
             # 如果不是这种情况，您可能需要调整如何从 llm_respond 提取预测值
+            prediction = None
             if ground_truth in llm_respond:
                 prediction = ground_truth 
             else:
@@ -265,5 +265,6 @@ if __name__ == "__main__":
     # lba = LesionBalancedAnalysis(args.res_path, args.map_path, args.save_path)
     # lba.analysis()
     mca = MultiModalClassificationAnalysis(args.res_path)
-    mca.calculate_confusion_matrix(args.res_path)
-    mca.calculate_accuracy()
+    acc = mca.calculate_accuracy()
+    print(acc)
+    mca.calculate_confusion_matrix(args.save_path)
