@@ -64,8 +64,9 @@ class MultiVQAAnalysis(BaseAnalysis):
                             # "wet age-related macular degeneration", 
                             # "dry age-related macular degeneration", 
                             "age-related macular degeneration",
-                            "central retinal vein occlusion", 
-                            "branch retinal vein occlusion", 
+                            # "central retinal vein occlusion", 
+                            # "branch retinal vein occlusion", 
+                            "retinal vein occlusion"
                             "central serous chorioretinopathy",
                             "choroidal melanoma", 
                             "coats disease", 
