@@ -117,7 +117,7 @@ class LesionBalancedAnalysis():
                 possible_inputs = self.mapping_df[self.mapping_df['general diagnosis'] == general_diagnosis]['input'].tolist()
 
                 # Check if answer contains general diagnosis or its corresponding inputs
-                if general_diagnosis in row['answer'] or any(input_item in row['answer'] for input_item in possible_inputs):
+                if general_diagnosis in row['llm respond'] or any(input_item in row['llm respond'] for input_item in possible_inputs):
                     correct_diagnosis_count += 1
 
         # Calculate diagnosis accuracy
