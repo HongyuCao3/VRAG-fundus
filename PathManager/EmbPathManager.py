@@ -19,7 +19,7 @@ class EmbPathManager(BasePathManager):
         emb_path = Path.joinpath(self.config.emb_saving_dir, emb_name)
         return emb_path
     
-    def get_image_dir(self, image_name: str):
+    def get_image_dir(self, image_name: str) -> Path:
         img_dir = Path.joinpath(self.config.data_dir, image_name)
         return img_dir
         
