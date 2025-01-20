@@ -1,6 +1,8 @@
 import sys
 sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 import pathlib
+import torch
+import json
 from KnowledgeBase.EmbBuilder.BaseEmbBuilder import BaseEmbBuilder
 from PathManager.EmbPathManager import EmbPathManager
 from KnowledgeBase.DataExtractor.MultiDiseaseDataExtractor import MultiDiseaseDataExtractor
@@ -21,13 +23,13 @@ class MultiDiseaseEmbBuilder(BaseEmbBuilder):
             representation = self.get_layer_representation(image_path, layer_index)
             
             # Save the representation as a .pt file
-            representation_file = os.path.join(target_folder, f"{os.path.splitext(os.path.basename(image_path))[0]}.pt")
-            torch.save(representation, representation_file)
+            representation_path = pathlib.Path.joinpath(target_folder, f"{image_path.stem}.pt")
+            torch.save(representation, representation_path)
 
             # Record the correspondence
-            representation_data[image_path] = representation_file
+            representation_data[image_path] = representation_path
 
         # Save the correspondence data to a JSON file
-        correspondence_file = os.path.join(target_folder, 'correspondence.json')
+        correspondence_file = pathlib.Path.joinpath(target_folder, 'correspondence.json')
         with open(correspondence_file, 'w') as f:
             json.dump(representation_data, f)
