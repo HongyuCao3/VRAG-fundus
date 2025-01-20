@@ -1,13 +1,14 @@
 import torch
 import os, json, sys
 from transformers import CLIPModel, CLIPProcessor
+from abc import ABC
 from PIL import Image
 from data_extractor import DataExtractor
 import argparse
 from torch.nn.functional import cosine_similarity
 sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 
-class BaseEmbBuilder():
+class BaseEmbBuilder(ABC):
     def __init__(self):
         pass
     
