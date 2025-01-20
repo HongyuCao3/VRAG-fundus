@@ -7,6 +7,31 @@ class BaseContextFormer(ABC):
     def __init__(self):
         pass
     
+    def build_prompt(
+        self,
+        query: str,
+        level_context: str = None,
+        crop_lesion_context: str = None,
+        diagnosis_context: str = None,
+        diagnosis_standard: str = None,
+    ):
+        parts = []
+        if diagnosis_standard:
+            parts.append(f"Diagnosing Standard: {diagnosis_standard}\n")
+        if level_context:
+            parts.append(
+                f"The possible diagnosing level and similarity: {level_context}\n"
+            )
+        if crop_lesion_context:
+            parts.append(f"The possible lesion and similarity: {crop_lesion_context}\n")
+        if diagnosis_context:
+            parts.append(
+                f"The possible diagnosis and similarity: {diagnosis_context}\n"
+            )
+        parts.append(query)
+
+        return "".join(parts)
+    
     def convert_abbreviation_to_full_name(abbreviation: str, diagnosis_mapping:dict):
         """
         将输入的简称转换为对应的全称。

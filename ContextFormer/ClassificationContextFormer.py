@@ -27,6 +27,7 @@ class ClassificationContextConfig(BaseContextConfig):
         "cotton wool spots": "",
         "exudates": "",
     }
+    # TODO:添加用于多病种分类的dict
 
 
 class ClassificationContextFormer(BaseContextFormer):
@@ -34,41 +35,16 @@ class ClassificationContextFormer(BaseContextFormer):
         super().__init__()
         self.config = ClassificationContextConfig()
 
-    def build_query(
-        self,
-        query: str,
-        level_context: str = None,
-        crop_lesion_context: str = None,
-        diagnosis_context: str = None,
-        diagnosis_standard: str = None,
-    ):
-        parts = []
-        if diagnosis_standard:
-            parts.append(f"Diagnosing Standard: {diagnosis_standard}\n")
-        if level_context:
-            parts.append(
-                f"The possible diagnosing level and similarity: {level_context}\n"
-            )
-        if crop_lesion_context:
-            parts.append(f"The possible lesion and similarity: {crop_lesion_context}\n")
-        if diagnosis_context:
-            parts.append(
-                f"The possible diagnosis and similarity: {diagnosis_context}\n"
-            )
-        parts.append(query)
-
-        return "".join(parts)
-
     def form_context_all_cl(
-        img_path: str, query: str, ret_cl: dict, use_pics: bool = False
+        self, img_path: str, query: str, diagnosis_context: dict, use_pics: bool = False
     ):
         record_data = {}
-        record_data.update({"ret_cl": str(ret_cl)})
+        record_data.update({"ret_cl": str(diagnosis_context)})
         record_data.update({"org": img_path})
         image_documents = [ImageDocument(image_path=img_path)]
         image_org = Image.open(img_path)
         images = [image_org]
-        img = ret_cl["img"]
+        img = diagnosis_context["img"]
         if use_pics:
             for res_img in img:
                 image_documents.append(ImageDocument(image_path=res_img))
@@ -76,12 +52,10 @@ class ClassificationContextFormer(BaseContextFormer):
                 image = Image.open(res_img)
                 images.append(image)
 
-        result_dict_cl = dict(zip(ret_cl["txt"], ret_cl["score"]))
-        context_str_cl = str(result_dict_cl)
-        metadata_str = ret_cl["metadata"]
-        metadata_str.extend(ret_cl["metadata"])
-        prompt = self.build_diagnosis_string_all(
-            "", "", context_str_cl, "", metadata_str, query_str
-        )
+        result_dict_cl = dict(zip(diagnosis_context["txt"], diagnosis_context["score"]))
+        diagnosis_context_str = str(result_dict_cl)
+        metadata_str = diagnosis_context["metadata"]
+        metadata_str.extend(diagnosis_context["metadata"])
+        prompt = self.build_prompt(diagnosis_context=diagnosis_context_str, query=query)
         record_data.update({"prompt": prompt})
         return prompt, images, record_data
