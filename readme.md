@@ -11,11 +11,9 @@
  - 使用chunk判断病灶的数量关系
 
 ## 步骤
- - 需要测试topk对于结果的影响
- - 需要考虑是否要将所有图片都作为输入
- - 需要测试crop的color超参数对于数据的影响
- - 对于level-emb只能用top1
- - level-emb和crop-emb的context必须分开
+ - 测试用不同图片数构建emb的效果
+ - 添加prompt的可编辑模板
+ - 将参数构建为config
 
 ## 实验
  - 现在的问题是需要提升匹配正确率

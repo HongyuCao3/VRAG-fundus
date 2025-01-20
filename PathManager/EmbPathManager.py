@@ -14,10 +14,14 @@ class EmbPathManager(BasePathManager):
         super().__init__()
         self.config = EmbPathConfig()
         
-    def get_emb_path(self, emb_name: str):
+    def get_emb_dir(self, emb_name: str):
         # TODO:添加emb_name的细分
         emb_path = Path.joinpath(self.config.emb_saving_dir, emb_name)
         return emb_path
+    
+    def get_image_dir(self, image_name: str):
+        img_dir = Path.joinpath(self.config.data_dir, image_name)
+        return img_dir
         
 if __name__ == "__main__":
     epm = EmbPathManager()
