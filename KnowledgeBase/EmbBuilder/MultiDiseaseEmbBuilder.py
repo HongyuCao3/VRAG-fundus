@@ -33,3 +33,9 @@ class MultiDiseaseEmbBuilder(BaseEmbBuilder):
         correspondence_file = pathlib.Path.joinpath(target_folder, 'correspondence.json')
         with open(correspondence_file, 'w') as f:
             json.dump(representation_data, f)
+            
+    # TODO: 添加text representation
+            
+if __name__ == "__main__":
+    mde = MultiDiseaseEmbBuilder()
+    
