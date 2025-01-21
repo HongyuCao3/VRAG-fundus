@@ -176,8 +176,7 @@ class BaseEmbBuilder(ABC):
         k=2,
         layer=11,
     ) -> list[Tuple[pathlib.Path, Number]]:
-        """  get the top k simlar images' path and similarities
-        """
+        """get the top k simlar images' path and similarities"""
         # 获取输入图片的嵌入
         input_emb = self.get_layer_representation(input_img, layer_index=layer)
 
@@ -217,6 +216,43 @@ class BaseEmbBuilder(ABC):
             for img_name, sim in top_k
         ]
         return similar_images
+
+    def build_text_embedings(
+        self, discription: dict, save_dir: pathlib.Path, layer: int = 11
+    ):
+        """build embeddings for every text and save to folder
+        - discription(dict): dict of text and detailed discription
+        - save_dir(Path):  saving forlder
+        """
+        emb_path_map = {}
+        for k, v in discription.items():
+            emb = self.get_text_embedding(text=v, layer=layer)
+            emb_path = pathlib.Path.joinpath(save_dir, f"{k}.pt")
+            torch.save(emb, f=emb_path)
+            emb_path_map[k] = emb_path
+        emb_path_map_path = pathlib.Path.joinpath(save_dir, "correspondence.json")
+        with open(emb_path_map_path, "w", encoding="utf-8") as ep_f:
+            json.dump(emb_path_map, fp=ep_f)
+        return emb_path_map
+
+    def load_text_embeddings(save_dir: pathlib.Path) -> dict:
+        """load embeddings from save folder
+
+        Args:
+            save_dir (pathlib.Path): save folder
+
+        Returns:
+            dict: text -> embedding
+        """
+        emb_map_path = pathlib.Path.joinpath(save_dir, "correspondence.json")
+        with open(emb_map_path, "r", encoding="utf-8") as f:
+            emp_map = json.load(f)
+
+        embeddings = {}
+        for text, emb_path in emp_map.items():
+            emb = torch.load(emb_path)
+            embeddings[text] = emb
+        return embeddings
 
 
 if __name__ == "__main__":
