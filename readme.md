@@ -15,6 +15,7 @@
  - 添加prompt的可编辑模板
  - 将参数构建为config
  - 添加text encoder联合匹配
+ - path manager添加实验结果保存模块，用于自动计算
 
 ## 实验
  - 现在的问题是需要提升匹配正确率
