@@ -3,13 +3,14 @@ sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 import pathlib
 import torch
 import json
+from transformers import CLIPModel, CLIPProcessor
 from KnowledgeBase.EmbBuilder.BaseEmbBuilder import BaseEmbBuilder
 from PathManager.EmbPathManager import EmbPathManager
 from KnowledgeBase.DataExtractor.MultiDiseaseDataExtractor import MultiDiseaseDataExtractor
 
 class MultiDiseaseEmbBuilder(BaseEmbBuilder):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, model_name: str="openai/clip-vit-base-patch32"):
+        super().__init__(model_name=model_name)
         self.path_manager = EmbPathManager()
         self.data_extractor = MultiDiseaseDataExtractor()
         
@@ -20,7 +21,7 @@ class MultiDiseaseEmbBuilder(BaseEmbBuilder):
         representation_data = {}
         for image_path, disease, meta_data in image_data:
             
-            representation = self.get_layer_representation(image_path, layer_index)
+            representation = self.get_image_embedding(image_path, layer_index)
             
             # Save the representation as a .pt file
             representation_path = pathlib.Path.joinpath(target_folder, f"{image_path.stem}.pt")

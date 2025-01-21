@@ -3,14 +3,13 @@ import os, json, sys
 from transformers import CLIPModel, CLIPProcessor
 from abc import ABC
 from PIL import Image
-from data_extractor import DataExtractor
-import argparse
 from torch.nn.functional import cosine_similarity
 sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 
 class BaseEmbBuilder(ABC):
-    def __init__(self):
-        pass
+    def __init__(self, model_name: str="openai/clip-vit-base-patch32"):
+        self.model = CLIPModel.from_pretrained(model_name)
+        self.processor = CLIPProcessor.from_pretrained(model_name)
     
     def find_json_file(self, folder):
         """
@@ -24,7 +23,7 @@ class BaseEmbBuilder(ABC):
                 return os.path.join(folder, filename)
         return None
     
-    def get_layer_representation(self, img_path: str, layer_index: int=11):
+    def get_image_embedding(self, img_path: str, layer_index: int=11):
         # 加载并预处理图像
         image = Image.open(img_path)
         inputs = self.processor(images=image, return_tensors="pt")
@@ -107,3 +106,43 @@ class BaseEmbBuilder(ABC):
         correspondence_file = os.path.join(target_folder, 'correspondence.json')
         with open(correspondence_file, 'w') as f:
             json.dump(representation_data, f)
+            
+            
+    def get_text_embedding(self, text: str, layer: int=11) -> torch.Tensor:
+        """
+        获取一段文本在模型第layer层的表示。
+
+        参数:
+        text (str): 输入文本。
+        layer (int): 模型层索引，0 表示嵌入层，1-n 表示各隐藏层。
+
+        返回:
+        torch.Tensor: 文本在指定层的表示。
+        """
+        inputs = self.processor(text=text, return_tensors="pt", padding=True, truncation=True)
+        
+        # 设置 output_hidden_states 为 True 来获取所有隐藏层的状态
+        outputs = self.model.text_model(**inputs, output_hidden_states=True)
+
+        # 获取所有隐藏层的状态
+        hidden_states = outputs.hidden_states
+
+        # 检查请求的层是否在可用范围内
+        if layer < 0 or layer >= len(hidden_states):
+            raise ValueError(f"Layer {layer} out of range. Number of layers available: {len(hidden_states)}")
+
+        # 获取特定层的输出
+        layer_output = hidden_states[layer]
+
+        # 假设我们想要平均池化这个层的输出来得到一个句子级别的表示
+        # 如果你想获取每个token的表示，则不需要进行池化操作
+        sentence_embedding = layer_output.mean(dim=1)
+
+        return sentence_embedding
+        
+        
+if __name__ == "__main__":
+    beb = BaseEmbBuilder()
+    text = "enlargement of optic disc-cup ratio, nerve fiber layer loss"
+    text_emb = beb.get_text_embedding(text=text)
+    print(text_emb)
