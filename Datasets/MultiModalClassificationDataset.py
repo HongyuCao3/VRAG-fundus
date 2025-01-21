@@ -1,8 +1,11 @@
 import pandas as pd
 import pathlib
 import torch
+import sys
+sys.path.append("/home/hongyu/Visual-RAG-LLaVA-Med")
 from collections import Counter, OrderedDict
-from torch.utils.data import Dataset
+from typing import Tuple, Any
+from torch.utils.data import Dataset, DataLoader
 from torchvision.io import read_image
 from PathManager.DatasetPathManager import DatasetPathManager
 
@@ -57,7 +60,7 @@ class MultiModalClassificationDataset(Dataset):
                     self.config.dataset_dir,
                     sheet_name,
                     row["Diagnosis"],
-                    f"{row['Case number']}".jpg,
+                    f"{row['Case number']}.jpg",
                 )
                 # img_path2 = os.path.join(self.root_dir, sheet_name, row['Diagnosis'], f"{row['Case number']}.png")
                 img_path2 = pathlib.Path.joinpath(
@@ -82,7 +85,7 @@ class MultiModalClassificationDataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> Tuple[str, str]:
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
@@ -91,12 +94,12 @@ class MultiModalClassificationDataset(Dataset):
         diagnosis = sample["diagnosis"]
 
         # Load image
-        image = read_image(img_path)
+        image = read_image(str(img_path))
 
         if self.transform:
             image = self.transform(image)
 
-        return img_path, diagnosis
+        return str(img_path), diagnosis
 
     def get_entries_by_diagnosis(self, diagnosis):
         """
@@ -112,3 +115,11 @@ class MultiModalClassificationDataset(Dataset):
         ]
 
         return filtered_samples
+    
+if __name__ == "__main__":
+    config = MultiModalClassificationConfig()
+    mdcd = MultiModalClassificationDataset(config.DEFAULT_EXCEL_PATH, sheet_names=["CFP"])
+    dataloader = DataLoader(dataset=mdcd, batch_size=1, shuffle=False)
+    for image_path, diagnosis in dataloader:
+        print(f"image path: {image_path}")
+        print(f"diagnosis: {diagnosis}")
