@@ -6,11 +6,15 @@ import json
 from transformers import CLIPModel, CLIPProcessor
 from KnowledgeBase.EmbBuilder.BaseEmbBuilder import BaseEmbBuilder
 from PathManager.EmbPathManager import EmbPathManager
+from Datasets.MultiModalClassificationDataset import MultiModalClassificationConfig
 from KnowledgeBase.DataExtractor.MultiDiseaseDataExtractor import MultiDiseaseDataExtractor
 
 class MultiDiseaseEmbBuilder(BaseEmbBuilder):
     def __init__(self, model_name: str="openai/clip-vit-base-patch32"):
         super().__init__(model_name=model_name)
+        self.default_text_emb_name = "MultiDiseaseText"
+        self.default_img_emb_name = "MultiDiseaseImage"
+        self.default_img_dir_name = "Classic Images"
         self.path_manager = EmbPathManager()
         self.data_extractor = MultiDiseaseDataExtractor()
         
@@ -35,8 +39,17 @@ class MultiDiseaseEmbBuilder(BaseEmbBuilder):
         with open(correspondence_file, 'w') as f:
             json.dump(representation_data, f)
             
-    # TODO: 添加text representation
             
 if __name__ == "__main__":
+    config = MultiModalClassificationConfig()
+    path_manager = EmbPathManager()
     mde = MultiDiseaseEmbBuilder()
+    discription_path = pathlib.Path.joinpath(path_manager.get_image_dir("Classic Images"), "classic.json")
+    with open(discription_path, "r", encoding="utf-8") as ds_f:
+        discription = json.load(ds_f)
+    print(discription)
+    save_dir = pathlib.Path.joinpath(path_manager.get_emb_dir(path_manager.config.default_text_emb_name))
+    print(save_dir)
+    mde.build_text_embedings(discription=discription, save_dir=save_dir)
+    
     

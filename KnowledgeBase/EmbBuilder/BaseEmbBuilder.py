@@ -229,7 +229,7 @@ class BaseEmbBuilder(ABC):
             emb = self.get_text_embedding(text=v, layer=layer)
             emb_path = pathlib.Path.joinpath(save_dir, f"{k}.pt")
             torch.save(emb, f=emb_path)
-            emb_path_map[k] = emb_path
+            emb_path_map[k] = str(emb_path)
         emb_path_map_path = pathlib.Path.joinpath(save_dir, "correspondence.json")
         with open(emb_path_map_path, "w", encoding="utf-8") as ep_f:
             json.dump(emb_path_map, fp=ep_f)
