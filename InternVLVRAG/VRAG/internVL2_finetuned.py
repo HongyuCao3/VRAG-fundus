@@ -51,7 +51,7 @@ class InternVL2_finetuned:
             similar_txts = self.vrag_filter.filter_finetuned(similar_txts)
 
         # form inference context
-        prompt, images, record_data = self.context_former.form_inference_rag_context(
+        prompt, images, record_data = self.context_former.form_rag_context(
             img_path, query, similar_imgs, similar_txts
         )
 

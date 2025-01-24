@@ -1,8 +1,11 @@
 import sys
-
+from torch.types import (
+    Number,
+)
 sys.path.append("/home/hongyu/Visual-RAG-LLaVA-Med")
 from PIL import Image
 from llama_index.core.schema import ImageDocument
+import pathlib
 from ContextFormer.BaseContextFormer import BaseContextFormer, BaseContextConfig
 
 
@@ -59,3 +62,30 @@ class ClassificationContextFormer(BaseContextFormer):
         prompt = self.build_prompt(diagnosis_context=diagnosis_context_str, query=query)
         record_data.update({"prompt": prompt})
         return prompt, images, record_data
+    
+    def form_rag_context(
+        self,
+        img_path: pathlib.Path,
+        query: str,
+        similar_imgs: list[tuple[pathlib.Path, Number]]=[],
+        similar_txts: list[tuple[pathlib.Path, Number]]=[],
+        input_pics_num: int=0
+    ):
+        record_data = {}
+        record_data["similar_imgs"] = similar_imgs
+        record_data["similar_txts"] = similar_txts
+        image_documents = [ImageDocument(image_path=img_path)]
+        image_org = Image.open(img_path)
+        # process similar images
+        images = [image_org]
+        diagnosis = []
+        # TODO： 查看返回类别
+        for img, diag in similar_imgs:
+            image_documents.append(ImageDocument(image_path=img))
+            image = Image.open(img)
+            images.append(image)
+            diagnosis.append(diag)
+            
+        # process similar texts
+        
+        
