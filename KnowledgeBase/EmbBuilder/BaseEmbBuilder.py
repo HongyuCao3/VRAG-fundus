@@ -235,7 +235,7 @@ class BaseEmbBuilder(ABC):
             json.dump(emb_path_map, fp=ep_f)
         return emb_path_map
 
-    def load_text_embeddings(save_dir: pathlib.Path) -> dict:
+    def load_text_embeddings(self, save_dir: pathlib.Path) -> dict:
         """load embeddings from save folder
 
         Args:

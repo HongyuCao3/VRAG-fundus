@@ -7,8 +7,6 @@ class BaseRetriever(ABC):
     def __init__(self):
         super().__init__()
         
-    def load_embs(self, model_name):
-        pass
         
     def retrieve(self, img_path, emb):
         ret_empty = {"img": [], "txt": [], "score": [], "metadata": []}
