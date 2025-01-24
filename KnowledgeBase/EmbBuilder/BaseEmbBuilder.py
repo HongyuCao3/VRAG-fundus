@@ -226,7 +226,8 @@ class BaseEmbBuilder(ABC):
         """
         emb_path_map = {}
         for k, v in discription.items():
-            emb = self.get_text_embedding(text=v, layer=layer)
+            # 这里可以使用layer embedding也可以直接encode
+            emb = self.encode_text(text=v)
             emb_path = pathlib.Path.joinpath(save_dir, f"{k}.pt")
             torch.save(emb, f=emb_path)
             emb_path_map[k] = str(emb_path)
@@ -253,10 +254,27 @@ class BaseEmbBuilder(ABC):
             emb = torch.load(emb_path)
             embeddings[text] = emb
         return embeddings
+    
+    def encode_text(self, text: str):
+        inputs = self.processor(text=text, return_tensors="pt", padding=True)
+        outputs = self.model.get_text_features(**inputs)
+        text_features = outputs / outputs.norm(p=2, dim=-1, keepdim=True)  # Normalize the features
+        return text_features
 
+    def encode_image(self, image_path: str):
+        image = Image.open(image_path)
+        inputs = self.processor(images=image, return_tensors="pt")
+        outputs = self.model.get_image_features(**inputs)
+        image_features = outputs / outputs.norm(p=2, dim=-1, keepdim=True)  # Normalize the features
+        return image_features
 
 if __name__ == "__main__":
     beb = BaseEmbBuilder()
     text = "enlargement of optic disc-cup ratio, nerve fiber layer loss"
-    text_emb = beb.get_text_embedding(text=text)
-    print(text_emb)
+    # text_emb = beb.get_text_embedding(text=text)
+    # print(text_emb)
+    text_emb = beb.encode_text(text=text)
+    print(text_emb.shape)
+    image_emb = beb.encode_image(image_path=beb.path_manager.config.test_img_path)
+    print(image_emb.shape)
+    print(cosine_similarity(text_emb, image_emb))

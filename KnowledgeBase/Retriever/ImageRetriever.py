@@ -13,7 +13,7 @@ class ImageRetriever(BaseRetriever):
         self.emb_builder = MultiDiseaseEmbBuilder()
         self.representations = self.emb_builder.load_image_representations(emb_folder)
         
-    def find_similar_images(
+    def get_similar_images(
         self,
         input_img: pathlib.Path,
         img_folder: pathlib.Path,

@@ -5,6 +5,7 @@ class BasePathConfig(ABC):
     def __init__(self):
         self.root_path = Path("/home/hongyu/Visual-RAG-LLaVA-Med/")
         self.data_dir = Path.joinpath(self.root_path, "data")
+        self.test_img_path = Path("/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg")
     
 
 class BasePathManager(ABC):
