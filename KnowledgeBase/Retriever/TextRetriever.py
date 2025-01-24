@@ -16,11 +16,10 @@ class TextRetriever(BaseRetriever):
         self.emb_builder = MultiDiseaseEmbBuilder()
         self.representations = self.emb_builder.load_text_embeddings(emb_folder)
         
-    def get_similar_text(
+    def get_similar_texts(
         self,
         input_img: pathlib.Path,
         k=2,
-        layer=11,
     ) -> list[tuple[str, Number]]:
         input_emb = self.emb_builder.encode_image(input_img)
         similarities = []
@@ -44,5 +43,5 @@ if __name__ == "__main__":
     print(emb_folder)
     tr = TextRetriever(emb_folder=emb_folder)
     input_img = pm.config.test_img_path
-    similar_txts = tr.get_similar_text(input_img=input_img)
+    similar_txts = tr.get_similar_texts(input_img=input_img)
     print(similar_txts)
