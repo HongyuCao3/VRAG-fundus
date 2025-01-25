@@ -3,16 +3,18 @@ from typing import Tuple
 from torch.types import (
     Number,
 )
+import json
 from torch.nn.functional import cosine_similarity
 from KnowledgeBase.Retriever.BaseRetriever import BaseRetriever
 from KnowledgeBase.EmbBuilder.MultiDiseaseEmbBuilder import MultiDiseaseEmbBuilder
+
 
 class ImageRetriever(BaseRetriever):
     def __init__(self, emb_folder: pathlib.Path):
         super().__init__()
         self.emb_builder = MultiDiseaseEmbBuilder()
         self.representations = self.emb_builder.load_image_representations(emb_folder)
-        
+
     def get_similar_images(
         self,
         input_img: pathlib.Path,
@@ -59,4 +61,20 @@ class ImageRetriever(BaseRetriever):
             for img_name, sim in top_k
         ]
         return similar_images
-        
+
+    def retrieve(
+        self, input_img: pathlib.Path, img_folder: pathlib.Path, k: int=2, layer: int=11
+    ):
+        score = []
+        txt = []
+        metadata = []
+        img = []
+        similar_images = self.get_similar_images(
+            input_img=input_img, img_folder=img_folder, k=k, layer=layer
+        )
+        for img_name, sim in similar_images:
+            score.append(sim)
+            txt.append(img_name.stem)
+            metadata.append(img_name)
+            img.append(img_name)
+        return {"score": score, "txt": txt, "metadata": metadata, "img": img}

@@ -219,7 +219,7 @@ class BaseEmbBuilder(ABC):
 
     def build_text_embedings(
         self, discription: dict, save_dir: pathlib.Path, layer: int = 11
-    ):
+    )-> dict:
         """build embeddings for every text and save to folder
         - discription(dict): dict of text and detailed discription
         - save_dir(Path):  saving forlder
@@ -230,7 +230,7 @@ class BaseEmbBuilder(ABC):
             emb = self.encode_text(text=v)
             emb_path = pathlib.Path.joinpath(save_dir, f"{k}.pt")
             torch.save(emb, f=emb_path)
-            emb_path_map[k] = str(emb_path)
+            emb_path_map[k] = {"emb_path":str(emb_path), "discription": v}
         emb_path_map_path = pathlib.Path.joinpath(save_dir, "correspondence.json")
         with open(emb_path_map_path, "w", encoding="utf-8") as ep_f:
             json.dump(emb_path_map, fp=ep_f)
@@ -250,9 +250,11 @@ class BaseEmbBuilder(ABC):
             emp_map = json.load(f)
 
         embeddings = {}
-        for text, emb_path in emp_map.items():
+        for text, emb_info in emp_map.items():
+            emb_path = emb_info["emb_path"]
+            discription = emb_info["discription"]
             emb = torch.load(emb_path)
-            embeddings[text] = emb
+            embeddings[text] = {"embedding": emb, "discription": discription}
         return embeddings
     
     def encode_text(self, text: str):

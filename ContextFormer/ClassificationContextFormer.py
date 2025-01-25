@@ -87,5 +87,3 @@ class ClassificationContextFormer(BaseContextFormer):
             diagnosis.append(diag)
             
         # process similar texts
-        
-        

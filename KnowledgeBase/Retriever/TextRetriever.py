@@ -24,18 +24,32 @@ class TextRetriever(BaseRetriever):
         input_emb = self.emb_builder.encode_image(input_img)
         similarities = []
         for txt, rep in self.representations.items():
-            sim = cosine_similarity(input_emb, rep, dim=1)
-            similarities.append((txt, sim.item()))
+            sim = cosine_similarity(input_emb, rep["embedding"], dim=1)
+            similarities.append((txt, sim.item(), rep["discription"]))
             
         similarities.sort(key=lambda x: x[1], reverse=True)
         top_k = similarities[:k]
 
         # 获取最相似图像的原始路径
         similar_txts = [
-            (txt, sim)
-            for txt, sim in top_k
+            (txt, sim, discription)
+            for txt, sim, discription in top_k
         ]
         return similar_txts
+    
+    def retrieve(self, input_img: pathlib.Path,
+        k:int=2,):
+        scores = []
+        txts = []
+        metadata = []
+        discriptions = []
+        similar_txts = self.get_similar_texts(input_img=input_img)
+        for txt, sim, dis in similar_txts:
+            scores.append(sim)
+            txts.append(txt)
+            metadata.append(txt)
+            discriptions.append(dis)
+        return {"score": scores, "txt": txts, "metadata": metadata, "discription": discriptions}
     
 if __name__ == "__main__":
     pm = EmbPathManager()
