@@ -10,8 +10,8 @@ from ContextFormer.ClassificationContextFormer import (
     ClassificationContextFormer,
     ClassificationContextConfig,
 )
-from KnowledgeBase.Retriever.ImageRetriever import ImageRetriever
-from KnowledgeBase.Retriever.TextRetriever import TextRetriever
+from fundus_knowledge_base.Retriever.ImageRetriever import ImageRetriever
+from fundus_knowledge_base.Retriever.TextRetriever import TextRetriever
 from VRAG_Framework import load_model_and_tokenizer
 
 class InternVL2_finetuned:

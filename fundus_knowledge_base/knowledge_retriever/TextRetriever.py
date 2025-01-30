@@ -6,8 +6,8 @@ from torch.types import (
     Number,
 )
 from torch.nn.functional import cosine_similarity
-from KnowledgeBase.Retriever.BaseRetriever import BaseRetriever
-from KnowledgeBase.EmbBuilder.MultiDiseaseEmbBuilder import MultiDiseaseEmbBuilder
+from fundus_knowledge_base.Retriever.BaseRetriever import BaseRetriever
+from fundus_knowledge_base.EmbBuilder.MultiDiseaseEmbBuilder import MultiDiseaseEmbBuilder
 from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
 
 class TextRetriever(BaseRetriever):

@@ -4,10 +4,10 @@ import pathlib
 import torch
 import json
 from transformers import CLIPModel, CLIPProcessor
-from KnowledgeBase.EmbBuilder.BaseEmbBuilder import BaseEmbBuilder
+from fundus_knowledge_base.EmbBuilder.BaseEmbBuilder import BaseEmbBuilder
 from PathManager.EmbPathManager import EmbPathManager
 from Datasets.MultiModalClassificationDataset import MultiModalClassificationConfig
-from KnowledgeBase.DataExtractor.MultiDiseaseDataExtractor import MultiDiseaseDataExtractor
+from fundus_knowledge_base.DataExtractor.MultiDiseaseDataExtractor import MultiDiseaseDataExtractor
 
 class MultiDiseaseEmbBuilder(BaseEmbBuilder):
     def __init__(self, model_name: str="openai/clip-vit-base-patch32"):

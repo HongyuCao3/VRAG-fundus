@@ -5,8 +5,8 @@ from torch.types import (
 )
 import json
 from torch.nn.functional import cosine_similarity
-from KnowledgeBase.Retriever.BaseRetriever import BaseRetriever
-from KnowledgeBase.EmbBuilder.MultiDiseaseEmbBuilder import MultiDiseaseEmbBuilder
+from fundus_knowledge_base.Retriever.BaseRetriever import BaseRetriever
+from fundus_knowledge_base.EmbBuilder.MultiDiseaseEmbBuilder import MultiDiseaseEmbBuilder
 
 
 class ImageRetriever(BaseRetriever):
