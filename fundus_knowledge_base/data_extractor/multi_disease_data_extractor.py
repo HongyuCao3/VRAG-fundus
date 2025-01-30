@@ -3,7 +3,7 @@ import sys
 sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 import os
 import pathlib
-from fundus_knowledge_base.DataExtractor.BaseDataExtractor import BaseDataExtractor
+from fundus_knowledge_base.data_extractor.base_data_extractor import BaseDataExtractor
 
 
 
