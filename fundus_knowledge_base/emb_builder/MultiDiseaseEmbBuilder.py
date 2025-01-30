@@ -39,7 +39,6 @@ class MultiDiseaseEmbBuilder(BaseEmbBuilder):
         with open(correspondence_file, 'w') as f:
             json.dump(representation_data, f)
             
-            
 if __name__ == "__main__":
     config = MultiModalClassificationConfig()
     path_manager = EmbPathManager()

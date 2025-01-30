@@ -43,3 +43,9 @@ python index_builder.py \
     --classic-dir "./data/Classic Images/" \
     --persist-dir "./data/classic_dr_emb_large/" \
     --embedding-name "BAAI/bge-large-en-v1.5"
+
+cd /home/hongyu/Visual-RAG-LLaVA-Med
+conda activate llava-med
+python ./fundus_knowledge_base/index_builder.bkup.py \
+    --classic-dir "./data/Classic Images/" \
+    --persist-dir "./fundus_knowledge_base/emb_savings/mulit_disease_clip_embeddings/" \

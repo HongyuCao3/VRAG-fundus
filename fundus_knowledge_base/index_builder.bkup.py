@@ -5,9 +5,7 @@ import json
 from tqdm import tqdm
 
 from PIL import Image
-from transformers import set_seed, logging
 
-from utils import split_image, delete_images
 
 from llama_index.core import (ServiceContext, 
                                SimpleDirectoryReader,
@@ -17,7 +15,6 @@ from llama_index.core import (ServiceContext,
                                Settings)
 from llama_index.core.schema import ImageNode
 from llama_index.core.schema import ImageDocument
-from llama_index.vector_stores.qdrant import QdrantVectorStore
 from llama_index.core.response.notebook_utils import display_source_node
 from llama_index.core.indices.multi_modal.base import MultiModalVectorStoreIndex
 from llama_index.embeddings.clip import ClipEmbedding
@@ -56,9 +53,7 @@ class IndexBuilder():
             image_nodes.extend(image_nodes_)
         
         # use llama-index to construct index
-        print(self.embedding_name)
-        Settings.embed_model = HuggingFaceEmbedding(model_name=self.embedding_name)
-        self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True, embed_model=HuggingFaceEmbedding(model_name=self.embedding_name))
+        self.multi_index = MultiModalVectorStoreIndex(image_nodes, show_progress=True, embed_model=ClipEmbedding(model_name="ViT-B/32"))
         
         # save index
         if self.persist_dir != None:
