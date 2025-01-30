@@ -86,3 +86,19 @@ class MultiDiseaseIndexManager(BaseIndexManager):
             print("None emb")
             multi_index = None
         return multi_index
+    
+    def retrieve(self, multi_index, img_path, top_k):
+        txt = []
+        score = [] 
+        img = [] 
+        metadata = []
+        if multi_index != None:
+            retrieve_data = multi_index.as_retriever(similarity_top_k=top_k, image_similarity_top_k=top_k)
+            nodes = retrieve_data.image_to_image_retrieve(img_path)
+            for node in nodes:
+                txt.append(node.get_text()) # excudates
+                score.append(node.get_score()) # 0.628
+                img.append(node.node.image_path)
+                metadata.append(node.node.metadata)
+            # TODO: add text retrieve
+        return {"txt": txt, "score": score, "img": img, "metadata": metadata}
