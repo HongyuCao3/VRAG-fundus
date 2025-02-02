@@ -38,12 +38,12 @@ class TextRetriever(BaseRetriever):
         return similar_txts
     
     def retrieve(self, input_img: pathlib.Path,
-        k:int=2,):
+        k:int=1):
         scores = []
         txts = []
         metadata = []
         discriptions = []
-        similar_txts = self.get_similar_texts(input_img=input_img)
+        similar_txts = self.get_similar_texts(input_img=input_img, k=k)
         for txt, sim, dis in similar_txts:
             scores.append(sim)
             txts.append(txt)

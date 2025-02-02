@@ -71,10 +71,10 @@ class QwenVLVRAG:
         for message in messages:
             image_path = message["content"][0]["image"]
             query = message["content"][1]["text"]
-            image_context = self.index_manager.retrieve(
+            image_context = self.index_manager.retrieve_image(
                 self.image_index, img_path=image_path, top_k=1
             )
-            text_context = self.text_embedding.get_similar_texts(input_img=image_path)
+            text_context = self.text_embedding.retrieve(input_img=image_path)
             print(image_context)
             print(text_context)
         # self.inference(messages)
