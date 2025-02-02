@@ -9,16 +9,31 @@ from Datasets.MultiModalClassificationDataset import (
     MultiModalClassificationConfig,
 )
 from qwen_vl_utils import process_vision_info
+from fundus_knowledge_base.index_manager.mulit_disease_index_manager import (
+    MultiDiseaseIndexManager,
+)
 
 
 class QwenVLVRAG:
-    def __init__(self, checkpoint_path="./Model/Qwen2.5-VL-7B-Instruct"):
+    def __init__(
+        self,
+        checkpoint_path="./Model/Qwen2.5-VL-7B-Instruct",
+        image_index_folder="",
+        text_index_folder="",
+    ):
         min_pixels = 256 * 28 * 28
         max_pixels = 1280 * 28 * 28
-        self.model =  Qwen2_5_VLForConditionalGeneration.from_pretrained(
-        checkpoint_path, torch_dtype=torch.bfloat16, device_map="cuda:0",
+        self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+            checkpoint_path,
+            torch_dtype=torch.bfloat16,
+            device_map="cuda:0",
         )
-        self.processor = AutoProcessor.from_pretrained(checkpoint_path, min_pixels=min_pixels, max_pixels=max_pixels)
+        self.processor = AutoProcessor.from_pretrained(
+            checkpoint_path, min_pixels=min_pixels, max_pixels=max_pixels
+        )
+        self.index_manager = MultiDiseaseIndexManager()
+        self.image_index = self.index_manager.load_index(image_index_folder)
+        self.text_index = self.index_manager.load_index(text_index_folder)
 
     def inference(self, messages):
         text = self.processor.apply_chat_template(
@@ -37,29 +52,44 @@ class QwenVLVRAG:
         # Inference: Generation of the output
         generated_ids = self.model.generate(**inputs, max_new_tokens=128)
         generated_ids_trimmed = [
-            out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+            out_ids[len(in_ids) :]
+            for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
         ]
         output_text = self.processor.batch_decode(
-            generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+            generated_ids_trimmed,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False,
         )
         return output_text
-    
-    
+
+    def inference_rag(self, messages):
+        for message in messages:
+            image_path = message["content"][0]["image"]
+            query = message["content"][1]["text"]
+            image_context = self.index_manager.retrieve(
+                self.image_index, img_path=image_path, top_k=1
+            )
+            text_context = self.index_manager.retrieve(
+                multi_index=self.text_index, img_path=image_path, top_k=1
+            )
+        self.inference(messages)
+
+
 if __name__ == "__main__":
     qvlvrag = QwenVLVRAG()
     image_path = "./data/Classic Images/DR/mild NPDR_1.jpeg"
     query = "What is the diagnsis"
     messages = [
+        {
+            "role": "user",
+            "content": [
                 {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "image": image_path,
-                        },
-                        {"type": "text", "text": query},
-                    ],
-                }
-            ]
+                    "type": "image",
+                    "image": image_path,
+                },
+                {"type": "text", "text": query},
+            ],
+        }
+    ]
     answer = qvlvrag.inference(messages=messages)
     print(answer)
