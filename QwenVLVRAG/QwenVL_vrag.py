@@ -31,7 +31,29 @@ class QwenVLVRAG:
         self.processor = AutoProcessor.from_pretrained(
             checkpoint_path, min_pixels=min_pixels, max_pixels=max_pixels
         )
+        
+    def build_prompt(
+        self,
+        query: str,
+        image_context: str = None,
+        text_context: str = None,
+        diagnosis_standard: str = None,
+    ):
+        parts = []
+        if diagnosis_standard:
+            parts.append(f"Diagnosing Standard: {diagnosis_standard}\n")
+        if image_context:
+            parts.append(
+                f"The possible diagnosing level and similarity: {image_context}\n"
+            )
+        if text_context:
+            parts.append(
+                f"The possible diagnosis and similarity: {text_context}\n"
+            )
+        parts.append(query)
 
+        return "".join(parts)
+    
     def inference(self, messages):
         text = self.processor.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
@@ -64,20 +86,31 @@ class QwenVLVRAG:
         messages,
         image_index_folder: pathlib.Path,
         text_emb_folder: pathlib.Path,
+        use_pics: bool=False,
     ):
         self.index_manager = MultiDiseaseIndexManager()
         self.image_index = self.index_manager.load_index(image_index_folder)
         self.text_embedding = TextRetriever(emb_folder=text_emb_folder)
+        messages_rag = []
         for message in messages:
             image_path = message["content"][0]["image"]
             query = message["content"][1]["text"]
-            image_context = self.index_manager.retrieve_image(
+            retrieved_images = self.index_manager.retrieve_image(
                 self.image_index, img_path=image_path, top_k=1
             )
-            text_context = self.text_embedding.retrieve(input_img=image_path)
-            print(image_context)
-            print(text_context)
-        # self.inference(messages)
+            retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
+            content = [message["content"][0]]
+            if use_pics: # multi image as input
+                for img in retrieved_images["img"]:
+                    content.append({"type": "image", "image": img})
+            # form prompt
+            image_context = " ".join([f"{txt}: {img}" for txt, img in zip(retrieved_images["txt"], retrieved_images["score"])])
+            text_context = " ".join([f"{txt}: {img}" for txt, img in zip(retrieved_texts["txt"], retrieved_texts["score"])])
+            prompt =  self.build_prompt(query=query, image_context=image_context, text_context=text_context)
+            content.append({"type": "text", "text": prompt})
+            messages_rag.append({"role": "user", "content": content})
+        answer = self.inference(messages_rag)
+        return answer
 
 
 if __name__ == "__main__":
