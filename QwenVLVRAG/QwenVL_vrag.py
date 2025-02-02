@@ -1,43 +1,34 @@
-import torch
-from tqdm import tqdm
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+from qwen_vl_utils import process_vision_info
 
 
 class QwenVLVRAG:
-    def __init__(self, checkpoint_path):
-        self.model = AutoModelForCausalLM.from_pretrained(
-            checkpoint_path, device_map="cuda", trust_remote_code=True
-        ).eval()
-
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            checkpoint_path, trust_remote_code=True
+    def __init__(self, checkpoint_path="Qwen/Qwen2.5-VL-7B-Instruct"):
+        self.model =  Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        checkpoint_path, torch_dtype="auto", device_map="auto"
         )
-        self.tokenizer.padding_side = "left"
-        self.tokenizer.pad_token_id = self.tokenizer.eod_id
+        self.processor = AutoProcessor.from_pretrained(checkpoint_path)
 
-        prompt = "<img>{}</img>{} Answer:"
-
-    def inference(self, questions, max_new_tokens=128):
-        input_ids = self.tokenizer(questions, return_tensors="pt", padding="longest")
-        attention_mask = input_ids.attention_mask
-        pred = self.model.generate(
-            input_ids=input_ids.cuda(),
-            attention_mask=attention_mask.cuda(),
-            do_sample=False,
-            num_beams=1,
-            max_new_tokens=max_new_tokens,
-            min_new_tokens=1,
-            length_penalty=1,
-            num_return_sequences=1,
-            output_hidden_states=True,
-            use_cache=True,
-            pad_token_id=self.tokenizer.eod_id,
-            eos_token_id=self.tokenizer.eod_id,
+    def inference(self, messages):
+        text = self.processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
         )
-        answers = [
-            self.tokenizer.decode(
-                _[input_ids.size(1) :].cpu(), skip_special_tokens=True
-            ).strip()
-            for _ in pred
+        image_inputs, video_inputs = process_vision_info(messages)
+        inputs = self.processor(
+            text=[text],
+            images=image_inputs,
+            videos=video_inputs,
+            padding=True,
+            return_tensors="pt",
+        )
+        inputs = inputs.to(self.model.device)
+
+        # Inference: Generation of the output
+        generated_ids = self.model.generate(**inputs, max_new_tokens=128)
+        generated_ids_trimmed = [
+            out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
         ]
-        return answers
+        output_text = self.processor.batch_decode(
+            generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )
+        return output_text
