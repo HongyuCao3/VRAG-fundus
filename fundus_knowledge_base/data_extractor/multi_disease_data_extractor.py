@@ -23,7 +23,7 @@ class MultiDiseaseDataExtractor(BaseDataExtractor):
                         disease = "Normal"
                 else:
                     disease = sub_folder.name
-                image_path = pathlib.Path.joinpath(folder, sub_folder, file_name)
+                image_path = file_name
                 meta_data = {"source_file": image_path}
                 print(
                     f"Image found: {file_name.name} in subfolder: {sub_folder.name} at folder: {folder}"
