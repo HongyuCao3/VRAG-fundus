@@ -72,13 +72,13 @@ class MultiDiseaseIndexManager(BaseIndexManager):
             saving_folder.mkdir()
         self.text_index.storage_context.persist(persist_dir=saving_folder)
 
-    def load_index(self, saving_folder: pathlib.Path):
+    def load_index(self, saving_folder: pathlib.Path, model_name: str = "ViT-B/32"):
         if saving_folder != None:
             if saving_folder.exists():
                 storage_context_classic = StorageContext.from_defaults(
-                    persist_dir=saving_folder
+                    persist_dir=str(saving_folder),
                 )
-                multi_index = load_index_from_storage(storage_context_classic)
+                multi_index = load_index_from_storage(storage_context_classic,  embed_model=ClipEmbedding(model_name=model_name))
             else:
                 print("invalid emb " + saving_folder)
                 multi_index = None
@@ -108,8 +108,18 @@ if __name__ == "__main__":
     text_file = pathlib.Path("./data/Classic Images/classic.json",)
     text_index_saving_folder = pathlib.Path("./fundus_knowledge_base/emb_savings/mulit_desease_text_index")
     image_index_saving_folder = pathlib.Path("./fundus_knowledge_base/emb_savings/mulit_desease_image_index")
-    # mdim.build_text_index(text_file="./data/Classic Images/classic.json", saving_folder=text_saving_folder)
-    mdim.build_image_index(image_folder=pathlib.Path("./data/Classic Images/"), saving_folder=image_index_saving_folder)
+    
+    # build index
+    # mdim.build_text_index(text_file="./data/Classic Images/classic.json", saving_folder=text_index_saving_folder)
+    # mdim.build_image_index(image_folder=pathlib.Path("./data/Classic Images/"), aving_folder=image_index_saving_folder)
+    
+    # image retrieve
+    image_index = mdim.load_index(saving_folder=image_index_saving_folder)
+    image_path = "./data/Classic Images/DR/mild NPDR_1.jpeg"
+    result = mdim.retrieve(multi_index=image_index, img_path=image_path, top_k=3)
+    print(result)
+    
+    # text retrieve
     # text_index = mdim.load_index(saving_folder=saving_folder)
     # retrieve_data = text_index.as_retriever(similarity_top_k=1, image_similarity_top_k=3)
     # node = retrieve_data.retrieve
