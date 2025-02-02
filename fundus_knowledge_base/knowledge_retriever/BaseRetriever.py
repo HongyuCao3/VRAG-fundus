@@ -1,6 +1,6 @@
 import sys
 sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
-from fundus_knowledge_base.EmbBuilder.BaseEmbBuilder import BaseEmbBuilder
+from fundus_knowledge_base.emb_builder.BaseEmbBuilder import BaseEmbBuilder
 from abc import ABC
 
 class BaseRetriever(ABC):

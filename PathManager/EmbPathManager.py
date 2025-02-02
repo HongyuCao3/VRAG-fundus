@@ -6,7 +6,7 @@ from PathManager.BasePathManager import BasePathManager, BasePathConfig
 class EmbPathConfig(BasePathConfig):
     def __init__(self):
         super().__init__()
-        self.emb_saving_dir = Path.joinpath(self.root_path, "KnowledgeBase", "emb_savings")
+        self.emb_saving_dir = Path.joinpath(self.root_path, "fundus_knowledge_base", "emb_savings")
         self.default_text_emb_name = "MultiDiseaseText"
         self.default_img_emb_name = "MultiDiseaseImage"
 

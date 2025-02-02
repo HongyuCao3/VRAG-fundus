@@ -12,14 +12,14 @@ from qwen_vl_utils import process_vision_info
 from fundus_knowledge_base.index_manager.mulit_disease_index_manager import (
     MultiDiseaseIndexManager,
 )
+from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
+from fundus_knowledge_base.knowledge_retriever.TextRetriever import TextRetriever
 
 
 class QwenVLVRAG:
     def __init__(
         self,
         checkpoint_path="./Model/Qwen2.5-VL-7B-Instruct",
-        image_index_folder="",
-        text_index_folder="",
     ):
         min_pixels = 256 * 28 * 28
         max_pixels = 1280 * 28 * 28
@@ -31,9 +31,6 @@ class QwenVLVRAG:
         self.processor = AutoProcessor.from_pretrained(
             checkpoint_path, min_pixels=min_pixels, max_pixels=max_pixels
         )
-        self.index_manager = MultiDiseaseIndexManager()
-        self.image_index = self.index_manager.load_index(image_index_folder)
-        self.text_index = self.index_manager.load_index(text_index_folder)
 
     def inference(self, messages):
         text = self.processor.apply_chat_template(
@@ -62,17 +59,25 @@ class QwenVLVRAG:
         )
         return output_text
 
-    def inference_rag(self, messages):
+    def inference_rag(
+        self,
+        messages,
+        image_index_folder: pathlib.Path,
+        text_emb_folder: pathlib.Path,
+    ):
+        self.index_manager = MultiDiseaseIndexManager()
+        self.image_index = self.index_manager.load_index(image_index_folder)
+        self.text_embedding = TextRetriever(emb_folder=text_emb_folder)
         for message in messages:
             image_path = message["content"][0]["image"]
             query = message["content"][1]["text"]
             image_context = self.index_manager.retrieve(
                 self.image_index, img_path=image_path, top_k=1
             )
-            text_context = self.index_manager.retrieve(
-                multi_index=self.text_index, img_path=image_path, top_k=1
-            )
-        self.inference(messages)
+            text_context = self.text_embedding.get_similar_texts(input_img=image_path)
+            print(image_context)
+            print(text_context)
+        # self.inference(messages)
 
 
 if __name__ == "__main__":
@@ -91,5 +96,14 @@ if __name__ == "__main__":
             ],
         }
     ]
-    answer = qvlvrag.inference(messages=messages)
+    pm = EmbPathManager()
+    text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
+    image_index_folder = pathlib.Path(
+        "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
+    )
+    answer = qvlvrag.inference_rag(
+        messages=messages,
+        text_emb_folder=text_emb_folder,
+        image_index_folder=image_index_folder,
+    )
     print(answer)

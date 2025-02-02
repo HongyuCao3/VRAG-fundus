@@ -1,13 +1,13 @@
 import pathlib
 import sys
-sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
+sys.path.append("/home/hongyu/Visual-RAG-LLaVA-Med/")
 import json
 from torch.types import (
     Number,
 )
 from torch.nn.functional import cosine_similarity
-from fundus_knowledge_base.Retriever.BaseRetriever import BaseRetriever
-from fundus_knowledge_base.EmbBuilder.MultiDiseaseEmbBuilder import MultiDiseaseEmbBuilder
+from fundus_knowledge_base.knowledge_retriever.BaseRetriever import BaseRetriever
+from fundus_knowledge_base.emb_builder.MultiDiseaseEmbBuilder import MultiDiseaseEmbBuilder
 from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
 
 class TextRetriever(BaseRetriever):
