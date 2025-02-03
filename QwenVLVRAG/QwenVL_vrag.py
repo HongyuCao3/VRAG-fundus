@@ -31,7 +31,7 @@ class QwenVLVRAG:
         self.processor = AutoProcessor.from_pretrained(
             checkpoint_path, min_pixels=min_pixels, max_pixels=max_pixels
         )
-        
+
     def build_prompt(
         self,
         query: str,
@@ -47,13 +47,11 @@ class QwenVLVRAG:
                 f"The possible diagnosing level and similarity: {image_context}\n"
             )
         if text_context:
-            parts.append(
-                f"The possible diagnosis and similarity: {text_context}\n"
-            )
+            parts.append(f"The possible diagnosis and similarity: {text_context}\n")
         parts.append(query)
 
         return "".join(parts)
-    
+
     def inference(self, messages):
         text = self.processor.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
@@ -84,29 +82,55 @@ class QwenVLVRAG:
     def inference_rag(
         self,
         messages,
-        image_index_folder: pathlib.Path,
-        text_emb_folder: pathlib.Path,
-        use_pics: bool=False,
+        image_index_folder: pathlib.Path = None,
+        text_emb_folder: pathlib.Path = None,
+        use_pics: bool = False,
     ):
-        self.index_manager = MultiDiseaseIndexManager()
-        self.image_index = self.index_manager.load_index(image_index_folder)
-        self.text_embedding = TextRetriever(emb_folder=text_emb_folder)
+        if image_index_folder:
+            self.index_manager = MultiDiseaseIndexManager()
+            self.image_index = self.index_manager.load_index(image_index_folder)
+        if text_emb_folder:
+            self.text_embedding = TextRetriever(emb_folder=text_emb_folder)
         messages_rag = []
         for message in messages:
             image_path = message["content"][0]["image"]
             query = message["content"][1]["text"]
-            retrieved_images = self.index_manager.retrieve_image(
-                self.image_index, img_path=image_path, top_k=1
-            )
-            retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
+            if image_index_folder:
+                retrieved_images = self.index_manager.retrieve_image(
+                    self.image_index, img_path=image_path, top_k=1
+                )
+            if text_emb_folder:
+                retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
             content = [message["content"][0]]
-            if use_pics: # multi image as input
+            if use_pics and image_index_folder:  # multi image as input
                 for img in retrieved_images["img"]:
                     content.append({"type": "image", "image": img})
             # form prompt
-            image_context = " ".join([f"{txt}: {img}" for txt, img in zip(retrieved_images["txt"], retrieved_images["score"])])
-            text_context = " ".join([f"{txt}: {img}" for txt, img in zip(retrieved_texts["txt"], retrieved_texts["score"])])
-            prompt =  self.build_prompt(query=query, image_context=image_context, text_context=text_context)
+            if image_index_folder:
+                image_context = " ".join(
+                    [
+                        f"{txt}: {img}"
+                        for txt, img in zip(
+                            retrieved_images["txt"], retrieved_images["score"]
+                        )
+                    ]
+                )
+            else:
+                image_context = None
+            if text_emb_folder:
+                text_context = " ".join(
+                    [
+                        f"{txt}: {img}"
+                        for txt, img in zip(
+                            retrieved_texts["txt"], retrieved_texts["score"]
+                        )
+                    ]
+                )
+            else:
+                text_context = None
+            prompt = self.build_prompt(
+                query=query, image_context=image_context, text_context=text_context
+            )
             content.append({"type": "text", "text": prompt})
             messages_rag.append({"role": "user", "content": content})
         answer = self.inference(messages_rag)

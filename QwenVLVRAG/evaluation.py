@@ -22,12 +22,13 @@ class evaluation:
 
     def evaluate_classification(
         self,
-        checkpoint_path: str,
-        image_index_folder: pathlib.Path,
-        text_emb_folder: pathlib.Path,
+        checkpoint_path: str = "./Model/Qwen2.5-VL-7B-Instruct",
+        image_index_folder: pathlib.Path = None,
+        text_emb_folder: pathlib.Path= None,
         batch_size: int = 1,
         sheet_names=["CFP"],
         use_pics: bool = False,
+        test_num: int=-1,
     ):
         vrag = QwenVLVRAG(checkpoint_path=checkpoint_path)
         dataset_config = MultiModalClassificationConfig()
@@ -39,7 +40,9 @@ class evaluation:
         # Iterate through the dataloader
         results = []
         query = "what is th diagnosis?"
-        for images, diagnosis in tqdm(dataloader):
+        for idx, (images, diagnosis) in tqdm(enumerate(dataloader)):
+            if test_num != -1 and idx >= test_num:
+                break
             messages = [
                 {
                     "role": "user",
@@ -80,3 +83,5 @@ class evaluation:
 
 if __name__ == "__main__":
     eva = evaluation()
+    
+    eva.evaluate_classification()
