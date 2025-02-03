@@ -73,8 +73,16 @@ class evaluation:
         result_saving_folder = self.config.root_dir / dataset_config.dataset_name
         if not result_saving_folder.exists():
             result_saving_folder.mkdir()
+        if image_index_folder:
+            image_index_name = image_index_folder.name
+        else:
+            image_index_name = None
+        if text_emb_folder:
+            text_emb_name = text_emb_folder.name
+        else:
+            text_emb_name = None
         result_saving_path = result_saving_folder.joinpath(
-            f"{image_index_folder.name}_{text_emb_folder.name}_usepics_{str(use_pics)}.json"
+            f"{image_index_name}_{text_emb_name}_usepics_{str(use_pics)}.json"
         )
         with result_saving_path.open("w", encoding="utf-8") as f:
             json.dump(results, f)
