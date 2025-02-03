@@ -91,7 +91,8 @@ class evaluation:
 if __name__ == "__main__":
     eva = evaluation()
     pm = EmbPathManager()
-    text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
+    # text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
+    text_emb_folder = None
     image_index_folder = pathlib.Path(
         "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
     )
