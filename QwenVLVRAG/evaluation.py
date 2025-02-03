@@ -82,7 +82,7 @@ class evaluation:
         else:
             text_emb_name = None
         result_saving_path = result_saving_folder.joinpath(
-            f"{image_index_name}_{text_emb_name}_usepics_{str(use_pics)}.json"
+            f"{image_index_name}_{text_emb_name}_usepics_{str(use_pics)}_{test_num}.json"
         )
         with result_saving_path.open("w", encoding="utf-8") as f:
             json.dump(results, f)
@@ -95,4 +95,4 @@ if __name__ == "__main__":
     image_index_folder = pathlib.Path(
         "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
     )
-    eva.evaluate_classification(image_index_folder=image_index_folder, text_emb_folder=text_emb_folder, test_num=1)
+    eva.evaluate_classification(image_index_folder=image_index_folder, text_emb_folder=text_emb_folder, test_num=-1)
