@@ -2,7 +2,7 @@ import pathlib
 import sys
 
 sys.path.append(str(pathlib.Path.cwd()))
-import tqdm
+from tqdm import tqdm
 import json
 from Datasets.MultiModalClassificationDataset import (
     MultiModalClassificationDataset,
@@ -10,10 +10,11 @@ from Datasets.MultiModalClassificationDataset import (
 )
 from torch.utils.data import DataLoader
 from QwenVLVRAG.QwenVL_vrag import QwenVLVRAG
+from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
 
 
 class evaluation_config:
-    root_dir = pathlib.Path("./QwenVRAG/output/")
+    root_dir = pathlib.Path("/home/hongyu/Visual-RAG-LLaVA-Med/QwenVLVRAG/output/")
 
 
 class evaluation:
@@ -49,7 +50,7 @@ class evaluation:
                     "content": [
                         {
                             "type": "image",
-                            "image": images,
+                            "image": images[0],
                         },
                         {"type": "text", "text": query},
                     ],
@@ -63,15 +64,13 @@ class evaluation:
             )
             results.append(
                 {
-                    "img_name": images,
-                    "ground truth": diagnosis,
+                    "img_name": images[0],
+                    "ground truth": diagnosis[0],
                     "llm respond": answer,
                 }
             )
         # save_result
-        result_saving_folder = self.config.root_dir.joinpath(
-            dataset_config.dataset_name
-        )
+        result_saving_folder = self.config.root_dir / dataset_config.dataset_name
         if not result_saving_folder.exists():
             result_saving_folder.mkdir()
         result_saving_path = result_saving_folder.joinpath(
@@ -83,5 +82,9 @@ class evaluation:
 
 if __name__ == "__main__":
     eva = evaluation()
-    
-    eva.evaluate_classification()
+    pm = EmbPathManager()
+    text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
+    image_index_folder = pathlib.Path(
+        "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
+    )
+    eva.evaluate_classification(image_index_folder=image_index_folder, text_emb_folder=text_emb_folder, test_num=1)
