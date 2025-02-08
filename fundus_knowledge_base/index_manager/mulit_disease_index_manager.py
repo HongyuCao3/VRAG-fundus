@@ -6,7 +6,7 @@ from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.core.indices.multi_modal.base import MultiModalVectorStoreIndex
 from fundus_knowledge_base.index_manager.base_index_manager import (
     BaseIndexManager,
-    RetrieveResults,
+    ImageRetrieveResults,
 )
 from fundus_knowledge_base.data_extractor.multi_disease_data_extractor import (
     MultiDiseaseDataExtractor,
@@ -110,7 +110,7 @@ class MultiDiseaseIndexManager(BaseIndexManager):
                 img.append(node.node.image_path)
                 metadata.append(node.node.metadata)
         # return {"txt": txt, "score": score, "img": img, "metadata": metadata}
-        return RetrieveResults(txt=txt, score=score, img=img, metadata=metadata)
+        return ImageRetrieveResults(txt=txt, score=score, img=img, metadata=metadata)
 
     def retrieve_text(self, multi_index, img_path, top_k):
         txt = []
@@ -129,7 +129,7 @@ class MultiDiseaseIndexManager(BaseIndexManager):
                 # img.append(node.node.image_path)
                 metadata.append(node.node.metadata)
         # return {"txt": txt, "score": score, "img": img, "metadata": metadata}
-        return RetrieveResults(txt=txt, img=img, metadata=metadata, score=score)
+        return ImageRetrieveResults(txt=txt, img=img, metadata=metadata, score=score)
 
 
 if __name__ == "__main__":

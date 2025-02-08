@@ -103,7 +103,7 @@ class QwenVLVRAG:
                 retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
             content = [message["content"][0]]
             if use_pics and image_index_folder:  # multi image as input
-                for img in retrieved_images["img"]:
+                for img in retrieved_images.img:
                     content.append({"type": "image", "image": img})
             # form prompt
             if image_index_folder:
@@ -111,7 +111,7 @@ class QwenVLVRAG:
                     [
                         f"{txt}: {img}"
                         for txt, img in zip(
-                            retrieved_images["txt"], retrieved_images["score"]
+                            retrieved_images.txt, retrieved_images.score
                         )
                     ]
                 )
@@ -121,9 +121,7 @@ class QwenVLVRAG:
                 text_context = " ".join(
                     [
                         f"{txt}: {img}"
-                        for txt, img in zip(
-                            retrieved_texts["txt"], retrieved_texts["score"]
-                        )
+                        for txt, img in zip(retrieved_texts.txt, retrieved_texts.score)
                     ]
                 )
             else:

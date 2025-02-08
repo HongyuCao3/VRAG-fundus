@@ -19,7 +19,7 @@ AVAILABLE_CLIP_MODELS = (
 
 
 @dataclass
-class RetrieveResults:
+class ImageRetrieveResults:
     txt: list[str]
     score: list[float]  # 或者 int，取决于你需要的精度
     img: list[str]  # 假设为图像文件路径或图像对象的字符串表示
