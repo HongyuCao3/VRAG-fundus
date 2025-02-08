@@ -18,6 +18,7 @@ from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
 from fundus_knowledge_base.knowledge_retriever.TextRetriever import TextRetriever
 from VRAG_Framework import load_model_and_tokenizer
 
+
 class InternVL2_finetuned:
     def __init__(
         self,
@@ -26,21 +27,23 @@ class InternVL2_finetuned:
         t_filter: float,
         t_check: float,
     ):
-        self.model, self.tokenizer = load_model_and_tokenizer(args) 
+        self.model, self.tokenizer = load_model_and_tokenizer(args)
         self.context_former = ClassificationContextFormer()
         self.vrag_filter = VRAGFilter(
             self.context_former, threshold=t_filter, sheet_names=sheet_names
         )
         self.checker = Checker(threshold=t_check)
-        
+
     def load_image(self, image_file, input_size=448, max_num=12):
-        image = Image.open(image_file).convert('RGB')
+        image = Image.open(image_file).convert("RGB")
         transform = self.build_transform(input_size=input_size)
-        images = self.dynamic_preprocess(image, image_size=input_size, use_thumbnail=True, max_num=max_num)
+        images = self.dynamic_preprocess(
+            image, image_size=input_size, use_thumbnail=True, max_num=max_num
+        )
         pixel_values = [transform(image) for image in images]
         pixel_values = torch.stack(pixel_values)
         return pixel_values
-    
+
     def inference_rag(
         self,
         query: str,
@@ -48,11 +51,11 @@ class InternVL2_finetuned:
         filter: bool = False,
         check: bool = False,
         input_pics_num: int = 0,
-        num_beams: int=1,
-        temperature: float=0,
+        num_beams: int = 1,
+        temperature: float = 0,
         image_index_folder: pathlib.Path = None,
         text_emb_folder: pathlib.Path = None,
-        use_pics: int=0,
+        use_pics: int = 0,
     ):
         if image_index_folder:
             self.index_manager = MultiDiseaseIndexManager()
@@ -62,18 +65,16 @@ class InternVL2_finetuned:
 
         # form inference context
         if image_index_folder:
-                retrieved_images = self.index_manager.retrieve_image(
-                    self.image_index, img_path=image_path, top_k=1
-                )
+            retrieved_images = self.index_manager.retrieve_image(
+                self.image_index, img_path=image_path, top_k=1
+            )
         if text_emb_folder:
             retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
         if image_index_folder:
             image_context = " ".join(
                 [
-                    f"{txt}: {img}"
-                    for txt, img in zip(
-                        retrieved_images["txt"], retrieved_images["score"]
-                    )
+                    f"{txt}: {score}"
+                    for txt, score in zip(retrieved_images.txt, retrieved_images.score)
                 ]
             )
         else:
@@ -81,10 +82,8 @@ class InternVL2_finetuned:
         if text_emb_folder:
             text_context = " ".join(
                 [
-                    f"{txt}: {img}"
-                    for txt, img in zip(
-                        retrieved_texts["txt"], retrieved_texts["score"]
-                    )
+                    f"{txt}: {score}"
+                    for txt, score in zip(retrieved_texts.txt, retrieved_texts.score)
                 ]
             )
         else:
