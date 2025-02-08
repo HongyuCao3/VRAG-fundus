@@ -4,7 +4,10 @@ sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
 import json
 from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.core.indices.multi_modal.base import MultiModalVectorStoreIndex
-from fundus_knowledge_base.index_manager.base_index_manager import BaseIndexManager
+from fundus_knowledge_base.index_manager.base_index_manager import (
+    BaseIndexManager,
+    RetrieveResults,
+)
 from fundus_knowledge_base.data_extractor.multi_disease_data_extractor import (
     MultiDiseaseDataExtractor,
 )
@@ -79,7 +82,10 @@ class MultiDiseaseIndexManager(BaseIndexManager):
                 storage_context_classic = StorageContext.from_defaults(
                     persist_dir=str(saving_folder),
                 )
-                multi_index = load_index_from_storage(storage_context_classic,  embed_model=ClipEmbedding(model_name=model_name))
+                multi_index = load_index_from_storage(
+                    storage_context_classic,
+                    embed_model=ClipEmbedding(model_name=model_name),
+                )
             else:
                 print("invalid emb " + saving_folder)
                 multi_index = None
@@ -87,56 +93,70 @@ class MultiDiseaseIndexManager(BaseIndexManager):
             print("None emb")
             multi_index = None
         return multi_index
-    
+
     def retrieve_image(self, multi_index, img_path, top_k):
         txt = []
-        score = [] 
-        img = [] 
+        score = []
+        img = []
         metadata = []
         if multi_index != None:
-            retrieve_data = multi_index.as_retriever(similarity_top_k=top_k, image_similarity_top_k=top_k)
+            retrieve_data = multi_index.as_retriever(
+                similarity_top_k=top_k, image_similarity_top_k=top_k
+            )
             nodes = retrieve_data.image_to_image_retrieve(img_path)
             for node in nodes:
-                txt.append(node.get_text()) # excudates
-                score.append(node.get_score()) # 0.628
+                txt.append(node.get_text())  # excudates
+                score.append(node.get_score())  # 0.628
                 img.append(node.node.image_path)
                 metadata.append(node.node.metadata)
-        return {"txt": txt, "score": score, "img": img, "metadata": metadata}
-    
+        # return {"txt": txt, "score": score, "img": img, "metadata": metadata}
+        return RetrieveResults(txt=txt, score=score, img=img, metadata=metadata)
+
     def retrieve_text(self, multi_index, img_path, top_k):
         txt = []
-        score = [] 
-        img = [] 
+        score = []
+        img = []
         metadata = []
         if multi_index != None:
-            retrieve_data = multi_index.as_retriever(similarity_top_k=top_k, image_similarity_top_k=top_k)
+            retrieve_data = multi_index.as_retriever(
+                similarity_top_k=top_k, image_similarity_top_k=top_k
+            )
             # 这里无法从image retrieve text
             nodes = retrieve_data.retrieve(image_path)
             for node in nodes:
-                txt.append(node.get_text()) # excudates
-                score.append(node.get_score()) # 0.628
+                txt.append(node.get_text())  # excudates
+                score.append(node.get_score())  # 0.628
                 # img.append(node.node.image_path)
                 metadata.append(node.node.metadata)
-        return {"txt": txt, "score": score, "img": img, "metadata": metadata}
-    
+        # return {"txt": txt, "score": score, "img": img, "metadata": metadata}
+        return RetrieveResults(txt=txt, img=img, metadata=metadata, score=score)
+
+
 if __name__ == "__main__":
     mdim = MultiDiseaseIndexManager()
-    text_file = pathlib.Path("./data/Classic Images/classic.json",)
-    text_index_saving_folder = pathlib.Path("./fundus_knowledge_base/emb_savings/mulit_desease_text_index")
-    image_index_saving_folder = pathlib.Path("./fundus_knowledge_base/emb_savings/mulit_desease_image_index")
+    text_file = pathlib.Path(
+        "./data/Classic Images/classic.json",
+    )
+    text_index_saving_folder = pathlib.Path(
+        "./fundus_knowledge_base/emb_savings/mulit_desease_text_index"
+    )
+    image_index_saving_folder = pathlib.Path(
+        "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
+    )
     image_path = "./data/Classic Images/DR/mild NPDR_1.jpeg"
-    
+
     # build index
     # mdim.build_text_index(text_file="./data/Classic Images/classic.json", saving_folder=text_index_saving_folder)
     # mdim.build_image_index(image_folder=pathlib.Path("./data/Classic Images/"), aving_folder=image_index_saving_folder)
-    
+
     # image retrieve
     # image_index = mdim.load_index(saving_folder=image_index_saving_folder)
     # result = mdim.retrieve(multi_index=image_index, img_path=image_path, top_k=3)
     # print(result)
-    
+
     # text retrieve
     text_index = mdim.load_index(saving_folder=text_index_saving_folder)
-    retrieve_data = mdim.retrieve_text(multi_index=text_index, img_path=image_path, top_k=3)
+    retrieve_data = mdim.retrieve_text(
+        multi_index=text_index, img_path=image_path, top_k=3
+    )
     print(retrieve_data)
-    
