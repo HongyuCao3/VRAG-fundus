@@ -1,6 +1,7 @@
+import pathlib
 import sys
 
-sys.path.append(r"/home/hongyu/Visual-RAG-LLaVA-Med/")
+sys.path.append(str(pathlib.Path.cwd()))
 import json
 from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.core.indices.multi_modal.base import MultiModalVectorStoreIndex
@@ -94,7 +95,7 @@ class MultiDiseaseIndexManager(BaseIndexManager):
             multi_index = None
         return multi_index
 
-    def retrieve_image(self, multi_index, img_path, top_k):
+    def retrieve_image(self, multi_index, img_path, top_k) -> ImageRetrieveResults:
         txt = []
         score = []
         img = []

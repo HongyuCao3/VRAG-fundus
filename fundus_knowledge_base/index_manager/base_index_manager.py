@@ -1,7 +1,7 @@
 import os, pathlib
 from PIL import Image
 from llama_index.embeddings.clip import ClipEmbedding
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from llama_index.core.indices.multi_modal.base import MultiModalVectorStoreIndex
 from llama_index.core.schema import ImageNode
 
@@ -20,10 +20,18 @@ AVAILABLE_CLIP_MODELS = (
 
 @dataclass
 class ImageRetrieveResults:
-    txt: list[str]
-    score: list[float]  # 或者 int，取决于你需要的精度
-    img: list[str]  # 假设为图像文件路径或图像对象的字符串表示
-    metadata: list
+    txt: list[str] = field(default_factory=list)
+    score: list[float] = field(default_factory=list)
+    img: list[str] = field(default_factory=list) 
+    metadata: list = field(default_factory=list)
+
+    @classmethod
+    def create_with_empty_lists(cls):
+        """
+        创建一个所有属性都为空列表的ImageRetrieveResults实例。
+        """
+        return cls(txt=[], score=[], img=[], metadata=[])
+    
 
 
 class BaseIndexManager:

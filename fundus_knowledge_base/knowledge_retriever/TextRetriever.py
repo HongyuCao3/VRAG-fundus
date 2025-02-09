@@ -6,7 +6,7 @@ import json
 from torch.types import (
     Number,
 )
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from torch.nn.functional import cosine_similarity
 from fundus_knowledge_base.knowledge_retriever.BaseRetriever import BaseRetriever
 from fundus_knowledge_base.emb_builder.MultiDiseaseEmbBuilder import (
@@ -17,10 +17,17 @@ from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
 
 @dataclass
 class TextRetrieveResults:
-    txt: list[str]
-    score: list[float]  # 或者 int，取决于你需要的精度
-    discription: list[str]  # discription of the desease
-    metadata: list
+    txt: list[str] = field(default_factory=list)
+    score: list[float] = field(default_factory=list)  
+    description: list[str] = field(default_factory=list) 
+    metadata: list = field(default_factory=list)
+
+    @classmethod
+    def create_with_empty_lists(cls):
+        """
+        创建一个所有属性都为空列表的TextRetrieveResults实例。
+        """
+        return cls(txt=[], score=[], description=[], metadata=[])
 
 
 class TextRetriever(BaseRetriever):

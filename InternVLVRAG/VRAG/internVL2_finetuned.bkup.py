@@ -14,10 +14,54 @@ from emb_module.emb_builder import ClassicEmbBuilder
 from internvl.model.internvl_chat.modeling_internvl_chat import InternVLChatModel
 from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys, expand_disease_abbreviation
-from VRAG_Framework import load_model_and_tokenizer
 from conflict_resolution.vrag_filter import VRAGFilter
 from conflict_resolution.checker import Checker
 
+import math
+
+import torch
+from internvl.model.internvl_chat import InternVLChatConfig, InternVLChatModel
+from transformers import AutoTokenizer, AutoModel
+
+def split_model(num_layers, vit_alpha=0.5):
+    device_map = {}
+    world_size = torch.cuda.device_count()
+    # Since the first GPU will be used for ViT, treat it as half a GPU.
+    num_layers_per_gpu = math.ceil(num_layers / (world_size - vit_alpha))
+    num_layers_per_gpu = [num_layers_per_gpu] * world_size
+    num_layers_per_gpu[0] = math.ceil(num_layers_per_gpu[0] * (1 - vit_alpha))
+    layer_cnt = 0
+    for i, num_layer in enumerate(num_layers_per_gpu):
+        for j in range(num_layer):
+            device_map[f'language_model.model.layers.{layer_cnt}'] = i
+            layer_cnt += 1
+    device_map['vision_model'] = 0
+    device_map['mlp1'] = 0
+    device_map['language_model.model.tok_embeddings'] = 0
+    device_map['language_model.model.embed_tokens'] = 0
+    device_map['language_model.output'] = 0
+    device_map['language_model.model.norm'] = 0
+    device_map['language_model.lm_head'] = 0
+    device_map[f'language_model.model.layers.{num_layers - 1}'] = 0
+
+    return device_map
+
+def load_model_and_tokenizer(args):
+    if args.auto:
+        config = InternVLChatConfig.from_pretrained(args.model_path)
+        num_hidden_layers = config.llm_config.num_hidden_layers
+        device_map = split_model(num_hidden_layers)
+    kwargs = {'device_map': device_map} if args.auto else {}
+    tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True, use_fast=False)
+    model = InternVLChatModel.from_pretrained(
+        args.model_path, 
+        low_cpu_mem_usage=True, torch_dtype=torch.float16,
+        load_in_8bit=args.load_in_8bit, load_in_4bit=args.load_in_4bit, device_map="auto",**kwargs).eval()
+    # 去掉low_cpu_mem_usage可以运行
+    if not args.load_in_8bit and not args.load_in_4bit and not args.auto:
+        model = model.cuda()
+        # model.to("cuda:0")
+    return model, tokenizer
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 load_8bit=True
