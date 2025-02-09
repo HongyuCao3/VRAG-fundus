@@ -19,7 +19,7 @@ from fundus_knowledge_base.index_manager.mulit_disease_index_manager import (
 from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
 from fundus_knowledge_base.knowledge_retriever.TextRetriever import TextRetriever
 from InternVLVRAG.internvl.model import load_model_and_tokenizer
-from InternVLVRAG.VRAG.internVL2_base import InternVL2Base
+from InternVLVRAG.VRAG.internVL2_base import InternVL2Base, InterVLInferenceParams
 
 
 class InternVL2Finetuned(InternVL2Base):
@@ -41,27 +41,18 @@ class InternVL2Finetuned(InternVL2Base):
         self,
         query: str,
         image_path: pathlib.Path,
-        filter: bool = False,
-        check: bool = False,
-        num_beams: int = 1,
-        temperature: float = 0,
-        image_index_folder: pathlib.Path = None,
-        image_topk:int=1,
-        text_topk: int=1,
-        text_emb_folder: pathlib.Path = None,
-        use_pics: int = 0,
-        # TODO: warp the parameters
+        params: InterVLInferenceParams
     ):
-        if image_index_folder:
+        if params.image_index_folder:
             self.index_manager = MultiDiseaseIndexManager()
-            self.image_index = self.index_manager.load_index(image_index_folder)
+            self.image_index = self.index_manager.load_index(params.image_index_folder)
         if text_emb_folder:
-            self.text_embedding = TextRetriever(emb_folder=text_emb_folder)
+            self.text_embedding = TextRetriever(emb_folder=params.text_emb_folder)
 
         # retrieval and post-process
         if image_index_folder:
             retrieved_images = self.index_manager.retrieve_image(
-                self.image_index, img_path=image_path, top_k=image_topk
+                self.image_index, img_path=image_path, top_k=params.image_topk
             )
             if filter:
                 retrieved_images = self.vrag_filter.filter_retrieved_images(retrieved_images=retrieved_images)
@@ -74,7 +65,7 @@ class InternVL2Finetuned(InternVL2Base):
         else:
             image_context = None
         if text_emb_folder:
-            retrieved_texts = self.text_embedding.retrieve(input_img=image_path, k=text_topk)
+            retrieved_texts = self.text_embedding.retrieve(input_img=image_path, k=params.text_topk)
             if filter:
                 retrieved_texts = self.vrag_filter.filter_retrieved_texts(retrieved_texts=retrieved_texts)
             text_context = " ".join(
@@ -94,16 +85,34 @@ class InternVL2Finetuned(InternVL2Base):
 
         # do inference
         generation_config = dict(
-            num_beams=num_beams,
+            num_beams=params.num_beams,
             min_new_tokens=1,
-            do_sample=True if temperature > 0 else False,
-            temperature=temperature,
+            do_sample=True if params.temperature > 0 else False,
+            temperature=params.temperature,
         )
         pixel_values = self.load_image(image_path, max_num=12).to(torch.float16).cuda()
-        for i in range(use_pics):
+        for i in range(params.use_pics):
             rag_pixel_values = self.load_image(retrieved_images["img"][i])
             pixel_values = torch.cat((pixel_values, rag_pixel_values), dim=0)
         response = self.model.chat(
             self.tokenizer, pixel_values, prompt, generation_config, verbose=True
         )
         return response, record_data
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--checkpoint", type=str, default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/InternVL2-8B")
+    parser.add_argument("--dataset", type=str, default="DR")
+    parser.add_argument('--load-in-8bit', action='store_true')
+    parser.add_argument('--load-in-4bit', action='store_true')
+    parser.add_argument('--auto', action='store_true')
+    args = parser.parse_args()
+    query = "what's the diagnosis level?"
+    test_img = "/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg"
+    pm = EmbPathManager()
+    text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
+    image_index_folder = pathlib.Path(
+        "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
+    )
+    params = InterVLInferenceParams(query=query, image_path=test_img, filter=True, check=False, image_index_folder=image_index_folder, text_emb_folder=text_emb_folder)
+    

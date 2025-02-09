@@ -4,6 +4,7 @@ import sys
 sys.path.append(str(pathlib.Path.cwd()))
 import torch
 import argparse
+from dataclasses import dataclass
 from PIL import Image
 import torchvision.transforms as T
 from torchvision.transforms.functional import InterpolationMode
@@ -12,6 +13,18 @@ IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 load_8bit = True
 
+@dataclass
+class InterVLInferenceParams:
+    filter: bool = False  # 是否过滤
+    check: bool = False  # 是否检查
+    num_beams: int = 1  # 使用的beam数量
+    temperature: float = 0.0  # 温度参数，用于控制生成的随机性
+    image_index_folder: pathlib.Path = None  # 图像索引文件夹路径
+    image_topk: int = 1  # 返回图像结果的数量
+    text_emb_folder: pathlib.Path = None  # 文本嵌入文件夹路径
+    text_topk: int = 1  # 返回文本结果的数量
+    use_pics: int = 0  # 是否使用图片，以及使用的图片数量
+    
 class InternVL2Base:
     def __init__(
         self,
