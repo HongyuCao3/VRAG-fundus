@@ -27,17 +27,17 @@ class InternVL2Finetuned(InternVL2Base):
         self,
         args: argparse.Namespace,
         sheet_names: str,
-        t_filter: float,
-        t_check: float,
+        t_filter: float=0.5,
+        t_check: float=0.5,
     ):
         self.model, self.tokenizer = load_model_and_tokenizer(args)
         self.context_former = ClassificationContextFormer()
         self.vrag_filter = VRAGFilter(
-            self.context_former, threshold=t_filter, sheet_names=sheet_names
+            self.context_former, image_threshold=t_filter, sheet_names=sheet_names
         )
         self.checker = Checker(threshold=t_check)
 
-    def inference_rag(
+    def inference(
         self,
         query: str,
         image_path: pathlib.Path,
@@ -90,9 +90,9 @@ class InternVL2Finetuned(InternVL2Base):
             do_sample=True if params.temperature > 0 else False,
             temperature=params.temperature,
         )
-        pixel_values = self.load_image(image_path, max_num=12).to(torch.float16).cuda()
+        pixel_values = self.load_image(image_path, max_num=12).to(torch.bfloat16).cuda()
         for i in range(params.use_pics):
-            rag_pixel_values = self.load_image(retrieved_images["img"][i])
+            rag_pixel_values = self.load_image(retrieved_images.img[i], max_num=12).to(torch.bfloat16).cuda()
             pixel_values = torch.cat((pixel_values, rag_pixel_values), dim=0)
         response = self.model.chat(
             self.tokenizer, pixel_values, prompt, generation_config, verbose=True
@@ -114,5 +114,8 @@ if __name__ == "__main__":
     image_index_folder = pathlib.Path(
         "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
     )
-    params = InterVLInferenceParams(query=query, image_path=test_img, filter=True, check=False, image_index_folder=image_index_folder, text_emb_folder=text_emb_folder)
+    params = InterVLInferenceParams(filter=True, check=False, image_index_folder=image_index_folder, text_emb_folder=text_emb_folder)
+    I2F = InternVL2Finetuned(args = args, sheet_names=["CFP"])
+    answer = I2F.inference(query=query, image_path=test_img, params=params)
+    print(answer)
     

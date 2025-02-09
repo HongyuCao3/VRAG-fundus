@@ -252,9 +252,9 @@ class BaseEmbBuilder(ABC):
         embeddings = {}
         for text, emb_info in emp_map.items():
             emb_path = emb_info["emb_path"]
-            discription = emb_info["discription"]
+            discription = emb_info["description"]
             emb = torch.load(emb_path)
-            embeddings[text] = {"embedding": emb, "discription": discription}
+            embeddings[text] = {"embedding": emb, "description": discription}
         return embeddings
     
     def encode_text(self, text: str):

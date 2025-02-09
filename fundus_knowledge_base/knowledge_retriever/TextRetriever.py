@@ -45,29 +45,29 @@ class TextRetriever(BaseRetriever):
         similarities = []
         for txt, rep in self.representations.items():
             sim = cosine_similarity(input_emb, rep["embedding"], dim=1)
-            similarities.append((txt, sim.item(), rep["discription"]))
+            similarities.append((txt, sim.item(), rep["description"]))
 
         similarities.sort(key=lambda x: x[1], reverse=True)
         top_k = similarities[:k]
 
         # 获取最相似图像的原始路径
-        similar_txts = [(txt, sim, discription) for txt, sim, discription in top_k]
+        similar_txts = [(txt, sim, description) for txt, sim, description in top_k]
         return similar_txts
 
     def retrieve(self, input_img: pathlib.Path, k: int = 1):
         scores = []
         txts = []
         metadata = []
-        discriptions = []
+        descriptions = []
         similar_txts = self.get_similar_texts(input_img=input_img, k=k)
         for txt, sim, dis in similar_txts:
             scores.append(sim)
             txts.append(txt)
             metadata.append(txt)
-            discriptions.append(dis)
-        # return {"score": scores, "txt": txts, "metadata": metadata, "discription": discriptions}
+            descriptions.append(dis)
+        # return {"score": scores, "txt": txts, "metadata": metadata, "description": descriptions}
         return TextRetrieveResults(
-            score=scores, txt=txts, metadata=metadata, discription=discriptions
+            score=scores, txt=txts, metadata=metadata, description=descriptions
         )
 
 
