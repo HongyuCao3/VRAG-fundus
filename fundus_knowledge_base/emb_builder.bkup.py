@@ -19,6 +19,7 @@ class EmbBuilder():
         self.data_extractor = DataExtractor()
         if self.json_file is None:
             raise FileNotFoundError("JSON file not found in the specified folder.")
+        print("this module will be aborted ----------------------------- please use index_manager or knowledge retriever")
         
     def get_layer_representation(self, img_path, layer_index=11):
         # 加载并预处理图像

@@ -29,6 +29,7 @@ class IndexBuilder():
         self.persist_dir = args.persist_dir
         self.embedding_name = args.embedding_name
         # Settings.embed_model = HuggingFaceEmbedding(model_name=self.embedding_name)
+        print("this module will be aborted ----------------------------- please use index_manager or knowledge retriever")
         
     def build_index(self,):
         document = []
