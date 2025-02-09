@@ -50,7 +50,7 @@ class InternVL2Finetuned(InternVL2Base):
             self.text_embedding = TextRetriever(emb_folder=params.text_emb_folder)
 
         # retrieval and post-process
-        if image_index_folder:
+        if params.image_index_folder:
             retrieved_images = self.index_manager.retrieve_image(
                 self.image_index, img_path=image_path, top_k=params.image_topk
             )
@@ -64,7 +64,7 @@ class InternVL2Finetuned(InternVL2Base):
             )
         else:
             image_context = None
-        if text_emb_folder:
+        if params.text_emb_folder:
             retrieved_texts = self.text_embedding.retrieve(input_img=image_path, k=params.text_topk)
             if params.filter:
                 retrieved_texts = self.vrag_filter.filter_retrieved_texts(retrieved_texts=retrieved_texts)
