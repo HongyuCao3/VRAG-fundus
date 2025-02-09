@@ -2,6 +2,7 @@ import sys
 from torch.types import (
     Number,
 )
+
 sys.path.append("/home/hongyu/Visual-RAG-LLaVA-Med")
 from PIL import Image
 from llama_index.core.schema import ImageDocument
@@ -62,28 +63,42 @@ class ClassificationContextFormer(BaseContextFormer):
         prompt = self.build_prompt(diagnosis_context=diagnosis_context_str, query=query)
         record_data.update({"prompt": prompt})
         return prompt, images, record_data
-    
-    def form_rag_context(
+
+    def build_prompt(
         self,
-        img_path: pathlib.Path,
         query: str,
-        similar_imgs: list[tuple[pathlib.Path, Number]]=[],
-        similar_txts: list[tuple[pathlib.Path, Number]]=[],
-        input_pics_num: int=0
+        image_context: str = None,
+        text_context: str = None,
+        diagnosis_standard: str = None,
+    ):
+        parts = []
+        if diagnosis_standard:
+            parts.append(f"Diagnosing Standard: {diagnosis_standard}\n")
+        if image_context:
+            parts.append(
+                f"The possible diagnosing level and similarity: {image_context}\n"
+            )
+        if text_context:
+            parts.append(f"The possible diagnosis and similarity: {text_context}\n")
+        parts.append(query)
+
+        return "".join(parts)
+
+    def build_query_context(
+        self,
+        image_path: pathlib.Path,
+        query: str,
+        image_context: str = None,
+        text_context: str = None,
+        diagnosis_standard: str = None,
     ):
         record_data = {}
-        record_data["similar_imgs"] = similar_imgs
-        record_data["similar_txts"] = similar_txts
-        image_documents = [ImageDocument(image_path=img_path)]
-        image_org = Image.open(img_path)
-        # process similar images
-        images = [image_org]
-        diagnosis = []
-        # TODO： 查看返回类别
-        for img, diag in similar_imgs:
-            image_documents.append(ImageDocument(image_path=img))
-            image = Image.open(img)
-            images.append(image)
-            diagnosis.append(diag)
-            
-        # process similar texts
+        record_data["similar_imgs"] = image_context
+        record_data["similar_txts"] = text_context
+        prompt = self.build_prompt(
+            query=query,
+            image_context=image_context,
+            text_context=text_context,
+            diagnosis_standard=diagnosis_standard,
+        )
+        return prompt, record_data

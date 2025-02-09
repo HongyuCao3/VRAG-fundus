@@ -5,6 +5,8 @@ import pathlib
 import torch
 import argparse
 from PIL import Image
+import torchvision.transforms as T
+from torchvision.transforms.functional import InterpolationMode
 from conflict_resolution.vrag_filter import VRAGFilter
 from conflict_resolution.checker import Checker
 from ContextFormer.ClassificationContextFormer import (
@@ -16,7 +18,11 @@ from fundus_knowledge_base.index_manager.mulit_disease_index_manager import (
 )
 from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
 from fundus_knowledge_base.knowledge_retriever.TextRetriever import TextRetriever
-from VRAG_Framework import load_model_and_tokenizer
+from InternVLVRAG.internvl.model import load_model_and_tokenizer
+
+IMAGENET_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_STD = (0.229, 0.224, 0.225)
+load_8bit = True
 
 
 class InternVL2_finetuned:
@@ -44,13 +50,71 @@ class InternVL2_finetuned:
         pixel_values = torch.stack(pixel_values)
         return pixel_values
 
+    def build_transform(self, input_size):
+        MEAN, STD = IMAGENET_MEAN, IMAGENET_STD
+        transform = T.Compose(
+            [
+                T.Lambda(lambda img: img.convert("RGB") if img.mode != "RGB" else img),
+                T.Resize(
+                    (input_size, input_size), interpolation=InterpolationMode.BICUBIC
+                ),
+                T.ToTensor(),
+                T.Normalize(mean=MEAN, std=STD),
+            ]
+        )
+        return transform
+
+    def dynamic_preprocess(
+        self, image, min_num=1, max_num=12, image_size=448, use_thumbnail=False
+    ):
+        orig_width, orig_height = image.size
+        aspect_ratio = orig_width / orig_height
+
+        # calculate the existing image aspect ratio
+        target_ratios = set(
+            (i, j)
+            for n in range(min_num, max_num + 1)
+            for i in range(1, n + 1)
+            for j in range(1, n + 1)
+            if i * j <= max_num and i * j >= min_num
+        )
+        target_ratios = sorted(target_ratios, key=lambda x: x[0] * x[1])
+
+        # find the closest aspect ratio to the target
+        target_aspect_ratio = self.find_closest_aspect_ratio(
+            aspect_ratio, target_ratios, orig_width, orig_height, image_size
+        )
+
+        # calculate the target width and height
+        target_width = image_size * target_aspect_ratio[0]
+        target_height = image_size * target_aspect_ratio[1]
+        blocks = target_aspect_ratio[0] * target_aspect_ratio[1]
+
+        # resize the image
+        resized_img = image.resize((target_width, target_height))
+        processed_images = []
+        for i in range(blocks):
+            box = (
+                (i % (target_width // image_size)) * image_size,
+                (i // (target_width // image_size)) * image_size,
+                ((i % (target_width // image_size)) + 1) * image_size,
+                ((i // (target_width // image_size)) + 1) * image_size,
+            )
+            # split the image
+            split_img = resized_img.crop(box)
+            processed_images.append(split_img)
+        assert len(processed_images) == blocks
+        if use_thumbnail and len(processed_images) != 1:
+            thumbnail_img = image.resize((image_size, image_size))
+            processed_images.append(thumbnail_img)
+        return processed_images
+
     def inference_rag(
         self,
         query: str,
         image_path: pathlib.Path,
         filter: bool = False,
         check: bool = False,
-        input_pics_num: int = 0,
         num_beams: int = 1,
         temperature: float = 0,
         image_index_folder: pathlib.Path = None,
@@ -63,14 +127,11 @@ class InternVL2_finetuned:
         if text_emb_folder:
             self.text_embedding = TextRetriever(emb_folder=text_emb_folder)
 
-        # form inference context
+        # retrieval and post-process
         if image_index_folder:
             retrieved_images = self.index_manager.retrieve_image(
                 self.image_index, img_path=image_path, top_k=1
             )
-        if text_emb_folder:
-            retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
-        if image_index_folder:
             image_context = " ".join(
                 [
                     f"{txt}: {score}"
@@ -80,6 +141,7 @@ class InternVL2_finetuned:
         else:
             image_context = None
         if text_emb_folder:
+            retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
             text_context = " ".join(
                 [
                     f"{txt}: {score}"
@@ -88,14 +150,16 @@ class InternVL2_finetuned:
             )
         else:
             text_context = None
-        prompt, images, record_data = self.context_former.form_rag_context(
-            image_path, query, image_context, text_context
+        prompt, record_data = self.context_former.build_query_context(
+            image_path=image_path,
+            query=query,
+            image_context=image_context,
+            text_context=text_context,
         )
 
         # do inference
         generation_config = dict(
             num_beams=num_beams,
-            # max_new_tokens=ds_collections[ds_name]['max_new_tokens'],
             min_new_tokens=1,
             do_sample=True if temperature > 0 else False,
             temperature=temperature,
