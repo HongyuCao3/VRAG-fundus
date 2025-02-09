@@ -114,7 +114,7 @@ if __name__ == "__main__":
     image_index_folder = pathlib.Path(
         "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
     )
-    params = InterVLInferenceParams(filter=True, check=False, image_index_folder=image_index_folder, text_emb_folder=text_emb_folder)
+    params = InterVLInferenceParams(filter=False, check=False, image_index_folder=image_index_folder, text_emb_folder=text_emb_folder)
     I2F = InternVL2Finetuned(args = args, sheet_names=["CFP"])
     answer = I2F.inference(query=query, image_path=test_img, params=params)
     print(answer)
