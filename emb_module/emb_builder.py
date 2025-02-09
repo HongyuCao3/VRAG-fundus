@@ -410,6 +410,7 @@ class LevelEmbBuilder(EmbBuilder):
 class ClassicEmbBuilder(EmbBuilder):
     def __init__(self, img_folder, emb_folder):
         super().__init__(img_folder, emb_folder)
+        print("This module will be replaced by index_manager, please change ------------------------")
         
     def find_similar_images(self, input_img, k=2, layer=11):
         """

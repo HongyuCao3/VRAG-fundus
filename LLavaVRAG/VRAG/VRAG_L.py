@@ -19,8 +19,8 @@ from llava.model.builder import load_pretrained_model
 from llava.utils import disable_torch_init
 from llava.mm_utils import tokenizer_image_token, get_model_name_from_path, KeywordsStoppingCriteria, process_images
 from llama_index.core.schema import ImageDocument
-from VRAG_Framework.vrag_filter import VRAGFilter
-from VRAG_Framework.checker import Checker
+from conflict_resolution.vrag_filter import VRAGFilter
+from conflict_resolution.checker import Checker
 from transformers import AutoModelForCausalLM
 class VRAG():
     def __init__(self, args):

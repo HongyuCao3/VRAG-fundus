@@ -15,8 +15,8 @@ from internvl.model.internvl_chat.modeling_internvl_chat import InternVLChatMode
 from context_former import ContextFormer
 from utils import split_image, delete_images, merge_dicts, find_longest_diagnosis_keys, expand_disease_abbreviation
 from VRAG_Framework import load_model_and_tokenizer
-from VRAG_Framework.vrag_filter import VRAGFilter
-from VRAG_Framework.checker import Checker
+from conflict_resolution.vrag_filter import VRAGFilter
+from conflict_resolution.checker import Checker
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)

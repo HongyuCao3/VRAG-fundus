@@ -5,8 +5,8 @@ import pathlib
 import torch
 import argparse
 from PIL import Image
-from VRAG_Framework.vrag_filter import VRAGFilter
-from VRAG_Framework.checker import Checker
+from conflict_resolution.vrag_filter import VRAGFilter
+from conflict_resolution.checker import Checker
 from ContextFormer.ClassificationContextFormer import (
     ClassificationContextFormer,
     ClassificationContextConfig,
