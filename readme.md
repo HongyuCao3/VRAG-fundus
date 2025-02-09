@@ -1,23 +1,19 @@
-# 思路
-## 问题描述
- - 输入：
-    - 一张眼底图
- - 输出：
-    - 眼底图的诊断结果
+# Readme
 
-## RAG目标
- - 根据现有的病灶分割图进行颜色和形态的匹配
- - 找到病灶的文字描述作为增强
- - 使用chunk判断病灶的数量关系
+## Background
+### Tasks
+ - Multi-modal Fundus Image Classification
+ - Multi-modal Fundus Imaga Visual Question Answering
+### Method
+ - Fine-tuning
+ - Visual RAG
+     - Image Index
+     - Text Embedding
+     - Filter
+## install
 
-## 步骤
- - 测试用不同图片数构建emb的效果
- - 添加prompt的可编辑模板
- - 将参数构建为config
- - 添加text encoder联合匹配
- - path manager添加实验结果保存模块，用于自动计算
+## Usage    
+ - Evaluation VRAG
+## Maintainers
+ - HongyuCao pb18111726@mail.ustc.edu.cn
 
-## 实验
- - 现在的问题是需要提升匹配正确率
-   - 图片分块匹配
-   - 图片embedding分段匹配
