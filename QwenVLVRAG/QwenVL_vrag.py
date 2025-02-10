@@ -84,7 +84,7 @@ class QwenVLVRAG:
         messages,
         image_index_folder: pathlib.Path = None,
         text_emb_folder: pathlib.Path = None,
-        use_pics: bool = False,
+        use_pics: int = 0,
     ):
         if image_index_folder:
             self.index_manager = MultiDiseaseIndexManager()
@@ -102,9 +102,10 @@ class QwenVLVRAG:
             if text_emb_folder:
                 retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
             content = [message["content"][0]]
-            if use_pics and image_index_folder:  # multi image as input
-                for img in retrieved_images.img:
-                    content.append({"type": "image", "image": img})
+            if image_index_folder:  # multi image as input
+                for i in range(use_pics):
+                    # for img in retrieved_images.img:
+                    content.append({"type": "image", "image": retrieved_images.img[i]})
             # form prompt
             if image_index_folder:
                 image_context = " ".join(
