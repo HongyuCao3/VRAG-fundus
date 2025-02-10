@@ -3,6 +3,8 @@ import sys
 
 sys.path.append(str(pathlib.Path.cwd()))
 import torch
+from PIL import Image
+import argparse
 from dataclasses import dataclass
 from transformers import set_seed
 from LLavaVRAG.llava.constants import (
@@ -34,6 +36,12 @@ from conflict_resolution.checker import Checker
 
 
 @dataclass
+class LLaVAConfig:
+    llava_med_path = "/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b"
+    llava_med_finetuned_path = "/home/hongyu/eye_llava_medllava_finetune_mistral"
+
+
+@dataclass
 class LLaVAInferenceParams:
     filter: bool = False  # 是否过滤
     check: bool = False  # 是否检查
@@ -51,8 +59,8 @@ class llava_vrag:
         self,
         args,
         model_path,
-        model_base,
-        sheet_names: str,
+        model_base=None,
+        sheet_names: list[str] = ["CFP"],
         t_filter: float = 0.5,
         t_check: float = 0.5,
     ):
@@ -172,5 +180,51 @@ class llava_vrag:
             image_context=image_context,
             text_context=text_context,
         )
-        
-        # TODO: do inference
+
+        image_org = Image.open(image_path)
+        images = [image_org]
+        for i in range(params.use_pics):
+            images.append(retrieved_images.img[i])
+
+        outputs = self.model_chat(images, prompt)
+        record_data["outputs"] = outputs
+        return outputs, record_data
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--model-path",
+        type=str,
+        default="/home/hongyu/Visual-RAG-LLaVA-Med/Model/llava-med-v1.5-mistral-7b",
+    )
+    parser.add_argument("--model-base", type=str, default=None)
+    parser.add_argument("--conv-mode", type=str, default="vicuna_v1")
+    parser.add_argument("--image-folder", type=str, default="./segmentation/")
+    parser.add_argument("--num-chunks", type=int, default=1)
+    parser.add_argument("--chunk-idx", type=int, default=0)
+    parser.add_argument("--temperature", type=float, default=0.2)
+    parser.add_argument("--top_k", type=int, default=3)
+    parser.add_argument("--top_p", type=float, default=None)
+    parser.add_argument("--num_beams", type=int, default=1)
+    parser.add_argument(
+        "--meta-data",
+        type=str,
+        default="/home/hongyu/Visual-RAG-LLaVA-Med/data/segmentation.json",
+    )
+    parser.add_argument("--chunk-m", type=int, default=1)
+    parser.add_argument("--chunk-n", type=int, default=1)
+    parser.add_argument("--tmp-path", type=str, default="./data/tmp")
+    args = parser.parse_args()
+    config = LLaVAConfig()
+    lv = llava_vrag(
+        args=args,
+        model_path=config.llava_med_path,
+    )
+    test_img = pathlib.Path("/home/hongyu/DDR/lesion_segmentation/test/image/007-1789-100.jpg")
+    query_str_0 = "Can you describe the image in details?"
+    query_str_1 = "what's the diagnosis?"
+    params = LLaVAInferenceParams()
+    output, records = lv.inference(query=query_str_1, image_path=test_img, params=params)
+    print(output)
+    print(records)
