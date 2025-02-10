@@ -11,7 +11,7 @@ import ast
 from AnalysisVRAG.base import BaseAnalysis
 from AnalysisVRAG.class_combiner import ClassCombiner
 
-class MultiVQAAnalysis(BaseAnalysis):
+class MultiModalClassificationAnalysis(BaseAnalysis):
     def __init__(self, args):
         super().__init__(args.file_path)
         self.sheet_names = args.sheet_names

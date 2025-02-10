@@ -2,7 +2,8 @@ import os,sys
 sys.path.append("/home/hongyu/Visual-RAG-LLaVA-Med")
 import json
 import argparse
-from AnalysisVRAG.mulit_modal_vqa_analysis import MultiVQAAnalysis
+from AnalysisVRAG.multi_modal_classification import MultiModalClassificationAnalysis
+from AnalysisVRAG.multi_modal_vqa import MultiModalVQAAnalysisConfig, MultiModalVQAAnalysis
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -13,7 +14,7 @@ if __name__ == "__main__":
     parser.add_argument("--step", type=int, default=4)
     parser.add_argument("--sheet-names", type=str, nargs='+', default=["CFP"])
     args = parser.parse_args()
-    analysis = MultiVQAAnalysis(args)
+    analysis = MultiModalClassificationAnalysis(args)
     cm = analysis.calculate_confusion_matrix(args.res_path)
     print(f"Accuracy: {analysis.calculate_accuracy():.4f}")
     print(cm)
