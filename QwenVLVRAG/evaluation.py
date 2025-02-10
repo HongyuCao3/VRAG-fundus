@@ -119,7 +119,7 @@ class evaluation:
                             "type": "image",
                             "image": images[0],
                         },
-                        {"type": "text", "text": query},
+                        {"type": "text", "text": query[0]},
                     ],
                 }
             ]
@@ -138,8 +138,8 @@ class evaluation:
                 }
             )
         # save_result
-        result_saving_folder = (
-            self.config.root_dir / dataset_config.dataset_name + "_VQA"
+        result_saving_folder = self.config.root_dir / pathlib.Path(
+            str(dataset_config.dataset_name) + "_VQA"
         )
         if not result_saving_folder.exists():
             result_saving_folder.mkdir()
@@ -161,12 +161,12 @@ class evaluation:
 if __name__ == "__main__":
     eva = evaluation()
     pm = EmbPathManager()
-    # text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
-    text_emb_folder = None
-    # image_index_folder = pathlib.Path(
-    #     "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
-    # )
-    image_index_folder = None
+    text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
+    # text_emb_folder = None
+    image_index_folder = pathlib.Path(
+        "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
+    )
+    # image_index_folder = None
     # eva.evaluate_classification(
     #     image_index_folder=image_index_folder,
     #     text_emb_folder=text_emb_folder,
