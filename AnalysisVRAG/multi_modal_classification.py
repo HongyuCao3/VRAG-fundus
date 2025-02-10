@@ -1,7 +1,8 @@
 import os, sys
+
 sys.path.append("/home/hongyu/Visual-RAG-LLaVA-Med")
 import json
-import argparse
+import copy
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,20 +12,21 @@ import ast
 from AnalysisVRAG.base import BaseAnalysis
 from AnalysisVRAG.class_combiner import ClassCombiner
 
+
 class MultiModalClassificationAnalysis(BaseAnalysis):
-    def __init__(self, args):
-        super().__init__(args.file_path)
-        self.sheet_names = args.sheet_names
+    def __init__(self, file_path, sheet_names):
+        super().__init__(file_path)
+        self.sheet_names = sheet_names
         self.combiner = ClassCombiner()
 
     def calculate_accuracy(self):
         correct_count = 0
-        total_count = len(self.data['results'])
+        total_count = len(self.data["results"])
 
-        for result in self.data['results']:
-            ground_truth = result['ground truth'].lower()
+        for result in self.data["results"]:
+            ground_truth = result["ground truth"].lower()
             try:
-                llm_respond = str(json.loads(result['llm respond'])).lower()
+                llm_respond = str(json.loads(result["llm respond"])).lower()
             except:
                 llm_respond = result["llm respond"].lower()
             # print(type(llm_respond))
@@ -32,11 +34,11 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
 
             if ground_truth in llm_respond:
                 correct_count += 1
-        
+
         accuracy = correct_count / total_count if total_count > 0 else 0
         return accuracy
-    
-    def calculate_confusion_matrix(self, res_path):
+
+    def calculate_confusion_matrix(self, image_saving_path):
         # 初始化变量用于存储所有的 ground truths 和 predictions
         all_ground_truths = []
         all_predictions = []
@@ -44,69 +46,85 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         # 获取所有可能的类别
         classes = set([])
         if "CFP" in self.sheet_names:
-            classes = set(['diabetic retinopathy',
-            'age-related macular degeneration',
-            # 'central retinal vein occlusion',
-            # 'branch retinal vein occlusion',
-            'retinal vein occlusion',
-            # 'central retinal artery occlusion',
-            # 'branch retinal artery occlusion',
-            'retinal artery occlusion',
-            'central serous chorioretinopathy',
-            'retinal detachment',
-            'coats disease',
-            'macular hole',
-            'pathologic myopia',
-            'glaucoma',
-            'epiretinal membrane'])
+            classes = set(
+                [
+                    "diabetic retinopathy",
+                    "age-related macular degeneration",
+                    # 'central retinal vein occlusion',
+                    # 'branch retinal vein occlusion',
+                    "retinal vein occlusion",
+                    # 'central retinal artery occlusion',
+                    # 'branch retinal artery occlusion',
+                    "retinal artery occlusion",
+                    "central serous chorioretinopathy",
+                    "retinal detachment",
+                    "coats disease",
+                    "macular hole",
+                    "pathologic myopia",
+                    "glaucoma",
+                    "epiretinal membrane",
+                ]
+            )
         if "FFA" in self.sheet_names:
-            classes.update({"diabetic retinopathy", 
-                            # "wet age-related macular degeneration", 
-                            # "dry age-related macular degeneration", 
-                            "age-related macular degeneration",
-                            # "central retinal vein occlusion", 
-                            # "branch retinal vein occlusion", 
-                            "retinal vein occlusion"
-                            "central serous chorioretinopathy",
-                            "choroidal melanoma", 
-                            "coats disease", 
-                            "familial exudative vitreoretinopathy", 
-                            "vogt-koyanagi-harada disease"})
+            classes.update(
+                {
+                    "diabetic retinopathy",
+                    # "wet age-related macular degeneration",
+                    # "dry age-related macular degeneration",
+                    "age-related macular degeneration",
+                    # "central retinal vein occlusion",
+                    # "branch retinal vein occlusion",
+                    "retinal vein occlusion" "central serous chorioretinopathy",
+                    "choroidal melanoma",
+                    "coats disease",
+                    "familial exudative vitreoretinopathy",
+                    "vogt-koyanagi-harada disease",
+                }
+            )
             # classes = set(classes)
-            
+
         if "OCT" in self.sheet_names:
-            classes.update({"cystoid macular edema", 
-                            "central serous chorioretinopathy",
-                            # "dry age-related macular degeneration",
-                            "age-related macular degeneration",
-                            "epiretinal membrane",
-                            "macular hole",
-                            "polypoidal choroidal vasculopathy",
-                            "retinal detachment",
-                            "retinoschisis",
-                            "retinal vein occlusion",
-                            # "wet age-related macular degeneration"
-                            })
+            classes.update(
+                {
+                    "cystoid macular edema",
+                    "central serous chorioretinopathy",
+                    # "dry age-related macular degeneration",
+                    "age-related macular degeneration",
+                    "epiretinal membrane",
+                    "macular hole",
+                    "polypoidal choroidal vasculopathy",
+                    "retinal detachment",
+                    "retinoschisis",
+                    "retinal vein occlusion",
+                    # "wet age-related macular degeneration"
+                }
+            )
             # classes = set(classes)
         print(self.sheet_names)
-        for result in self.data['results']:
-            ground_truth = result['ground truth'].lower()
+        if isinstance(self.data, list):
+            data = copy.deepcopy(self.data)
+            self.data = {"results": data}
+        for result in self.data["results"]:
+            ground_truth = result["ground truth"].lower()
             try:
-                llm_respond = str(json.loads(result['llm respond'])).lower()
+                llm_respond = str(json.loads(result["llm respond"])).lower()
             except:
-                llm_respond = result["llm respond"].lower()
+                if isinstance(result["llm respond"], str):
+                    llm_respond = result["llm respond"].lower()
+                if isinstance(result["llm respond"], list):
+                    llm_respond = result["llm respond"][0].lower()
 
             ground_truth = self.combiner.combine(ground_truth)
             # 假设 llm_respond 是一个 JSON 字符串，其中包含 'diagnosis' 键作为预测结果
             # 如果不是这种情况，您可能需要调整如何从 llm_respond 提取预测值
             if ground_truth in llm_respond:
-                prediction = ground_truth 
+                prediction = ground_truth
             else:
-                flag=False
+                flag = False
                 for c in classes:
-                     if c.lower() in llm_respond:
-                         prediction = c.lower()
-                         flag=True
+                    if c.lower() in llm_respond:
+                        prediction = c.lower()
+                        flag = True
                 if not flag:
                     prediction = "incorrect"
 
@@ -125,38 +143,56 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         cm = confusion_matrix(all_ground_truths, all_predictions, labels=classes)
 
         # 使用父类的方法绘制混淆矩阵
-        self.plot_confusion_matrix(cm, classes, res_path, normalize=True, title='Normalized Confusion Matrix')
-        
-    def plot_confusion_matrix(self, cm, classes, res_path, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues, annotate=False):
+        self.plot_confusion_matrix(
+            cm,
+            classes,
+            image_saving_path,
+            normalize=True,
+            title="Normalized Confusion Matrix",
+        )
+
+    def plot_confusion_matrix(
+        self,
+        cm,
+        classes,
+        image_saving_path,
+        normalize=False,
+        title="Confusion matrix",
+        cmap=plt.cm.Blues,
+        annotate=False,
+    ):
         if normalize:
-            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+            cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
             print("Normalized confusion matrix")
         else:
-            print('Confusion matrix, without normalization')
+            print("Confusion matrix, without normalization")
         print(cm)
-        
-        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+
+        plt.imshow(cm, interpolation="nearest", cmap=cmap)
         plt.title(title)
         plt.colorbar()
         tick_marks = np.arange(len(classes))
         plt.xticks(tick_marks, classes, rotation=45)
         plt.yticks(tick_marks, classes)
-        
+
         if annotate:  # Check if annotation is needed
-            fmt = '.2f' if normalize else 'd'
-            thresh = cm.max() / 2.
+            fmt = ".2f" if normalize else "d"
+            thresh = cm.max() / 2.0
             for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-                plt.text(j, i,
-                        format(cm[i, j], fmt),
-                        horizontalalignment="center",
-                        color="white" if cm[i, j] > thresh else "black")
-        
+                plt.text(
+                    j,
+                    i,
+                    format(cm[i, j], fmt),
+                    horizontalalignment="center",
+                    color="white" if cm[i, j] > thresh else "black",
+                )
+
         font_size = 6  # 您可以更改这个值以适应您的需求
         tick_marks = np.arange(len(classes))
-        plt.xticks(tick_marks, classes, rotation=45, fontdict={'fontsize': font_size})
-        plt.yticks(tick_marks, classes, fontdict={'fontsize': font_size})
+        plt.xticks(tick_marks, classes, rotation=45, fontdict={"fontsize": font_size})
+        plt.yticks(tick_marks, classes, fontdict={"fontsize": font_size})
         plt.tight_layout()
-        plt.ylabel('True label')
-        plt.xlabel('Predicted label')
-        plt.savefig(res_path)
+        plt.ylabel("True label")
+        plt.xlabel("Predicted label")
+        plt.savefig(image_saving_path)
         plt.show()
