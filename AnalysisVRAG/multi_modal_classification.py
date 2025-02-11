@@ -104,6 +104,7 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         if isinstance(self.data, list):
             data = copy.deepcopy(self.data)
             self.data = {"results": data}
+        acc = 0
         for result in self.data["results"]:
             ground_truth = result["ground truth"].lower()
             try:
@@ -119,6 +120,7 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
             # 如果不是这种情况，您可能需要调整如何从 llm_respond 提取预测值
             if ground_truth in llm_respond:
                 prediction = ground_truth
+                acc += 1
             else:
                 flag = False
                 for c in classes:
@@ -142,6 +144,8 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         # 计算混淆矩阵
         cm = confusion_matrix(all_ground_truths, all_predictions, labels=classes)
 
+        accuracy = acc / len(self.data["results"])
+        
         # 使用父类的方法绘制混淆矩阵
         self.plot_confusion_matrix(
             cm,
@@ -149,7 +153,10 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
             image_saving_path,
             normalize=True,
             title="Normalized Confusion Matrix",
+            accuracy=accuracy
         )
+
+        return accuracy
 
     def plot_confusion_matrix(
         self,
@@ -160,6 +167,7 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         title="Confusion matrix",
         cmap=plt.cm.Blues,
         annotate=False,
+        accuracy=None
     ):
         if normalize:
             cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
@@ -191,6 +199,15 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         tick_marks = np.arange(len(classes))
         plt.xticks(tick_marks, classes, rotation=45, fontdict={"fontsize": font_size})
         plt.yticks(tick_marks, classes, fontdict={"fontsize": font_size})
+        if accuracy is not None:
+            plt.text(
+                cm.shape[0], 
+                -1, 
+                f'Accuracy: {accuracy:.2f}', 
+                color='red', 
+                horizontalalignment='left', 
+                verticalalignment='top'
+            )
         plt.tight_layout()
         plt.ylabel("True label")
         plt.xlabel("Predicted label")

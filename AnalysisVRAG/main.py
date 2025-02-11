@@ -1,7 +1,8 @@
-import os, sys
+import sys, pathlib
 
-sys.path.append("/home/hongyu/Visual-RAG-LLaVA-Med")
+sys.path.append(str(pathlib.Path.cwd()))
 import json
+from PathManager.EmbPathManager import EmbPathManager
 import argparse
 from AnalysisVRAG.multi_modal_classification import MultiModalClassificationAnalysis
 from AnalysisVRAG.multi_modal_vqa import (
@@ -11,9 +12,14 @@ from AnalysisVRAG.multi_modal_vqa import (
 
 
 def analyze_multi_modal_classification():
-    result_saving_path = (
-        "./QwenVLVRAG/output/Multimodal VQA Dataset/None_None_usepics_False_-1.json"
+    pm = EmbPathManager()
+    text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
+    image_index_folder = pathlib.Path(
+        "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
     )
+    text_emb_name = text_emb_folder.name
+    image_index_name = image_index_folder.name
+    result_saving_path = f"./QwenVLVRAG/output/Multimodal VQA Dataset/{image_index_name}_{text_emb_name}_usepics_False_-1.json"
     image_saving_path = result_saving_path.replace("output", "output/analysis")
     image_saving_path = image_saving_path.replace("json", "png")
     mmca = MultiModalClassificationAnalysis(
@@ -23,9 +29,14 @@ def analyze_multi_modal_classification():
 
 
 def analyze_multi_modal_vqa():
-    result_saving_path = (
-        "./QwenVLVRAG/output/Multimodal VQA Dataset_VQA/None_None_usepics_0_-1.json"
+    pm = EmbPathManager()
+    text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
+    image_index_folder = pathlib.Path(
+        "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
     )
+    text_emb_name = text_emb_folder.name
+    image_index_name = image_index_folder.name
+    result_saving_path = f"./QwenVLVRAG/output/Multimodal VQA Dataset_VQA/{image_index_name}_{text_emb_name}_usepics_0_-1.json"
     analysis_config = MultiModalVQAAnalysisConfig()
     analysis_saving_path = result_saving_path.replace("output", "output/analysis")
     mmva = MultiModalVQAAnalysis(
@@ -47,5 +58,5 @@ if __name__ == "__main__":
     # cm = analysis.calculate_confusion_matrix(args.res_path)
     # print(f"Accuracy: {analysis.calculate_accuracy():.4f}")
     # print(cm)
-    # analyze_multi_modal_classification()
-    analyze_multi_modal_vqa()
+    analyze_multi_modal_classification()
+    # analyze_multi_modal_vqa()
