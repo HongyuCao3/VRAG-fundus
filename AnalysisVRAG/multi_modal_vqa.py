@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
+
 @dataclass
 class MultiModalVQAAnalysisConfig:
     map_path = "/home/hongyu/Visual-RAG-LLaVA-Med/data/mapping_relationship.xlsx"
@@ -21,6 +22,7 @@ class MultiModalVQAAnalysis:
             self.df = pd.read_csv(self.res_path)
         self.map_path = map_path
         self.mapping_df = pd.read_excel(self.map_path)
+        self.seed = 52
 
     def analysis_modality(self):
         cfp_count_answer, cfp_count_gt, cfp_acc = self.cal_cfp_acc()
@@ -159,8 +161,12 @@ class MultiModalVQAAnalysis:
         fin_res = {"modality": modality, "eye": eye, "diag": diag}
         with open(analysis_saving_path, "w", encoding="utf-8") as f:
             json.dump(fin_res, f)
-            
-    def plot_word_cloud_comparsion(self, wordcloud_saving_path, words_to_remove={"image", "appear", "provided", "suggests", "appears"}):
+
+    def plot_word_cloud_comparsion(
+        self,
+        wordcloud_saving_path,
+        words_to_remove={"image", "appear", "provided", "suggests", "appears"},
+    ):
         gt_text = ""
         pred_text = ""
         for index, row in self.df.iterrows():
@@ -174,12 +180,20 @@ class MultiModalVQAAnalysis:
             word for word in gt_text.split() if word.lower() not in words_to_remove
         )
         wordcloud1 = WordCloud(
-            width=800, height=400, max_words=200, background_color="white"
+            width=800,
+            height=400,
+            max_words=200,
+            background_color="white",
+            random_state=self.seed,
         ).generate(pred_text_cleaned)
 
         # 生成第二个词云
         wordcloud2 = WordCloud(
-            width=800, height=400, max_words=200, background_color="white"
+            width=800,
+            height=400,
+            max_words=200,
+            background_color="white",
+            random_state=self.seed,
         ).generate(gt_text_cleaned)
 
         # 创建图像和轴

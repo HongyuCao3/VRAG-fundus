@@ -17,6 +17,7 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         super().__init__(file_path)
         self.sheet_names = sheet_names
         self.combiner = ClassCombiner()
+        self.seed = 52
 
     def calculate_confusion_matrix(self, image_saving_path):
         # 初始化变量用于存储所有的 ground truths 和 predictions
@@ -223,12 +224,20 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
             word for word in pred_text.split() if word.lower() not in words_to_remove
         )
         wordcloud1 = WordCloud(
-            width=800, height=400, max_words=200, background_color="white"
+            width=800,
+            height=400,
+            max_words=200,
+            background_color="white",
+            random_state=self.seed,
         ).generate(pred_text_cleaned)
 
         # 生成第二个词云
         wordcloud2 = WordCloud(
-            width=800, height=400, max_words=200, background_color="white"
+            width=800,
+            height=400,
+            max_words=200,
+            background_color="white",
+            random_state=self.seed,
         ).generate(gt_text)
 
         # 创建图像和轴
