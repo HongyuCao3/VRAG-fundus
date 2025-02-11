@@ -9,12 +9,16 @@ class MultiModalVQAAnalysisConfig:
 
 
 class MultiModalVQAAnalysis:
-    def __init__(self, res_path, map_path, save_path):
-        self.res_path = res_path
+    def __init__(self, evaluation_saving_path, map_path):
+        self.res_path = evaluation_saving_path
         self.classes = ["Normal", "Referable DR"]
-        self.df = pd.read_csv(self.res_path)
+        if isinstance(self.res_path, str) and self.res_path.endswith("json"):
+            with open(self.res_path, "r", encoding="utf-8") as f:
+                results = json.load(f)
+            self.df = pd.DataFrame(results)
+        else:
+            self.df = pd.read_csv(self.res_path)
         self.map_path = map_path
-        self.save_path = save_path
         self.mapping_df = pd.read_excel(self.map_path)
 
     def analysis_modality(self):
@@ -147,10 +151,10 @@ class MultiModalVQAAnalysis:
         print(f"Diagnosis accuracy: {diagnosis_accuracy:.2%}")
         return diagnosis_accuracy
 
-    def analysis(self):
+    def analysis(self, analysis_saving_path):
         modality = self.analysis_modality()
         eye = self.analysis_eye()
         diag = self.analysis_diagnosis()
         fin_res = {"modality": modality, "eye": eye, "diag": diag}
-        with open(self.save_path, "w", encoding="utf-8") as f:
+        with open(analysis_saving_path, "w", encoding="utf-8") as f:
             json.dump(fin_res, f)
