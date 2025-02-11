@@ -17,9 +17,12 @@ def analyze_multi_modal_classification():
     image_index_folder = pathlib.Path(
         "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
     )
-    text_emb_name = text_emb_folder.name
+    # text_emb_name = text_emb_folder.name
+    text_emb_name = None
     image_index_name = image_index_folder.name
-    result_saving_path = f"./QwenVLVRAG/output/Multimodal VQA Dataset/{image_index_name}_{text_emb_name}_usepics_False_-1.json"
+    # image_index_name = None
+    use_pics = False
+    result_saving_path = f"./QwenVLVRAG/output/Multimodal VQA Dataset/{image_index_name}_{text_emb_name}_usepics_{use_pics}_-1.json"
     image_saving_path = result_saving_path.replace("output", "output/analysis")
     image_saving_path = image_saving_path.replace("json", "png")
     mmca = MultiModalClassificationAnalysis(
