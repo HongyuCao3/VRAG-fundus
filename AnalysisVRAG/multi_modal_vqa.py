@@ -1,7 +1,8 @@
 import pandas as pd
 import json
 from dataclasses import dataclass
-
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 
 @dataclass
 class MultiModalVQAAnalysisConfig:
@@ -158,3 +159,42 @@ class MultiModalVQAAnalysis:
         fin_res = {"modality": modality, "eye": eye, "diag": diag}
         with open(analysis_saving_path, "w", encoding="utf-8") as f:
             json.dump(fin_res, f)
+            
+    def plot_word_cloud_comparsion(self, wordcloud_saving_path, words_to_remove={"image", "appear", "provided", "suggests", "appears"}):
+        gt_text = ""
+        pred_text = ""
+        for index, row in self.df.iterrows():
+            # Get corresponding general diagnosis
+            gt_text += row["answer"]
+            pred_text += row["llm respond"]
+        pred_text_cleaned = " ".join(
+            word for word in pred_text.split() if word.lower() not in words_to_remove
+        )
+        gt_text_cleaned = " ".join(
+            word for word in gt_text.split() if word.lower() not in words_to_remove
+        )
+        wordcloud1 = WordCloud(
+            width=800, height=400, max_words=200, background_color="white"
+        ).generate(pred_text_cleaned)
+
+        # 生成第二个词云
+        wordcloud2 = WordCloud(
+            width=800, height=400, max_words=200, background_color="white"
+        ).generate(gt_text_cleaned)
+
+        # 创建图像和轴
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+
+        # 在左侧显示第一个词云，并添加标题
+        ax1.imshow(wordcloud1, interpolation="bilinear")
+        ax1.axis("off")
+        ax1.set_title("LLM Respond", fontsize=20)
+
+        # 在右侧显示第二个词云，并添加标题
+        ax2.imshow(wordcloud2, interpolation="bilinear")
+        ax2.axis("off")
+        ax2.set_title("Ground Truth", fontsize=20)
+
+        # 调整布局以避免重叠
+        plt.tight_layout()
+        plt.savefig(wordcloud_saving_path)

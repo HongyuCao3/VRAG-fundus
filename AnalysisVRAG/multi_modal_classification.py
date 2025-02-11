@@ -3,12 +3,11 @@ import os, sys
 sys.path.append("/home/hongyu/Visual-RAG-LLaVA-Med")
 import json
 import copy
-from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import confusion_matrix
 import itertools
-import ast
+from wordcloud import WordCloud
 from AnalysisVRAG.base import BaseAnalysis
 from AnalysisVRAG.class_combiner import ClassCombiner
 
@@ -18,25 +17,6 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         super().__init__(file_path)
         self.sheet_names = sheet_names
         self.combiner = ClassCombiner()
-
-    def calculate_accuracy(self):
-        correct_count = 0
-        total_count = len(self.data["results"])
-
-        for result in self.data["results"]:
-            ground_truth = result["ground truth"].lower()
-            try:
-                llm_respond = str(json.loads(result["llm respond"])).lower()
-            except:
-                llm_respond = result["llm respond"].lower()
-            # print(type(llm_respond))
-            # diagnosis = llm_respond.get('diagnosis', '').lower()
-
-            if ground_truth in llm_respond:
-                correct_count += 1
-
-        accuracy = correct_count / total_count if total_count > 0 else 0
-        return accuracy
 
     def calculate_confusion_matrix(self, image_saving_path):
         # 初始化变量用于存储所有的 ground truths 和 predictions
@@ -145,7 +125,7 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         cm = confusion_matrix(all_ground_truths, all_predictions, labels=classes)
 
         accuracy = acc / len(self.data["results"])
-        
+
         # 使用父类的方法绘制混淆矩阵
         self.plot_confusion_matrix(
             cm,
@@ -153,7 +133,7 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
             image_saving_path,
             normalize=True,
             title="Normalized Confusion Matrix",
-            accuracy=accuracy
+            accuracy=accuracy,
         )
 
         return accuracy
@@ -167,7 +147,7 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         title="Confusion matrix",
         cmap=plt.cm.Blues,
         annotate=False,
-        accuracy=None
+        accuracy=None,
     ):
         if normalize:
             cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
@@ -201,15 +181,69 @@ class MultiModalClassificationAnalysis(BaseAnalysis):
         plt.yticks(tick_marks, classes, fontdict={"fontsize": font_size})
         if accuracy is not None:
             plt.text(
-                cm.shape[0], 
-                -1, 
-                f'Accuracy: {accuracy:.2f}', 
-                color='red', 
-                horizontalalignment='left', 
-                verticalalignment='top'
+                cm.shape[0],
+                -1,
+                f"Accuracy: {accuracy:.2f}",
+                color="red",
+                horizontalalignment="left",
+                verticalalignment="top",
             )
         plt.tight_layout()
         plt.ylabel("True label")
         plt.xlabel("Predicted label")
         plt.savefig(image_saving_path)
         plt.show()
+
+    def plot_word_cloud_comparsion(
+        self,
+        wordcloud_saving_path,
+        words_to_remove={"image", "appear", "provided", "suggests", "appears"},
+    ):
+        gt_text = ""
+        pred_text = ""
+
+        if isinstance(self.data, list):
+            data = copy.deepcopy(self.data)
+            self.data = {"results": data}
+        for result in self.data["results"]:
+            ground_truth = result["ground truth"].lower()
+            try:
+                llm_respond = str(json.loads(result["llm respond"])).lower()
+            except:
+                if isinstance(result["llm respond"], str):
+                    llm_respond = result["llm respond"].lower()
+                if isinstance(result["llm respond"], list):
+                    llm_respond = result["llm respond"][0].lower()
+
+            ground_truth = self.combiner.combine(ground_truth)
+            pred_text += llm_respond
+            gt_text += ground_truth
+
+        pred_text_cleaned = " ".join(
+            word for word in pred_text.split() if word.lower() not in words_to_remove
+        )
+        wordcloud1 = WordCloud(
+            width=800, height=400, max_words=200, background_color="white"
+        ).generate(pred_text_cleaned)
+
+        # 生成第二个词云
+        wordcloud2 = WordCloud(
+            width=800, height=400, max_words=200, background_color="white"
+        ).generate(gt_text)
+
+        # 创建图像和轴
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+
+        # 在左侧显示第一个词云，并添加标题
+        ax1.imshow(wordcloud1, interpolation="bilinear")
+        ax1.axis("off")
+        ax1.set_title("LLM Respond", fontsize=20)
+
+        # 在右侧显示第二个词云，并添加标题
+        ax2.imshow(wordcloud2, interpolation="bilinear")
+        ax2.axis("off")
+        ax2.set_title("Ground Truth", fontsize=20)
+
+        # 调整布局以避免重叠
+        plt.tight_layout()
+        plt.savefig(wordcloud_saving_path)
