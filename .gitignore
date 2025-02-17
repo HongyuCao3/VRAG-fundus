@@ -5,3 +5,4 @@ __pycache__/
 output/
 fundus_knowledge_base/emb_savings/
 fundus_knowledge_base/img_savings/
+fundus_knowledge_base/pre_match_savings/
