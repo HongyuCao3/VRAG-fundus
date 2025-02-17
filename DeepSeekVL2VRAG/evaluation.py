@@ -99,6 +99,6 @@ if __name__ == "__main__":
     eva.evaluate_classification_prematch(
         image_index_folder=image_index_folder,
         text_emb_folder=text_emb_folder,
-        test_num=3,
+        test_num=-1,
         use_pics=True,
     )
