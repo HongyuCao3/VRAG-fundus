@@ -13,9 +13,9 @@ from DeepSeekVL2VRAG.DeepSeek_VL2.deepseek_vl2.utils.io import load_pil_images
 
 from PIL import Image
 
-from fundus_knowledge_base.index_manager.mulit_disease_index_manager import (
-    MultiDiseaseIndexManager,
-)
+# from fundus_knowledge_base.index_manager.mulit_disease_index_manager import (
+#     MultiDiseaseIndexManager,
+# )
 from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
 from fundus_knowledge_base.knowledge_retriever.TextRetriever import TextRetriever
 
@@ -119,18 +119,75 @@ class DeepSeekVL2VRAG:
 
         return "".join(parts)
 
-    def inference_rag(
+    # def inference_rag(
+    #     self,
+    #     conversation,
+    #     image_index_folder: pathlib.Path = None,
+    #     text_emb_folder: pathlib.Path = None,
+    #     use_pics: int = 0,
+    # ):
+    #     if image_index_folder:
+    #         self.index_manager = MultiDiseaseIndexManager()
+    #         self.image_index = self.index_manager.load_index(image_index_folder)
+    #     if text_emb_folder:
+    #         self.text_embedding = TextRetriever(emb_folder=text_emb_folder)
+    #     conversation_rag = []
+    #     for message in conversation:
+    #         if message["role"] == "<|User|>":  # only vrag for user
+    #             image_path = message["images"][0]
+    #             query = message["content"]
+    #         else:
+    #             conversation_rag.append(message)  # remain original for assitant
+    #             continue
+    #         if image_index_folder:
+    #             retrieved_images = self.index_manager.retrieve_image(
+    #                 self.image_index, img_path=image_path, top_k=1
+    #             )
+    #         if text_emb_folder:
+    #             retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
+    #         images_content = [message["images"][0]]
+    #         if image_index_folder:  # multi image as input
+    #             for i in range(use_pics):
+    #                 # for img in retrieved_images.img:
+    #                 images_content.append(retrieved_images.img[i])
+    #         # form prompt
+    #         if image_index_folder:
+    #             image_context = " ".join(
+    #                 [
+    #                     f"{txt}: {img}"
+    #                     for txt, img in zip(
+    #                         retrieved_images.txt, retrieved_images.score
+    #                     )
+    #                 ]
+    #             )
+    #         else:
+    #             image_context = None
+    #         if text_emb_folder:
+    #             text_context = " ".join(
+    #                 [
+    #                     f"{txt}: {img}"
+    #                     for txt, img in zip(retrieved_texts.txt, retrieved_texts.score)
+    #                 ]
+    #             )
+    #         else:
+    #             text_context = None
+    #         prompt = self.build_prompt(
+    #             query=query, image_context=image_context, text_context=text_context
+    #         )
+    #         message["content"] = prompt
+    #         conversation_rag.append(message)
+    #     print(conversation_rag)
+    #     answer = self.inference(conversation_rag)
+    #     return answer
+
+    def inference_rag_prematch(
         self,
         conversation,
         image_index_folder: pathlib.Path = None,
         text_emb_folder: pathlib.Path = None,
         use_pics: int = 0,
+        pre_match_results: dict= None,
     ):
-        if image_index_folder:
-            self.index_manager = MultiDiseaseIndexManager()
-            self.image_index = self.index_manager.load_index(image_index_folder)
-        if text_emb_folder:
-            self.text_embedding = TextRetriever(emb_folder=text_emb_folder)
         conversation_rag = []
         for message in conversation:
             if message["role"] == "<|User|>":  # only vrag for user
@@ -139,38 +196,19 @@ class DeepSeekVL2VRAG:
             else:
                 conversation_rag.append(message)  # remain original for assitant
                 continue
-            if image_index_folder:
-                retrieved_images = self.index_manager.retrieve_image(
-                    self.image_index, img_path=image_path, top_k=1
-                )
-            if text_emb_folder:
-                retrieved_texts = self.text_embedding.retrieve(input_img=image_path)
             images_content = [message["images"][0]]
             if image_index_folder:  # multi image as input
                 for i in range(use_pics):
                     # for img in retrieved_images.img:
-                    images_content.append(retrieved_images.img[i])
-            # form prompt
-            if image_index_folder:
-                image_context = " ".join(
-                    [
-                        f"{txt}: {img}"
-                        for txt, img in zip(
-                            retrieved_images.txt, retrieved_images.score
-                        )
-                    ]
-                )
+                    images_content.append(pre_match_results["matched_images"][i])
+                image_context = pre_match_results["image_context"]
             else:
                 image_context = None
             if text_emb_folder:
-                text_context = " ".join(
-                    [
-                        f"{txt}: {img}"
-                        for txt, img in zip(retrieved_texts.txt, retrieved_texts.score)
-                    ]
-                )
+                text_context = pre_match_results["text_context"]
             else:
                 text_context = None
+            
             prompt = self.build_prompt(
                 query=query, image_context=image_context, text_context=text_context
             )
