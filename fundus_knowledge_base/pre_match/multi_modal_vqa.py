@@ -6,58 +6,37 @@ from fundus_knowledge_base.index_manager.mulit_disease_index_manager import (
     MultiDiseaseIndexManager,
 )
 import json
-from Datasets.MultiModalClassificationDataset import (
-    MultiModalClassificationDataset,
-    MultiModalClassificationConfig,
-)
+from Datasets.MultiModalVQADataset import MultiModalVQAConfig, MultiModalVQADataset
 from PathManager.EmbPathManager import EmbPathManager, EmbPathConfig
 from fundus_knowledge_base.knowledge_retriever.TextRetriever import TextRetriever
 from torch.utils.data import DataLoader
+from fundus_knowledge_base.pre_match.multi_modal_classification import MultiModalClassificationPreMatch
 
 
-class MultiModalClassificationPreMatch:
+class MultiModalVQAPreMatch(MultiModalClassificationPreMatch):
     def __init__(self):
-        pass
+        super().__init__()
 
-    def build_prompt(
-        self,
-        query: str,
-        image_context: str = None,
-        text_context: str = None,
-        diagnosis_standard: str = None,
-    ):
-        parts = []
-        if diagnosis_standard:
-            parts.append(f"Diagnosing Standard: {diagnosis_standard}\n")
-        if image_context:
-            parts.append(
-                f"The possible diagnosing level and similarity: {image_context}\n"
-            )
-        if text_context:
-            parts.append(f"The possible diagnosis and similarity: {text_context}\n")
-        parts.append(query)
-
-        return "".join(parts)
-
-    def get_classification_matching_results(
+    def get_vqa_matching_results(
         self,
         image_index_folder: pathlib.Path = None,
         text_emb_folder: pathlib.Path = None,
         batch_size: int = 1,
         sheet_names=["CFP"],
         test_num: int = -1,
-        saving_path: pathlib.Path = "./fundus_knowledge_base/pre_match_savings/classification_cfp.json",
+        saving_path: pathlib.Path = "./fundus_knowledge_base/pre_match_savings/vqa_cfp.json",
     ):
-        dataset_config = MultiModalClassificationConfig()
-        dataset = MultiModalClassificationDataset(
-            dataset_config.DEFAULT_EXCEL_PATH, sheet_names=sheet_names
+        dataset_config = MultiModalVQAConfig()
+        dataset = MultiModalVQADataset(
+            excel_file=dataset_config.DEFAULT_EXCEL_PATH,
+            sheet_names=sheet_names,
         )
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
         # Iterate through the dataloader
         results = []
         query = "what is th diagnosis?"
-        for idx, (images, diagnosis) in tqdm(enumerate(dataloader)):
+        for idx, (images, diagnosis, query, answer) in tqdm(enumerate(dataloader)):
             if test_num != -1 and idx >= test_num:
                 break
             matching_result = self.get_matching_results(
@@ -126,5 +105,5 @@ if __name__ == "__main__":
     image_index_folder = pathlib.Path(
         "./fundus_knowledge_base/emb_savings/mulit_desease_image_index"
     )
-    mmcpm = MultiModalClassificationPreMatch()
-    mmcpm.get_classification_matching_results(image_index_folder=image_index_folder, text_emb_folder=text_emb_folder, test_num=-1)
+    mmcpm = MultiModalVQAPreMatch()
+    mmcpm.get_vqa_matching_results(image_index_folder=image_index_folder, text_emb_folder=text_emb_folder, test_num=-1)
