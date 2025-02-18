@@ -224,5 +224,5 @@ class MultiModalVQAAnalysis:
 
         # 调整布局以避免重叠
         plt.tight_layout()
-        plt.title(title)
+        plt.suptitle(title)
         plt.savefig(wordcloud_saving_path)

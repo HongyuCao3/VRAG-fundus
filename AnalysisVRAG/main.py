@@ -74,5 +74,5 @@ if __name__ == "__main__":
     # cm = analysis.calculate_confusion_matrix(args.res_path)
     # print(f"Accuracy: {analysis.calculate_accuracy():.4f}")
     # print(cm)
-    # analyze_multi_modal_classification()
-    analyze_multi_modal_vqa(key_word="Right eye")
+    analyze_multi_modal_classification()
+    # analyze_multi_modal_vqa(key_word="epiretinal membrane")
