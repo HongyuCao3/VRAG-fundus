@@ -166,13 +166,21 @@ class MultiModalVQAAnalysis:
         self,
         wordcloud_saving_path,
         words_to_remove={"image", "appear", "provided", "suggests", "appears"},
+        key_word: str = None,
     ):
         gt_text = ""
         pred_text = ""
         for index, row in self.df.iterrows():
             # Get corresponding general diagnosis
-            gt_text += row["answer"]
-            pred_text += row["llm respond"]
+            if key_word is None:
+                gt_text += row["answer"]
+                pred_text += row["llm respond"]
+            else:
+                if key_word in row["answer"]:
+                    gt_text += row["answer"]
+                    pred_text += row["llm respond"]
+                else:
+                    pass
         pred_text_cleaned = " ".join(
             word for word in pred_text.split() if word.lower() not in words_to_remove
         )
@@ -209,6 +217,12 @@ class MultiModalVQAAnalysis:
         ax2.axis("off")
         ax2.set_title("Ground Truth", fontsize=20)
 
+        if key_word is None:
+            title = "WordCloud LLM vs GT"
+        else:
+            title = "WordCloud LLM vs GT" + f" : key word = {key_word}"
+
         # 调整布局以避免重叠
         plt.tight_layout()
+        plt.title(title)
         plt.savefig(wordcloud_saving_path)

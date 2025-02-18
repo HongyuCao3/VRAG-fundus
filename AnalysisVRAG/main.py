@@ -33,7 +33,7 @@ def analyze_multi_modal_classification():
     mmca.plot_word_cloud_comparsion(wordcloud_saving_path=word_cloud_saving_path)
 
 
-def analyze_multi_modal_vqa():
+def analyze_multi_modal_vqa(key_word: str = None):
     pm = EmbPathManager()
     text_emb_folder = pm.get_emb_dir(pm.config.default_text_emb_name)
     image_index_folder = pathlib.Path(
@@ -46,12 +46,19 @@ def analyze_multi_modal_vqa():
     result_saving_path = f"./QwenVLVRAG/output/Multimodal VQA Dataset_VQA/{image_index_name}_{text_emb_name}_usepics_0_-1.json"
     analysis_config = MultiModalVQAAnalysisConfig()
     analysis_saving_path = result_saving_path.replace("output", "output/analysis")
-    wordcloud_saving_path = analysis_saving_path.replace("json", "_wordcloud.png")
+    if key_word is None:
+        wordcloud_saving_path = analysis_saving_path.replace("json", "_wordcloud.png")
+    else:
+        wordcloud_saving_path = analysis_saving_path.replace(
+            "json", f"{key_word}_wordcloud.png"
+        )
     mmva = MultiModalVQAAnalysis(
         evaluation_saving_path=result_saving_path, map_path=analysis_config.map_path
     )
     mmva.analysis(analysis_saving_path=analysis_saving_path)
-    mmva.plot_word_cloud_comparsion(wordcloud_saving_path=wordcloud_saving_path)
+    mmva.plot_word_cloud_comparsion(
+        wordcloud_saving_path=wordcloud_saving_path, key_word=key_word
+    )
 
 
 if __name__ == "__main__":
@@ -67,5 +74,5 @@ if __name__ == "__main__":
     # cm = analysis.calculate_confusion_matrix(args.res_path)
     # print(f"Accuracy: {analysis.calculate_accuracy():.4f}")
     # print(cm)
-    analyze_multi_modal_classification()
-    analyze_multi_modal_vqa()
+    # analyze_multi_modal_classification()
+    analyze_multi_modal_vqa(key_word="Right eye")
